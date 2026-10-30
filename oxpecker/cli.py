@@ -47,6 +47,7 @@ def run_paths(paths: list[Path], args: argparse.Namespace) -> dict[str, Any]:
         print("no .js files found", file=sys.stderr)
         return {}
     modes = tuple(args.modes.split(","))
+    hard_only = getattr(args, "hard_only", False)
     counts: Counter[str] = Counter()
     status_counts: dict[str, Counter[str]] = {m: Counter() for m in modes}
     findings: list[tuple[Path, str]] = []
@@ -65,7 +66,7 @@ def run_paths(paths: list[Path], args: argparse.Namespace) -> dict[str, Any]:
             results[f.stem] = rec
             f.with_name(f.stem + ".result.json").write_text(json.dumps(rec, indent=2), encoding="utf-8")
             line = f"{f.name:28} {v.pretty()}"
-            if v.is_finding:
+            if v.is_finding and not (hard_only and v.kind != "hard"):
                 findings.append((f, v.pretty()))
                 print(line)
             elif args.verbose:
@@ -80,7 +81,7 @@ def run_paths(paths: list[Path], args: argparse.Namespace) -> dict[str, Any]:
     print("verdicts: " + ", ".join(f"{k}={n}" for k, n in sorted(counts.items())))
     sigs: Counter[str] = Counter()
     for r in results.values():
-        if r["verdict"]["kind"] in ("hard", "java-types"):
+        if r["verdict"]["kind"] in (("hard",) if hard_only else ("hard", "java-types")):
             sigs[r["verdict"]["signature"]] += 1
     if sigs:
         print("unique finding signatures:")
@@ -436,7 +437,7 @@ def cmd_fuzz(args: argparse.Namespace) -> int:
                        shrink_budget=args.shrink_budget, compact_budget=args.compact_budget,
                        source_shrink_budget=args.source_shrink_budget,
                        language_version=args.language_version, client=client, quiet=args.quiet,
-                       max_depth=args.max_lineage_depth)
+                       max_depth=args.max_lineage_depth, hard_only=args.hard_only)
     print(json.dumps({k: v for k, v in summary.items() if k != "signatures"}, indent=1))
     if summary["signatures"]:
         print("hard signatures seen:")
@@ -498,6 +499,8 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--strict", action="store_true", help="generate strict-mode programs")
     g.add_argument("--evolve", type=int, default=0, metavar="K", help="write the end of a K-step mutation lineage per case")
     g.add_argument("--run", action="store_true", help="run the written cases through the harness")
+    g.add_argument("--hard-only", action="store_true",
+                   help="with --run, do not report soft or java-types (Integer vs Double) findings; only hard ones")
     _add_run_options(g)
     g.set_defaults(fn=cmd_gen)
 
@@ -514,6 +517,8 @@ def main(argv: list[str] | None = None) -> int:
     fz.add_argument("--source-shrink-budget", type=int, default=300, help="runs spent on statement-level shrinking of each finding after Hypothesis (0 = off)")
     fz.add_argument("--findings-dir", help="where findings are recorded (default tests/findings)")
     fz.add_argument("--ignore-known", action="store_true", help="shrink and record findings whose signature a regression already has")
+    fz.add_argument("--hard-only", action="store_true",
+                    help="do not record soft or java-types (Integer vs Double) findings; only hard ones")
     fz.add_argument("--family", action="append")
     fz.add_argument("--generator", action="append")
     fz.add_argument("--without", action="append", help="disable a toggle")

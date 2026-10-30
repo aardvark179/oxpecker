@@ -417,12 +417,14 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
          known: set[str] | None = None, related_index=None, findings_dir: Path = findings.DEFAULT_DIR, shrink_budget: int = 150,
          compact_budget: int = 0, source_shrink_budget: int = 300, language_version: int = 200,
          runner: Runner | None = None, client=None, quiet: bool = False,
-         max_depth: int = MAX_DEPTH) -> dict[str, Any]:
+         max_depth: int = MAX_DEPTH, hard_only: bool = False) -> dict[str, Any]:
     """Run the loop. `runner` (or a `HarnessClient` in `client`) runs programs; without either a
     coverage-enabled client is started. `steps` is the mutation steps per round (a fresh lineage
     or one extension), `max_depth` the safety cap on a lineage's depth over all rounds (G49).
     `related_index` (oxpecker.related.KnownIndex) labels each new finding with the regressions it
-    probably connects to. Returns the summary also written to `last-run.json`."""
+    probably connects to. Returns the summary also written to `last-run.json`.
+    `hard_only` still counts soft and java-types verdicts but does not record them as findings.
+    Returns the summary also written to `last-run.json`."""
     rng = Random(seed)
     corpus = Corpus(corpus_dir)
     stats: Counter[str] = Counter()
@@ -496,7 +498,8 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                 child_timeouts[parent.id] += 1
                 weights = None
             if v.kind in (SOFT, JAVA_TYPES):
-                findings.record(lineage, obs.run, v, out_dir=findings_dir)
+                if not hard_only:
+                    findings.record(lineage, obs.run, v, out_dir=findings_dir)
             elif v.kind == HARD:
                 sig = v.signature()
                 sig_counts[sig] += 1
