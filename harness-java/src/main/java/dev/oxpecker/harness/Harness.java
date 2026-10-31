@@ -22,27 +22,51 @@ import org.mozilla.javascript.Context;
  *
  * <pre>
  *   java -jar oxpecker-harness-all.jar                 # JSON-lines server on stdin/stdout
+ *   java -jar oxpecker-harness-all.jar --serve --mode compiled   # ... running only that mode
  *   java -jar oxpecker-harness-all.jar --replay case.js [--mode compiled] [--language-version 250] [--strict]
  *   java -jar oxpecker-harness-all.jar --info
  * </pre>
  */
 public final class Harness {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+    /** Version of the JSON-lines protocol spoken by {@link #serve}. */
+    static final int PROTOCOL = 1;
 
     public static void main(String[] args) throws IOException {
         if (args.length == 0 || args[0].equals("--serve")) {
-            serve();
+            Mode pinned = null;
+            if (args.length == 3 && args[1].equals("--mode")) {
+                pinned = Mode.fromWire(args[2]);
+            } else if (args.length > 1) {
+                usage();
+            }
+            serve(pinned);
         } else if (args[0].equals("--replay")) {
             replay(args);
         } else if (args[0].equals("--info")) {
             System.out.println(GSON.toJson(info()));
         } else {
-            System.err.println("usage: harness [--serve | --replay file.js [--mode m]... [--language-version n] [--strict] | --info]");
-            System.exit(2);
+            usage();
         }
     }
 
+    private static void usage() {
+        System.err.println("usage: harness [--serve [--mode m] | --replay file.js [--mode m]... [--language-version n] [--strict] | --info]");
+        System.exit(2);
+    }
+
+    /** The {@link #info(Mode, Coverage)} of an unpinned harness without a coverage agent check. */
     static Map<String, Object> info() {
+        return info(null, new Coverage());
+    }
+
+    /**
+     * What this harness is. {@code protocol} versions the JSON-lines wire format, so that a
+     * harness for another engine (an oracle) can implement it; {@code capabilities} lists the
+     * optional Outcome fields this harness fills in, which the client compares only when both
+     * sides report them.
+     */
+    static Map<String, Object> info(Mode pinned, Coverage coverage) {
         Map<String, Object> m = new LinkedHashMap<>();
         // Rhino's own version string says "Rhino Snapshot" for release jars too (1.9.2), so the
         // artifact version the jar was built with, stamped into the manifest by fatJar, comes first.
@@ -51,19 +75,32 @@ public final class Harness {
             if (in != null) bundled = new java.util.jar.Manifest(in).getMainAttributes().getValue("Rhino-Version");
         } catch (java.io.IOException ignored) {
         }
+        String version;
         try (Context cx = Context.enter()) {
             String impl = cx.getImplementationVersion();
-            m.put("rhino", bundled != null ? bundled + " (" + impl + ")" : impl);
+            version = bundled != null ? bundled + " (" + impl + ")" : impl;
         }
+        m.put("protocol", PROTOCOL);
+        m.put("engine", "rhino");
+        m.put("version", version);
+        m.put("rhino", version);
         m.put("java", System.getProperty("java.version"));
         m.put("harness", "0.1.0");
+        // Every mode this harness can run; `mode` is the one it is pinned to (absent: any).
         m.put("modes", List.of(Mode.INTERPRETED.wire, Mode.COMPILED.wire, Mode.DEBUGGER.wire));
-        m.put("coverage", new Coverage().enabled());
+        m.put("mode", pinned == null ? null : pinned.wire);
+        List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace", "continuations"));
+        if (coverage.enabled()) capabilities.add("coverage");
+        m.put("capabilities", capabilities);
+        m.put("coverage", coverage.enabled());
         return m;
     }
 
-    /** JSON lines over stdio. Logging goes to stderr only; stdout is reserved for responses. */
-    static void serve() throws IOException {
+    /**
+     * JSON lines over stdio. Logging goes to stderr only; stdout is reserved for responses.
+     * With {@code pinned}, every request runs in that mode only and asking for another is an error.
+     */
+    static void serve(Mode pinned) throws IOException {
         PrintStream out = new PrintStream(System.out, false, StandardCharsets.UTF_8);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
         ModeRunner runner = new ModeRunner();
@@ -89,7 +126,7 @@ public final class Harness {
                     out.flush();
                     return;
                 }
-                case "info" -> resp.put("info", info());
+                case "info" -> resp.put("info", info(pinned, runner.coverage));
                 case "coverage-save", "coverage-load" -> {
                     try {
                         if (!runner.coverage.enabled()) resp.put("error", "coverage agent not attached");
@@ -111,7 +148,11 @@ public final class Harness {
                     if (req.source == null) {
                         resp.put("error", "missing source");
                     } else {
-                        resp.put("results", runAll(runner, req));
+                        try {
+                            resp.put("results", runAll(runner, req, req.modeList(pinned)));
+                        } catch (IllegalArgumentException e) {
+                            resp.put("error", e.getMessage());
+                        }
                     }
                 }
                 default -> resp.put("error", "unknown cmd: " + cmd);
@@ -126,9 +167,9 @@ public final class Harness {
         }
     }
 
-    static Map<String, Outcome> runAll(ModeRunner runner, Request req) {
+    static Map<String, Outcome> runAll(ModeRunner runner, Request req, List<Mode> modes) {
         Map<String, Outcome> results = new LinkedHashMap<>();
-        for (Mode mode : req.modeList()) {
+        for (Mode mode : modes) {
             results.put(mode.wire, runner.run(req, mode));
             if (runner.poisoned()) break;
         }
@@ -157,7 +198,7 @@ public final class Harness {
         req.sourceName = req.id;
         req.source = Files.readString(file, StandardCharsets.UTF_8);
         if (!modes.isEmpty()) req.modes = modes;
-        Map<String, Outcome> results = runAll(new ModeRunner(), req);
+        Map<String, Outcome> results = runAll(new ModeRunner(), req, req.modeList(null));
         if ("json".equals(req.cmd)) {
             System.out.println(GSON.toJson(results));
             return;

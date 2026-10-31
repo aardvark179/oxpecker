@@ -5,10 +5,11 @@ more mutation steps (the lineage's final "one more?" choice flipped to True, the
 fresh), and shrunk by Hypothesis's own shrinker.
 
     corpus   lineages that reached Rhino probes nothing before them had: `corpus.jsonl` plus the
-             JaCoCo store `coverage.exec`, so a later run resumes the frontier
+             JaCoCo store `coverage.exec`, so a later run resumes the frontier; the probes are
+             the guide harness's only, and `harnesses.json` records which guide that was
     loop     with p_new a fresh lineage, else a corpus entry extended by up to `steps` more
              mutation steps (per round, G49; `max_depth` bounds the whole lineage); the child's
-             program runs in both Rhino modes and is compared
+             program runs in the guide and every comparator and is compared
              new probes -> (optionally shrunk while it still reaches them) -> corpus
              a hard verdict with an unknown signature -> shrunk by Hypothesis -> recorded
     shrink   Hypothesis's shrinker (phases reuse + shrink from an in-memory example database
@@ -173,6 +174,7 @@ class Corpus:
         self.dir.mkdir(parents=True, exist_ok=True)
         self.file = self.dir / "corpus.jsonl"
         self.exec = self.dir / "coverage.exec"
+        self.harnesses = self.dir / "harnesses.json"   # Ensemble.describe() of the run that wrote coverage.exec
         self.entries: list[Entry] = []
         if self.file.exists():
             for ln in self.file.read_text(encoding="utf-8").splitlines():
@@ -195,6 +197,22 @@ class Corpus:
         e = self.entries[index]
         choices = decode(e.choices)
         return replay(choices, options, e.cap if e.cap is not None else steps) if choices is not None else None
+
+
+def check_guide(corpus: Corpus, current: dict[str, Any], reset_coverage: bool = False) -> None:
+    """Refuses to resume `coverage.exec` recorded by a different guide (its probes would describe
+    another mode's or engine's code); `reset_coverage` discards it instead. Records `current`
+    (Ensemble.describe) as the corpus's harnesses. A corpus without a record adopts `current`."""
+    from .harness.ensemble import describe_mismatch
+
+    if corpus.harnesses.exists() and corpus.exec.exists():
+        why = describe_mismatch(json.loads(corpus.harnesses.read_text(encoding="utf-8")), current)
+        if why is not None:
+            if not reset_coverage:
+                raise RuntimeError(f"{corpus.exec} was recorded by another guide ({why}); "
+                                   "pass reset_coverage (--reset-coverage) to discard it")
+            corpus.exec.unlink()
+    corpus.harnesses.write_text(json.dumps(current, indent=1), encoding="utf-8")
 
 
 class LineageCache:
@@ -272,14 +290,16 @@ class Runner(Protocol):
 
 
 def harness_runner(client, language_version: int = 200) -> Runner:
-    """Runs a lineage's final program in both Rhino modes, asking for new probe ids."""
+    """Runs a lineage's final program through an Ensemble, asking the guide for new probe ids. A
+    run with `require` is a coverage replay (shrink on insert): only the guide runs."""
     def run(lineage: Lineage, require: ProbeSet | None = None) -> Observation:
         res = client.run(lineage.source, language_version=language_version, seed=1,
-                         coverage_bucket=lineage.template, coverage_new_ids=True, coverage_require=require)
+                         coverage_bucket=lineage.template, coverage_new_ids=True, coverage_require=require,
+                         **({"comparators": ()} if require is not None else {}))
         new_ids: ProbeSet = {}
         reached: ProbeSet = {}
         new = 0
-        for o in res.results.values():
+        for o in ([res.results[res.guide]] if res.guide in res.results else res.results.values()):
             new += o.newProbes or 0
             union(new_ids, o.newProbeIds or {})
             union(reached, o.requiredReached or {})
@@ -417,9 +437,11 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
          known: set[str] | None = None, related_index=None, findings_dir: Path = findings.DEFAULT_DIR, shrink_budget: int = 150,
          compact_budget: int = 0, source_shrink_budget: int = 300, language_version: int = 200,
          runner: Runner | None = None, client=None, quiet: bool = False,
-         max_depth: int = MAX_DEPTH, hard_only: bool = False) -> dict[str, Any]:
-    """Run the loop. `runner` (or a `HarnessClient` in `client`) runs programs; without either a
-    coverage-enabled client is started. `steps` is the mutation steps per round (a fresh lineage
+         max_depth: int = MAX_DEPTH, hard_only: bool = False, reset_coverage: bool = False) -> dict[str, Any]:
+    """Run the loop. `runner` (or an `Ensemble` in `client`) runs programs; without either a
+    coverage-enabled ensemble with the default guide is started. Resuming a corpus whose coverage
+    came from another guide (mode or engine) is refused unless `reset_coverage`, which discards
+    `coverage.exec` (the entries stay). `steps` is the mutation steps per round (a fresh lineage
     or one extension), `max_depth` the safety cap on a lineage's depth over all rounds (G49).
     `related_index` (oxpecker.related.KnownIndex) labels each new finding with the regressions it
     probably connects to. Returns the summary also written to `last-run.json`.
@@ -434,14 +456,20 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
     last_report = t0
     own_client = None
     if runner is None:
-        from .harness.client import HarnessClient
+        from .harness.ensemble import Ensemble
         if client is None:
-            own_client = client = HarnessClient(quiet=True, coverage=True)
+            own_client = client = Ensemble.from_modes(coverage=True)
             client.start()
             if not client.info().get("coverage"):
                 client.stop()
                 raise RuntimeError("coverage agent not attached; the harness build must include jacocoagent.jar")
         runner = harness_runner(client, language_version)
+        try:
+            check_guide(corpus, client.describe(), reset_coverage)
+        except Exception:
+            if own_client is not None:
+                own_client.stop()
+            raise
     if client is not None:
         client.coverage_checkpoint = str(corpus.exec)
         if corpus.exec.exists():
@@ -524,7 +552,7 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                         # then statement-level deletion on the lifted source, which gets much further
                         # than choice shrinking within a budget (proposal §3.7)
                         shrunk = shrink_lifted(client, small[0].source, rec_verdict.coarse_signature(),
-                                               language_version, source_shrink_budget)
+                                               language_version, source_shrink_budget, against=rec_verdict.against)
                         if shrunk is not None:
                             record_as, rec_run, rec_verdict = shrunk
                     related = []
@@ -613,18 +641,22 @@ class Reproducer:
         return "\n".join(ln for ln in self.source.splitlines() if not ln.lstrip().startswith("__probe(")) + "\n"
 
 
-def shrink_lifted(client, source: str, coarse: str, language_version: int, budget: int):
+def shrink_lifted(client, source: str, coarse: str, language_version: int, budget: int,
+                  against: str | None = None):
     """Statement-level delta debugging (`shrink.shrink_source`) while the coarse signature holds;
-    returns (Reproducer, RunResult, Verdict) or None if nothing could go."""
+    returns (Reproducer, RunResult, Verdict) or None if nothing could go. With `against` (a
+    comparator of the Ensemble `client`), only the guide and that comparator run."""
     from .shrink import shrink_source
 
+    pair = {"comparators": (against,)} if against is not None else {}
+
     def verdict_of(src: str):
-        return compare_run(client.run(src, language_version=language_version, seed=1))
+        return compare_run(client.run(src, language_version=language_version, seed=1, **pair))
 
     small = shrink_source(source, lambda src: verdict_of(src).coarse_signature() == coarse, budget=budget)
     if small == source:
         return None
-    run = client.run(small, language_version=language_version, seed=1)
+    run = client.run(small, language_version=language_version, seed=1, **pair)
     v = compare_run(run)
     if v.coarse_signature() != coarse:
         return None

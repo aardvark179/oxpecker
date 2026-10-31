@@ -38,6 +38,11 @@ class Outcome:
     newProbeIds: dict[str, list[int]] | None = None        # with coverage_new_ids: which probes were new
     requiredReached: dict[str, list[int]] | None = None    # with coverage_require: the subset reached
     hitProbes: dict[str, str] | None = None                # with coverage_hits: every probe hit (base64 bitmaps)
+    # Filled in by the Ensemble, not by the harness: which process produced this outcome.
+    harness: str | None = None             # the harness's name, the key in RunResult.results
+    role: str | None = None                # guide | comparator | oracle
+    engine: str | None = None              # e.g. "rhino 2.0.0-SNAPSHOT (Rhino Snapshot)"
+    capabilities: list[str] | None = None  # optional fields the harness fills in (None: all of them)
 
     @classmethod
     def from_json(cls, d: dict[str, Any]) -> "Outcome":
@@ -51,12 +56,13 @@ class Outcome:
 @dataclass
 class RunResult:
     id: str
-    results: dict[str, Outcome]
+    results: dict[str, Outcome]     # by mode (HarnessClient) or by harness name (Ensemble)
     restarted: bool = False
+    guide: str | None = None        # the key of the guide's outcome, when run through an Ensemble
 
     def to_json(self) -> dict[str, Any]:
         return {"id": self.id, "results": {m: o.to_json() for m, o in self.results.items()},
-                "restarted": self.restarted}
+                "restarted": self.restarted, "guide": self.guide}
 
 
 class HarnessError(RuntimeError):
@@ -64,12 +70,15 @@ class HarnessError(RuntimeError):
 
 
 class HarnessClient:
-    """One long-lived JVM. Not thread-safe; use one client per worker."""
+    """One long-lived JVM. Not thread-safe; use one client per worker. With `mode`, the JVM is
+    pinned to that mode (`--serve --mode m`) and runs nothing else."""
 
     def __init__(self, harness_bin: os.PathLike[str] | str = HARNESS_BIN, *, recycle_every: int = 5000,
-                 hard_timeout_s: float = 60.0, quiet: bool = False, coverage: bool = False):
+                 hard_timeout_s: float = 60.0, quiet: bool = False, coverage: bool = False,
+                 mode: str | None = None):
         self.harness_bin = str(harness_bin)
         self.coverage = coverage
+        self.mode = mode
         self.recycle_every = recycle_every
         self.hard_timeout_s = hard_timeout_s
         self.quiet = quiet
@@ -89,7 +98,7 @@ class HarnessClient:
             env["OXPECKER_COVERAGE"] = "1"
             self.recycle_every = max(self.recycle_every, 10 ** 9)   # coverage lives in the JVM: never recycle
         self.proc = subprocess.Popen(
-            [self.harness_bin, "--serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            [self.harness_bin, "--serve", *(("--mode", self.mode) if self.mode else ())], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=None if not self.quiet else subprocess.DEVNULL, text=True, encoding="utf-8", bufsize=1, env=env,
         )
         self.cases_since_start = 0
@@ -177,14 +186,17 @@ class HarnessClient:
         if self.proc is not None:
             self.proc.kill()
 
-    def run(self, source: str, *, modes: tuple[str, ...] = DEFAULT_MODES, language_version: int = 200,
+    def run(self, source: str, *, modes: tuple[str, ...] | None = None, language_version: int = 200,
             strict: bool = False, instruction_budget: int = 5_000_000, wall_ms: int = 5000, seed: int = 1,
             id: str | None = None, source_name: str = "case.js", continuations: bool | None = None,
             coverage_bucket: str | None = None, coverage_new_ids: bool = False,
             coverage_require: dict[str, list[int]] | None = None, coverage_hits: bool = False) -> RunResult:
-        """Runs one case in every mode. If the JVM dies or asks to be restarted, the missing modes
-        are reported as crash/timeout and the JVM is restarted. `coverage_hits` asks for every probe
-        the run hit (Outcome.hitProbes), for corpus minimisation."""
+        """Runs one case in every mode (by default both, or the pinned one). If the JVM dies or asks
+        to be restarted, the missing modes are reported as crash/timeout and the JVM is restarted.
+        `coverage_hits` asks for every probe the run hit (Outcome.hitProbes), for corpus
+        minimisation."""
+        if modes is None:
+            modes = (self.mode,) if self.mode else DEFAULT_MODES
         case_id = id or uuid.uuid4().hex[:12]
         req = {"id": case_id, "source": source, "modes": list(modes), "languageVersion": language_version,
                "strict": strict, "instructionBudget": instruction_budget, "wallMs": wall_ms, "seed": seed,

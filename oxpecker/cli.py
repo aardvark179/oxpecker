@@ -1,7 +1,7 @@
 """Command-line interface.
 
   oxpecker run out/ tests/regressions/ run existing .js files through the harness
-  oxpecker diff case.js                where the two modes' outcomes first differ, per field
+  oxpecker diff case.js                where the guide's and a comparator's outcomes first differ, per field
   oxpecker corpus test262|rhino-jstests|rhino-mozilla [--filter PREFIX] [--limit N]   replay a corpus
   oxpecker probe                       refresh the Rhino capability table
 
@@ -14,6 +14,9 @@
   oxpecker related findings/          which checked-in regressions each finding probably connects to
   oxpecker export -o ui/data --per-generator 20   sample every generator/template for the UI; oxpecker metrics DIR
   oxpecker list [--family F] [--templates]   the registered generators (name, family, weight, doc)
+
+Each mode runs in its own harness process. The guide (--guide, default interpreted) is the
+reference every other mode is compared against and the only process coverage is gathered from.
 
 """
 
@@ -28,6 +31,17 @@ from pathlib import Path
 from typing import Any
 
 # ----------------------------------------------------------------------------- running
+def _ensemble(args: argparse.Namespace, *, coverage: bool = False):
+    """The harness processes `--modes` and `--guide` ask for: the guide is added to the modes if
+    missing, and every other mode is a comparator."""
+    from .harness.ensemble import Ensemble
+
+    modes = [m for m in args.modes.split(",") if m]
+    if args.guide not in modes:
+        modes.insert(0, args.guide)
+    return Ensemble.from_modes(modes, args.guide, quiet=True, coverage=coverage)
+
+
 def _js_files(paths: list[Path]) -> list[Path]:
     files: list[Path] = []
     for p in paths:
@@ -39,24 +53,24 @@ def _js_files(paths: list[Path]) -> list[Path]:
 
 
 def run_paths(paths: list[Path], args: argparse.Namespace) -> dict[str, Any]:
-    from .harness.client import HarnessClient
     from .harness.compare import compare_run
 
     files = _js_files(paths)
     if not files:
         print("no .js files found", file=sys.stderr)
         return {}
-    modes = tuple(args.modes.split(","))
+    client = _ensemble(args, coverage=args.coverage)
+    names = client.names
     hard_only = getattr(args, "hard_only", False)
     counts: Counter[str] = Counter()
-    status_counts: dict[str, Counter[str]] = {m: Counter() for m in modes}
+    status_counts: dict[str, Counter[str]] = {m: Counter() for m in names}
     findings: list[tuple[Path, str]] = []
     results: dict[str, Any] = {}
     t0 = time.time()
-    with HarnessClient(quiet=True, coverage=args.coverage) as client:
+    with client:
         for f in files:
             src = f.read_text(encoding="utf-8")
-            run = client.run(src, modes=modes, language_version=args.language_version, strict=args.strict,
+            run = client.run(src, language_version=args.language_version, strict=args.strict,
                              id=f.stem, source_name=f.name, wall_ms=args.wall_ms)
             v = compare_run(run, strict_java_types=args.strict_java_types)
             counts[v.kind] += 1
@@ -87,7 +101,7 @@ def run_paths(paths: list[Path], args: argparse.Namespace) -> dict[str, Any]:
         print("unique finding signatures:")
         for sig, n in sigs.most_common():
             print(f"  {n:4}  {sig}")
-    for m in modes:
+    for m in names:
         print(f"  {m:12} " + ", ".join(f"{k}={n}" for k, n in sorted(status_counts[m].items())))
     return results
 
@@ -115,7 +129,6 @@ def cmd_run(args: argparse.Namespace) -> int:
 # ----------------------------------------------------------------------------- corpora
 def cmd_corpus(args: argparse.Namespace) -> int:
     from .corpora import test262
-    from .harness.client import HarnessClient
     from .harness.compare import compare_run
 
     from .corpora import rhino_tests
@@ -128,9 +141,10 @@ def cmd_corpus(args: argparse.Namespace) -> int:
     out_dir = Path(args.out) if args.out else None
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
-    modes = tuple(args.modes.split(","))
+    client = _ensemble(args)
+    names = client.names
     counts: Counter[str] = Counter()
-    status_counts: dict[str, Counter[str]] = {m: Counter() for m in modes}
+    status_counts: dict[str, Counter[str]] = {m: Counter() for m in names}
     sigs: Counter[str] = Counter()
     n = 0
     t0 = time.time()
@@ -142,10 +156,10 @@ def cmd_corpus(args: argparse.Namespace) -> int:
         it = rhino_tests.jstests(filter=args.filter, limit=args.limit)
     else:
         it = rhino_tests.mozilla(filter=args.filter, limit=args.limit)
-    with HarnessClient(quiet=True) as client:
+    with client:
         for case in it:
             n += 1
-            run = client.run(case.source, modes=modes, language_version=args.language_version,
+            run = client.run(case.source, language_version=args.language_version,
                              id=case.id, source_name=case.path, strict=case.strict and args.corpus != "test262",
                              wall_ms=args.wall_ms)
             v = compare_run(run, strict_java_types=args.strict_java_types)
@@ -172,7 +186,7 @@ def cmd_corpus(args: argparse.Namespace) -> int:
     elapsed = time.time() - t0
     print(f"\n{n} cases in {elapsed:.1f}s ({n / max(elapsed, 1e-9):.1f}/s), JVM restarts: {client.restarts}")
     print("verdicts: " + ", ".join(f"{k}={c}" for k, c in sorted(counts.items())))
-    for m in modes:
+    for m in names:
         print(f"  {m:12} " + ", ".join(f"{k}={c}" for k, c in sorted(status_counts[m].items())))
     if sigs:
         print("unique finding signatures:")
@@ -183,16 +197,20 @@ def cmd_corpus(args: argparse.Namespace) -> int:
 
 # ----------------------------------------------------------------------------- diff
 def cmd_diff(args: argparse.Namespace) -> int:
-    """Runs one file and shows, per field, where the two modes' outcomes first differ."""
-    from .harness.client import HarnessClient
+    """Runs one file and shows, per field, where the guide's and a comparator's outcomes first differ."""
     from .harness.compare import compare_run
 
     path = Path(args.path)
-    modes = tuple(args.modes.split(","))
-    with HarnessClient(quiet=True) as client:
-        run = client.run(path.read_text(encoding="utf-8"), modes=modes, language_version=args.language_version,
+    client = _ensemble(args)
+    against = args.against or (client.comparators[0] if client.comparators else None)
+    if against not in client.comparators:
+        print(f"--against must name a comparator: one of {client.comparators}", file=sys.stderr)
+        return 2
+    with client:
+        run = client.run(path.read_text(encoding="utf-8"), language_version=args.language_version,
                          strict=args.strict, id=path.stem, source_name=path.name, wall_ms=args.wall_ms)
-    a, b = run.results[modes[0]], run.results[modes[1]]
+    modes = (client.guide, against)
+    a, b = run.results[client.guide], run.results[against]
     print(f"verdict: {compare_run(run, strict_java_types=args.strict_java_types).pretty()}\n")
     for field in ("status", "compiledActually", "value", "valueJavaTypes", "thrown", "trace", "traceJavaTypes",
                   "javaTrace", "javaTraceTypes", "continuations", "output", "soft", "reason"):
@@ -336,13 +354,12 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 def cmd_shrink(args: argparse.Namespace) -> int:
     """Statement-level delta debugging of a reproducer while its coarse verdict signature holds."""
-    from .harness.client import HarnessClient
     from .harness.compare import compare_run
     from .shrink import shrink_source
 
     path = Path(args.path)
     source = path.read_text(encoding="utf-8")
-    with HarnessClient(quiet=True) as client:
+    with _ensemble(args) as client:
         def verdict_of(src: str):
             return compare_run(client.run(src, language_version=args.language_version, strict=args.strict, seed=1,
                                           wall_ms=args.wall_ms))
@@ -406,7 +423,8 @@ def cmd_export(args: argparse.Namespace) -> int:
 
     options = _gen_options(args)
     out = inspector.export(Path(args.out), per_generator=args.per_generator, per_template=args.per_template,
-                           seed=args.seed, options=options, language_version=args.language_version, coverage=args.coverage)
+                           seed=args.seed, options=options, language_version=args.language_version, coverage=args.coverage,
+                           modes=tuple(_ensemble(args).names), guide=args.guide)
     print(f"exported to {out}\n")
     inspector.print_table(out / "metrics.json", worst=args.worst)
     return 0
@@ -421,23 +439,26 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 def cmd_fuzz(args: argparse.Namespace) -> int:
     from . import findings
     from .fuzz import fuzz
-    from .harness.client import HarnessClient
     from .related import known_index
 
     options = _gen_options(args)
-    with HarnessClient(quiet=True, coverage=True) as client:
+    with _ensemble(args, coverage=True) as client:
         if not client.info().get("coverage"):
             print("coverage agent not attached: the harness build must include jacocoagent.jar", file=sys.stderr)
             return 2
         index = known_index(client)
         known = index.signatures if not args.ignore_known else set()
-        summary = fuzz(corpus_dir=Path(args.corpus), options=options, iterations=args.iterations, seconds=args.seconds,
-                       steps=args.steps, p_new=args.p_new, seed=args.seed, known=known, related_index=index,
-                       findings_dir=Path(args.findings_dir) if args.findings_dir else findings.DEFAULT_DIR,
-                       shrink_budget=args.shrink_budget, compact_budget=args.compact_budget,
-                       source_shrink_budget=args.source_shrink_budget,
-                       language_version=args.language_version, client=client, quiet=args.quiet,
-                       max_depth=args.max_lineage_depth, hard_only=args.hard_only)
+        try:
+            summary = fuzz(corpus_dir=Path(args.corpus), options=options, iterations=args.iterations, seconds=args.seconds,
+                           steps=args.steps, p_new=args.p_new, seed=args.seed, known=known,
+                           findings_dir=Path(args.findings_dir) if args.findings_dir else findings.DEFAULT_DIR,
+                           shrink_budget=args.shrink_budget, compact_budget=args.compact_budget,
+                           source_shrink_budget=args.source_shrink_budget,
+                           language_version=args.language_version, client=client, quiet=args.quiet,
+                           max_depth=args.max_lineage_depth, hard_only=args.hard_only, reset_coverage=args.reset_coverage)
+        except RuntimeError as e:
+            print(e, file=sys.stderr)
+            return 2
     print(json.dumps({k: v for k, v in summary.items() if k != "signatures"}, indent=1))
     if summary["signatures"]:
         print("hard signatures seen:")
@@ -446,8 +467,15 @@ def cmd_fuzz(args: argparse.Namespace) -> int:
     return 0
 
 
+def _add_harness_options(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--modes", default="interpreted,compiled", help="modes to run, one harness process each")
+    p.add_argument("--guide", default="interpreted",
+                   help="mode of the guide harness: the reference for comparisons and the only one coverage is "
+                        "gathered from (added to --modes if missing)")
+
+
 def _add_run_options(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--modes", default="interpreted,compiled")
+    _add_harness_options(p)
     p.add_argument("--language-version", type=int, default=200, help="Rhino language version: 200=ES6, 250=ECMASCRIPT")
     p.add_argument("--wall-ms", type=int, default=5000)
     p.add_argument("--strict-java-types", action="store_true",
@@ -483,6 +511,7 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("path")
     d.add_argument("--strict", action="store_true")
     d.add_argument("--context", type=int, default=60, help="characters of context around the first difference")
+    d.add_argument("--against", help="the comparator to show against the guide (default: the first)")
     _add_run_options(d)
     d.set_defaults(fn=cmd_diff)
 
@@ -526,6 +555,9 @@ def main(argv: list[str] | None = None) -> int:
     fz.add_argument("--max-depth", type=int)
     fz.add_argument("--strict", action="store_true")
     fz.add_argument("--language-version", type=int, default=200)
+    fz.add_argument("--reset-coverage", action="store_true",
+                    help="discard the corpus's coverage.exec if another guide recorded it (otherwise resuming is refused)")
+    _add_harness_options(fz)
     fz.add_argument("-q", "--quiet", action="store_true")
     fz.set_defaults(fn=cmd_fuzz)
 
@@ -536,6 +568,7 @@ def main(argv: list[str] | None = None) -> int:
     sh.add_argument("--strict", action="store_true")
     sh.add_argument("--language-version", type=int, default=200)
     sh.add_argument("--wall-ms", type=int, default=5000)
+    _add_harness_options(sh)
     sh.set_defaults(fn=cmd_shrink)
 
     cm = sub.add_parser("cmin", help="minimise a corpus: the smallest entry per coverage probe (afl-cmin)")
@@ -565,6 +598,7 @@ def main(argv: list[str] | None = None) -> int:
     ex.add_argument("--max-depth", type=int)
     ex.add_argument("--strict", action="store_true")
     ex.add_argument("--language-version", type=int, default=200)
+    _add_harness_options(ex)
     ex.set_defaults(fn=cmd_export)
 
     me = sub.add_parser("metrics", help="print the quality table of an exported run")

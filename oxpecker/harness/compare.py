@@ -22,6 +22,9 @@ class Verdict:
     reasons: list[str] = field(default_factory=list)
     java_type_diff: list[str] = field(default_factory=list)   # Integer-vs-Double style differences
     first_trace_diff: int | None = None
+    against: str | None = None                  # the harness compared with the guide (compare_run)
+    pair_class: str = "mode"                    # "mode": same engine; "engine:<a>|<b>": two engines
+    pairs: dict[str, "Verdict"] = field(default_factory=dict)  # compare_run: the verdict per comparator
 
     @property
     def is_finding(self) -> bool:
@@ -45,11 +48,18 @@ class Verdict:
         # Numbers become '#', except zero: -0 vs 0 is its own class of bug.
         first = re.sub(r"(?<![A-Za-z_#])(-?)(\d+(\.\d+)?(e[+-]?\d+)?)",
                        lambda m: m.group(1) + "0" if float(m.group(2)) == 0 else "#", first)
-        return f"{self.kind}:{first}"
+        return f"{self._kind_and_pair()}:{first}"
+
+    def _kind_and_pair(self) -> str:
+        """The kind, qualified by the pair class unless the pair differs only in mode (the case
+        every signature so far was recorded under, so those stay as they were)."""
+        return self.kind if self.pair_class == "mode" else f"{self.kind}@{self.pair_class}"
 
     def to_json(self) -> dict:
         return {"kind": self.kind, "reasons": self.reasons, "javaTypeDiff": self.java_type_diff,
-                "firstTraceDiff": self.first_trace_diff, "signature": self.signature()}
+                "firstTraceDiff": self.first_trace_diff, "signature": self.signature(),
+                "against": self.against, "pairClass": self.pair_class,
+                "pairs": {name: v.kind for name, v in self.pairs.items()}}
 
     def coarse_signature(self) -> str:
         """kind + the *type* of the first difference, without any values: what a shrinker should
@@ -61,7 +71,7 @@ class Verdict:
         head = m.group(0) if m else first[:20]
         head = re.sub(r"\[\d+\]", "[]", head)
         head = re.sub(r"arg\d+", "arg", head)
-        return f"{self.kind}:{head}"
+        return f"{self._kind_and_pair()}:{head}"
 
     def pretty(self) -> str:
         s = self.kind.upper()
@@ -90,8 +100,16 @@ def canon_identity(s: str | None) -> str | None:
     return None if s is None else _IDENTITY_HASH.sub(r"\1", s)
 
 
+def _has(a: Outcome, b: Outcome, capability: str) -> bool:
+    """Whether both harnesses report an optional field (an outcome without capabilities has all)."""
+    return all(o.capabilities is None or capability in o.capabilities for o in (a, b))
+
+
 def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_messages: bool = False) -> Verdict:
-    """Compares the outcome of one mode against another (a is the reference, usually interpreted)."""
+    """Compares the outcome of one mode against another (a is the reference, usually interpreted).
+    Optional fields (Java types, the J.* trace, continuations) are compared only when both
+    harnesses report them."""
+    java_types, java_trace, continuations = (_has(a, b, c) for c in ("javaTypes", "javaTrace", "continuations"))
     a = replace(a, value=canon_identity(a.value), trace=[canon_identity(t) for t in a.trace],
                 output=[canon_identity(t) for t in a.output], javaTrace=[canon_identity(t) for t in a.javaTrace])
     b = replace(b, value=canon_identity(b.value), trace=[canon_identity(t) for t in b.trace],
@@ -117,7 +135,7 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
         # frame, or captured at all in the compiled mode): the partial traces differ by construction
         return Verdict(SKIP, [f"both unsupported ({a.reason} / {b.reason})"])
     paused = {o.mode: bool(o.continuations) for o in (a, b)}
-    if paused.get("interpreted") and not paused.get("compiled") and "unsupported" not in (a.status, b.status):
+    if continuations and paused.get("interpreted") and not paused.get("compiled") and "unsupported" not in (a.status, b.status):
         # the interpreter paused; the compiled mode recorded no continuation and did not report the
         # refusal, so the program's own try/catch swallowed it (G42): everything after that point
         # differs by construction, like the both-unsupported case
@@ -155,9 +173,9 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
             reasons.append(f"trace length {len(a.trace)} vs {len(b.trace)}")
     if a.output != b.output:
         reasons.append(f"output differs: {_short(str(a.output))} vs {_short(str(b.output))}")
-    if a.continuations != b.continuations:
+    if continuations and a.continuations != b.continuations:
         reasons.append(f"continuations {_short(str(a.continuations))} vs {_short(str(b.continuations))}")
-    if a.javaTrace != b.javaTrace:
+    if java_trace and a.javaTrace != b.javaTrace:
         for i, (x, y) in enumerate(zip(a.javaTrace, b.javaTrace)):
             if x != y:
                 reasons.append(f"java[{i}] {_short(x)} vs {_short(y)}")
@@ -168,9 +186,9 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
         return Verdict(HARD, reasons, first_trace_diff=first_diff)
 
     # Soft: messages and Java representation types.
-    if a.valueJavaTypes != b.valueJavaTypes:
+    if java_types and a.valueJavaTypes != b.valueJavaTypes:
         jdiff.append(f"value {_short(a.valueJavaTypes)} vs {_short(b.valueJavaTypes)}")
-    if a.traceJavaTypes != b.traceJavaTypes:
+    if java_types and a.traceJavaTypes != b.traceJavaTypes:
         for i, (x, y) in enumerate(zip(a.traceJavaTypes, b.traceJavaTypes)):
             if x != y:
                 # Report only the first probe argument whose Java types differ.
@@ -182,13 +200,13 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
                 else:
                     jdiff.append(f"trace[{i}] arity {len(xs)} vs {len(ys)}")
                 break
-    if a.javaTraceTypes != b.javaTraceTypes:
+    if java_types and java_trace and a.javaTraceTypes != b.javaTraceTypes:
         for i, (x, y) in enumerate(zip(a.javaTraceTypes, b.javaTraceTypes)):
             if x != y:
                 jdiff.append(f"java[{i}] {_short(x, 60)} vs {_short(y, 60)}")
                 break
     ta, tb = a.thrown or {}, b.thrown or {}
-    if ta.get("valueJavaTypes") != tb.get("valueJavaTypes"):
+    if java_types and ta.get("valueJavaTypes") != tb.get("valueJavaTypes"):
         jdiff.append(f"thrown {ta.get('valueJavaTypes')} vs {tb.get('valueJavaTypes')}")
     soft_reasons: list[str] = []
     if a.soft != b.soft or (ta.get("message") != tb.get("message")):
@@ -201,24 +219,51 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
     return Verdict(EQUAL, [], [])
 
 
-def compare_run(run: RunResult, *, reference: str = "interpreted", strict_java_types: bool = False,
+_MODE_ORDER = ("interpreted", "compiled", "debugger")
+
+
+def _canonical_pair(x: Outcome, y: Outcome) -> tuple[Outcome, Outcome]:
+    """The pair in a fixed order (by mode, then engine, then harness name), whichever is the guide,
+    so that a divergence reads, and signs, the same with an interpreted or a compiled guide."""
+    def key(o: Outcome) -> tuple:
+        return (_MODE_ORDER.index(o.mode) if o.mode in _MODE_ORDER else len(_MODE_ORDER), o.mode,
+                o.engine or "", o.harness or "")
+    return (x, y) if key(x) <= key(y) else (y, x)
+
+
+def pair_class(a: Outcome, b: Outcome) -> str:
+    """"mode" when both outcomes come from the same engine, else which two engines differ."""
+    if a.engine == b.engine:
+        return "mode"
+    return "engine:" + "|".join(sorted(str(o.engine) for o in (a, b)))
+
+
+def compare_run(run: RunResult, *, reference: str | None = None, strict_java_types: bool = False,
                 strict_messages: bool = False) -> Verdict:
-    """Compares every other mode against the reference; the worst verdict wins."""
+    """Compares every other outcome against the reference (default: the run's guide, else
+    interpreted); the worst verdict wins and the per-comparator verdicts are in `pairs`."""
+    reference = reference or run.guide or "interpreted"
     ref = run.results.get(reference)
     if ref is None:
         return Verdict(SKIP, [f"no {reference} result"])
     order = {HARD: 0, JAVA_TYPES: 1, SOFT: 2, DISCARD: 3, SKIP: 4, EQUAL: 5}
     worst: Verdict | None = None
-    for mode, o in run.results.items():
-        if mode == reference:
+    pairs: dict[str, Verdict] = {}
+    for name, o in run.results.items():
+        if name == reference:
             continue
-        v = compare(ref, o, strict_java_types=strict_java_types, strict_messages=strict_messages)
+        v = compare(*_canonical_pair(ref, o), strict_java_types=strict_java_types, strict_messages=strict_messages)
+        v.against, v.pair_class = name, pair_class(ref, o)
+        pairs[name] = replace(v, reasons=list(v.reasons), java_type_diff=list(v.java_type_diff))
         if worst is None or order[v.kind] < order[worst.kind]:
             worst = v
         elif v.kind == worst.kind:
             worst.reasons.extend(r for r in v.reasons if r not in worst.reasons)
             worst.java_type_diff.extend(j for j in v.java_type_diff if j not in worst.java_type_diff)
-    return worst or Verdict(EQUAL)
+    if worst is None:
+        return Verdict(SKIP, [f"no comparator ran beside {reference}"])
+    worst.pairs = pairs
+    return worst
 
 
 _shell_client = None

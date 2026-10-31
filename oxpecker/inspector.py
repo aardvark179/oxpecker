@@ -27,7 +27,8 @@ from pathlib import Path
 from typing import Any
 
 import oxpecker.il.templates  # noqa: F401  (registration)
-from .harness.client import HarnessClient
+from .harness.client import DEFAULT_MODES
+from .harness.ensemble import DEFAULT_GUIDE, Ensemble
 from .harness.compare import compare_run
 from .il import ops
 from .il.lift import LiftOptions, lift
@@ -168,7 +169,8 @@ def sample(options: GenOptions, per_generator: int, per_template: int, seed: int
 # ------------------------------------------------------------------------------- export
 def export(out_root: Path, *, per_generator: int = 20, per_template: int = 20, seed: int = 0,
            options: GenOptions = GenOptions(), language_version: int = 200, quiet: bool = False,
-           coverage: bool = False, client: HarnessClient | None = None) -> Path:
+           coverage: bool = False, client: Ensemble | None = None, modes: tuple[str, ...] = DEFAULT_MODES,
+           guide: str = DEFAULT_GUIDE) -> Path:
     rid = run_id()
     out = out_root / rid
     out.mkdir(parents=True, exist_ok=True)
@@ -185,7 +187,7 @@ def export(out_root: Path, *, per_generator: int = 20, per_template: int = 20, s
     t0 = time.time()
     own = client is None
     if own:
-        client = HarnessClient(quiet=True, coverage=coverage)
+        client = Ensemble.from_modes(modes, guide, quiet=True, coverage=coverage)
         client.start()
     try:
         with (out / "samples.jsonl").open("w", encoding="utf-8") as sf:

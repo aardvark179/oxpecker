@@ -40,10 +40,11 @@ def record(prog: Any, run: RunResult, verdict: Verdict, *, out_dir: Path = DEFAU
     if sig not in seen:
         with log.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"signature": sig, "verdict": verdict.to_json(), "source": prog.source,
-                                "template": prog.template, "choices": choices,
+                                "template": prog.template, "choices": choices, "guide": run.guide,
                                 "related": [{"regression": r.name, "score": r.score, "shared": list(r.shared)}
                                             for r in related or ()],
-                                "results": run.to_json()["results"]}) + "\n")
+                                "results": run.to_json()["results"],
+                                "against": verdict.against, "results": run.to_json()["results"]}) + "\n")
     if not reproducer:
         return None
     path = out_dir / f"{verdict.kind}-{short_sig(verdict)}.js"

@@ -76,8 +76,18 @@ public final class Request {
         return sourceName == null ? "case.js" : sourceName;
     }
 
-    public List<Mode> modeList() {
-        if (modes == null || modes.isEmpty()) return List.of(Mode.INTERPRETED, Mode.COMPILED);
-        return modes.stream().map(Mode::fromWire).toList();
+    /**
+     * The modes to run. A harness pinned to one mode runs only that mode: an absent list means it,
+     * and a list naming any other mode is rejected (IllegalArgumentException, as for an unknown mode).
+     */
+    public List<Mode> modeList(Mode pinned) {
+        if (modes == null || modes.isEmpty()) {
+            return pinned != null ? List.of(pinned) : List.of(Mode.INTERPRETED, Mode.COMPILED);
+        }
+        List<Mode> list = modes.stream().map(Mode::fromWire).toList();
+        if (pinned != null && !list.equals(List.of(pinned))) {
+            throw new IllegalArgumentException("harness is pinned to mode " + pinned.wire + ", asked for " + modes);
+        }
+        return list;
     }
 }

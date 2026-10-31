@@ -27,6 +27,7 @@ STEPS = 4
 class FakeRun:
     """Stands in for a RunResult in findings.record."""
     results: dict = {}
+    guide = None
 
     def to_json(self):
         return {"results": {}}

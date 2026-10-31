@@ -1,7 +1,7 @@
 import pytest
 
 from oxpecker import HARNESS_BIN
-from oxpecker.harness.client import HarnessClient
+from oxpecker.harness.ensemble import Ensemble
 
 
 @pytest.fixture(scope="session")
@@ -10,7 +10,7 @@ def harness():
         pytest.skip("harness not built: cd harness-java && ./gradlew fatJar")
     # OXPECKER_COVERAGE=1 attaches JaCoCo so the property test can steer on new Rhino probes.
     import os
-    with HarnessClient(quiet=True, coverage=bool(os.environ.get("OXPECKER_COVERAGE"))) as c:
+    with Ensemble.from_modes(quiet=True, coverage=bool(os.environ.get("OXPECKER_COVERAGE"))) as c:
         yield c
 
 
