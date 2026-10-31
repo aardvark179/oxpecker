@@ -24,8 +24,10 @@ jobs:
           java-version: "21"
           cache: gradle
 
-      - name: Build the harness jar (bundles Rhino from Maven Central)
-        working-directory: harness-java
+      # Rhino 2.0 is a snapshot published to the local Maven repository only (harness-rhino2.0), so
+      # CI builds and tests the Rhino 1.9 harness, from Maven Central.
+      - name: Build the Rhino 1.9 harness jar (bundles Rhino from Maven Central)
+        working-directory: harness-rhino1.9
         # gradle.properties pins org.gradle.java.home to a local path; the command line wins.
         run: ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" fatJar
 
@@ -41,6 +43,7 @@ jobs:
       - name: Run the tests
         env:
           OXPECKER_JAVA: ${{ env.JAVA_HOME }}/bin/java
+          OXPECKER_HARNESS: rhino1.9
         run: pytest -q
 
       - name: Keep the harness jar
@@ -48,5 +51,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: oxpecker-harness
-          path: harness-java/build/libs/oxpecker-harness-all.jar
+          path: harness-rhino1.9/build/libs/oxpecker-harness-all.jar
           retention-days: 7

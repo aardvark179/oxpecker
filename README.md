@@ -38,13 +38,18 @@ flowchart LR
 JDK 21 and Python 3.13.
 
 ```bash
-(cd harness-java && ./gradlew fatJar)              # harness jar, bundles Rhino 1.9.2 from Maven Central
+(cd harness-rhino2.0 && ./gradlew fatJar)          # Rhino 2.0 harness: needs ../rhino published to mavenLocal
+(cd harness-rhino1.9 && ./gradlew fatJar)          # Rhino 1.9 harness: bundles Rhino 1.9.2 from Maven Central
 python3.13 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 source .venv/bin/activate
 ```
 
-The Rhino version is `rhinoVersion` in `harness-java/gradle.properties`; a locally published
-snapshot works as well.
+There is one harness project per Rhino line, `harness-rhino1.9/` and `harness-rhino2.0/`, each
+with its launcher `bin/harness-<name>`; their Rhino version is `rhinoVersion` in the project's
+`gradle.properties`. To build against a local Rhino jar instead, pass its path:
+`(cd harness-rhino2.0 && ./gradlew fatJar -PrhinoJar=/path/to/rhino.jar)`. The default harness is
+rhino2.0 (`OXPECKER_HARNESS` overrides it); a mode can name another, so
+`oxpecker run --modes interpreted,rhino1.9:interpreted case.js` compares the two versions.
 
 ## First run
 

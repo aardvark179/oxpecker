@@ -67,7 +67,7 @@ class Verdict:
         import re
         first = (self.reasons or self.java_type_diff or [""])[0]
         m = re.match(r"(status \S+ vs \S+|thrown name|thrown value|value|trace\[\d+\]( arg\d+)?|trace length|output differs"
-                     r"|java\[\d+\]|java trace length|continuations|(\w+) crashed: [\w.$]+|java types differ|error messages differ)", first)
+                     r"|java\[\d+\]|java trace length|continuations|([\w.:]+) crashed: [\w.$]+|java types differ|error messages differ)", first)
         head = m.group(0) if m else first[:20]
         head = re.sub(r"\[\d+\]", "[]", head)
         head = re.sub(r"arg\d+", "arg", head)
@@ -114,17 +114,20 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
                 output=[canon_identity(t) for t in a.output], javaTrace=[canon_identity(t) for t in a.javaTrace])
     b = replace(b, value=canon_identity(b.value), trace=[canon_identity(t) for t in b.trace],
                 output=[canon_identity(t) for t in b.output], javaTrace=[canon_identity(t) for t in b.javaTrace])
+    # Each side by its mode, or by its harness name when the two come from different engines (the
+    # same mode in two Rhino versions would otherwise read "interpreted vs interpreted").
+    label = {id(o): o.mode if a.engine == b.engine else (o.harness or o.mode) for o in (a, b)}
     reasons: list[str] = []
     jdiff: list[str] = []
     first_diff: int | None = None
 
     if a.status == "fallback" or b.status == "fallback":
-        return Verdict(SKIP, [f"{'/'.join(o.mode for o in (a, b) if o.status == 'fallback')} fell back to the interpreter"])
+        return Verdict(SKIP, [f"{'/'.join(label[id(o)] for o in (a, b) if o.status == 'fallback')} fell back to the interpreter"])
     if a.status == "crash" or b.status == "crash":
         for o in (a, b):
             if o.status == "crash":
                 ee = o.engineException or {}
-                reasons.append(f"{o.mode} crashed: {ee.get('clazz')}: {str(ee.get('message'))[:120]}")
+                reasons.append(f"{label[id(o)]} crashed: {ee.get('clazz')}: {str(ee.get('message'))[:120]}")
         return Verdict(HARD, reasons)
 
     slow = {"timeout", "resource"}
@@ -142,12 +145,13 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
         return Verdict(SKIP, ["interpreted paused, compiled refusal caught by the program (continuations)"])
     if a.status in slow or b.status in slow:
         o = a if a.status in slow else b
-        return Verdict(SOFT, [f"{o.mode} {o.status} ({o.reason}) while {(b if o is a else a).mode} {(b if o is a else a).status}"])
+        other = b if o is a else a
+        return Verdict(SOFT, [f"{label[id(o)]} {o.status} ({o.reason}) while {label[id(other)]} {other.status}"])
 
     if a.status != b.status:
         def st(o: Outcome) -> str:
             return o.status + (f"({o.reason})" if o.status == "unsupported" else "")
-        reasons.append(f"status {a.mode}={st(a)} vs {b.mode}={st(b)}")
+        reasons.append(f"status {label[id(a)]}={st(a)} vs {label[id(b)]}={st(b)}")
         if a.thrown or b.thrown:
             reasons.append(f"thrown {_thrown_sig(a)[0]} vs {_thrown_sig(b)[0]}")
         return Verdict(HARD, reasons)

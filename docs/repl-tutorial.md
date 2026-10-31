@@ -318,5 +318,5 @@ The CLI does the same without a shell: `oxpecker gen -o DIR -n 20 --seed 3 [--fa
   the seed. On hand-built IL it is the rule you broke (assignment to a const, a label used as
   a value, a strict function with a rest parameter, ...).
 - A `Builder`'s `finish()` can be called once; build a new one for another program.
-- The harness functions need `harness-java/build/libs/oxpecker-harness-all.jar`; without it
-  `run_and_compare` raises at start. Build it with `cd harness-java && ./gradlew fatJar`.
+- The harness functions need `harness-rhino2.0/build/libs/oxpecker-harness-all.jar`; without it
+  `run_and_compare` raises at start. Build it with `cd harness-rhino2.0 && ./gradlew fatJar`.

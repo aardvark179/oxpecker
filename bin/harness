@@ -1,6 +1,8 @@
 #!/bin/sh
-# Runs the Java harness with the JDK Rhino needs. Build first: (cd harness-java && ./gradlew fatJar)
-LIBS="$(dirname "$0")/../harness-java/build/libs"
+# Runs a Java harness with the JDK Rhino needs. OXPECKER_HARNESS picks the harness project
+# (harness-<name>/, default rhino2.0); bin/harness-<name> sets it. Build first:
+# (cd harness-rhino2.0 && ./gradlew fatJar)
+LIBS="$(dirname "$0")/../harness-${OXPECKER_HARNESS:-rhino2.0}/build/libs"
 AGENT=""
 # OXPECKER_COVERAGE=1 attaches the JaCoCo agent so the harness can report which Rhino code each
 # case reached (coverage buckets, `oxpecker ... --coverage`). Generated script classes are excluded.

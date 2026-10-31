@@ -37,7 +37,7 @@ made); 33 reproducers in `tests/regressions/` show on 1.9.2, 7 more under `maste
 
 ```
 Python (Hypothesis)                                       Java harness (one JVM, Rhino embedded)
-  oxpecker/gen/        ProgramBuilder → JS source text      harness-java/
+  oxpecker/gen/        ProgramBuilder → JS source text      harness-rhino*/
     generators/*.py    133 generators, 15 families            Harness        JSON lines on stdio; --replay; --info
     templates*.py      9 templates                            ModeRunner     per mode: fresh Context + safe scope,
     strategies.py      swarm subset + template → Program                     64 MB-stack thread, watchdog, budget
@@ -55,7 +55,7 @@ Python (Hypothesis)                                       Java harness (one JVM,
 ### Repository layout
 
 ```
-harness-java/            Gradle; rhinoVersion in gradle.properties; ./gradlew fatJar → build/libs/
+harness-rhino*/          Gradle, one per Rhino line; rhinoVersion in gradle.properties; ./gradlew fatJar → build/libs/
 bin/harness              launcher (JDK 21; OXPECKER_JAVA, OXPECKER_COVERAGE)
 oxpecker/                Python package (installed editable into .venv)
 tests/regressions/*.js   minimal reproducers; each must stay detected (test_harness.py)

@@ -10,7 +10,8 @@ mkdir -p "$OUT"
 . .venv/bin/activate
 
 echo "== build"
-(cd harness-java && ./gradlew -q fatJar) || exit 1
+(cd harness-rhino2.0 && ./gradlew -q fatJar) || exit 1
+(cd harness-rhino1.9 && ./gradlew -q fatJar) || exit 1
 
 echo "== regressions must still be detected"
 pytest tests/test_harness.py tests/test_harness_coverage.py -q 2>&1 | tail -1 | tee "$OUT/tests.txt"

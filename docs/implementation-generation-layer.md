@@ -490,7 +490,7 @@ Harness observation points:
 - The compiled mode's refusal of `new Continuation()` is reported as
   `unsupported(continuations)` (G42), a known signature; a program both modes report as
   unsupported is skipped.
-- Rebuild the jar after any Java change (`cd harness-java && ./gradlew fatJar`), never while
+- Rebuild the jar after any Java change (`cd harness-rhino<version> && ./gradlew fatJar`), never while
   harness runs are in progress (a JVM loading classes lazily from a replaced jar fails oddly).
   Coverage needs `OXPECKER_COVERAGE=1` (the client sets it) and `jacocoagent.jar` next to it.
   A re-run reaches 87 % of a run's new probes; 13 % are once-per-JVM.

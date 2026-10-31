@@ -3,8 +3,8 @@ __pycache__/
 *.pyc
 .hypothesis/
 .pytest_cache/
-harness-java/.gradle/
-harness-java/build/
+harness-*/.gradle/
+harness-*/build/
 .gradle/
 build/
 ui/node_modules/

@@ -1,0 +1,3 @@
+#!/bin/sh
+# The harness built in harness-rhino2.0/ (see bin/harness).
+OXPECKER_HARNESS=rhino2.0 exec "$(dirname "$0")/harness" "$@"

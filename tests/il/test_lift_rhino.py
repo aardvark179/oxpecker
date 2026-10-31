@@ -2,7 +2,7 @@
 
 A syntax error here is a generator or lifter bug, never a Rhino finding; the property shrinks it
 to the smallest program the lifter gets wrong. Only the parser is under test, so only the
-interpreted mode runs (both modes share it). Needs the harness (`cd harness-java && ./gradlew fatJar`).
+interpreted mode runs (both modes share it). Needs the harness (`cd harness-rhino2.0 && ./gradlew fatJar`).
 
     pytest tests/il/test_lift_rhino.py
     OXPECKER_EXAMPLES=500 pytest tests/il/test_lift_rhino.py

@@ -17,6 +17,7 @@
 
 Each mode runs in its own harness process. The guide (--guide, default interpreted) is the
 reference every other mode is compared against and the only process coverage is gathered from.
+A mode can name the harness (Rhino version) that runs it: --modes interpreted,rhino1.9:interpreted.
 
 """
 
@@ -32,14 +33,15 @@ from typing import Any
 
 # ----------------------------------------------------------------------------- running
 def _ensemble(args: argparse.Namespace, *, coverage: bool = False):
-    """The harness processes `--modes` and `--guide` ask for: the guide is added to the modes if
-    missing, and every other mode is a comparator."""
-    from .harness.ensemble import Ensemble
+    """The harness processes `--modes` and `--guide` ask for, each a `[harness:]mode`: the guide
+    is added to the modes if missing, and every other target is a comparator."""
+    from .harness.ensemble import Ensemble, specs_for
 
-    modes = [m for m in args.modes.split(",") if m]
-    if args.guide not in modes:
-        modes.insert(0, args.guide)
-    return Ensemble.from_modes(modes, args.guide, quiet=True, coverage=coverage)
+    try:
+        specs = specs_for([m for m in args.modes.split(",") if m], args.guide, include_guide=True)
+    except ValueError as e:
+        raise SystemExit(f"oxpecker: {e}") from None
+    return Ensemble(specs, quiet=True, coverage=coverage)
 
 
 def _js_files(paths: list[Path]) -> list[Path]:
@@ -468,9 +470,11 @@ def cmd_fuzz(args: argparse.Namespace) -> int:
 
 
 def _add_harness_options(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--modes", default="interpreted,compiled", help="modes to run, one harness process each")
+    p.add_argument("--modes", default="interpreted,compiled",
+                   help="[harness:]mode targets to run, one harness process each, e.g. "
+                        "interpreted,rhino1.9:interpreted (harnesses: bin/harness-*, default $OXPECKER_HARNESS or rhino2.0)")
     p.add_argument("--guide", default="interpreted",
-                   help="mode of the guide harness: the reference for comparisons and the only one coverage is "
+                   help="[harness:]mode of the guide: the reference for comparisons and the only process coverage is "
                         "gathered from (added to --modes if missing)")
 
 

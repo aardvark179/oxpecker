@@ -146,7 +146,7 @@ where it lives, `docs/repl-tutorial.md` shows it from a shell.
 
 ## Comparing and findings
 
-- **Harness** (`harness-java/`, `HarnessClient`): the Java process that runs a program in
+- **Harness** (`harness-rhino1.9/`, `harness-rhino2.0/`, `HarnessClient`): the Java process that runs a program in
   Rhino's *interpreted* and *compiled* modes with probes, traces and Java types.
 - **Mode**: `interpreted` or `compiled`; the differential test compares the two.
 - **Verdict** (`harness/compare.py`): the comparison of the modes: `equal`, `soft` (a

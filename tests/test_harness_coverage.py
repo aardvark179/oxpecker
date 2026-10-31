@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import pytest
 
-from oxpecker import HARNESS_BIN
+from oxpecker import DEFAULT_HARNESS, HARNESS_BIN, harness_libs
 from oxpecker.harness.client import HarnessClient
 
-AGENT = HARNESS_BIN.parent.parent / "harness-java" / "build" / "libs" / "jacocoagent.jar"
+AGENT = harness_libs(DEFAULT_HARNESS) / "jacocoagent.jar"
 pytestmark = pytest.mark.skipif(not (HARNESS_BIN.exists() and AGENT.exists()), reason="harness/agent not built")
 
 PROGRAM = """

@@ -33,7 +33,7 @@ public final class Harness {
     /** Version of the JSON-lines protocol spoken by {@link #serve}. */
     static final int PROTOCOL = 1;
     /** The name this harness declares in {@link #info}: which engine it runs. */
-    static final String NAME = "Rhino";
+    static final String NAME = "Rhino2.0";
 
     public static void main(String[] args) throws IOException {
         if (args.length == 0 || args[0].equals("--serve")) {
@@ -93,7 +93,8 @@ public final class Harness {
         // Every mode this harness can run; `mode` is the one it is pinned to (absent: any).
         m.put("modes", Arrays.stream(Mode.values()).map(mode -> mode.wire).toList());
         m.put("mode", pinned == null ? null : pinned.wire);
-        List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace", "continuations"));
+        // No "continuations": this Rhino line has no executeScriptWithContinuations, so __pause never pauses.
+        List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace"));
         if (coverage.enabled()) capabilities.add("coverage");
         m.put("capabilities", capabilities);
         m.put("coverage", coverage.enabled());

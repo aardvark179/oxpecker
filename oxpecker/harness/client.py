@@ -100,13 +100,13 @@ def describe_harness(harness_bin: os.PathLike[str] | str = HARNESS_BIN, timeout_
     """Asks a harness launcher what it is (`--info`, one short-lived process), before choosing
     how to start it."""
     if not os.path.exists(harness_bin):
-        raise HarnessError(f"harness launcher not found: {harness_bin} (build with: cd harness-java && ./gradlew fatJar)")
+        raise HarnessError(f"harness launcher not found: {harness_bin}")
     try:
         out = subprocess.run([str(harness_bin), "--info"], capture_output=True, text=True, encoding="utf-8",
                              timeout=timeout_s, check=True).stdout
         return HarnessInfo.from_json(json.loads(out))
     except (subprocess.SubprocessError, json.JSONDecodeError) as e:
-        raise HarnessError(f"{harness_bin} --info failed: {e}") from e
+        raise HarnessError(f"{harness_bin} --info failed: {e} (is it built? cd harness-<name> && ./gradlew fatJar)") from e
 
 
 class HarnessClient:
@@ -132,7 +132,7 @@ class HarnessClient:
     # -- process management --------------------------------------------------------------
     def start(self) -> None:
         if not os.path.exists(self.harness_bin):
-            raise HarnessError(f"harness launcher not found: {self.harness_bin} (build with: cd harness-java && ./gradlew fatJar)")
+            raise HarnessError(f"harness launcher not found: {self.harness_bin}")
         env = dict(os.environ)
         if self.coverage:
             env["OXPECKER_COVERAGE"] = "1"
