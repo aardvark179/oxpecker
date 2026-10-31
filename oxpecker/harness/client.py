@@ -69,6 +69,46 @@ class HarnessError(RuntimeError):
     pass
 
 
+@dataclass(frozen=True)
+class HarnessInfo:
+    """What a harness declares about itself in `info` (protocol 1)."""
+    name: str                              # the engine it runs, e.g. "Rhino"
+    version: str
+    modes: tuple[str, ...]                 # the execution modes it can run (and be pinned to)
+    mode: str | None = None                # the mode this process is pinned to, if any
+    capabilities: tuple[str, ...] = ()     # optional Outcome fields it fills in
+    coverage: bool = False
+    protocol: int = 1
+
+    @classmethod
+    def from_json(cls, d: dict[str, Any]) -> "HarnessInfo":
+        missing = [k for k in ("name", "version", "modes") if k not in d]
+        if missing:
+            raise HarnessError(f"harness info does not declare {', '.join(missing)} (protocol {d.get('protocol')}); "
+                               "rebuild the harness")
+        return cls(name=d["name"], version=d["version"], modes=tuple(d["modes"]), mode=d.get("mode"),
+                   capabilities=tuple(d.get("capabilities", ())), coverage=bool(d.get("coverage")),
+                   protocol=int(d.get("protocol", 1)))
+
+    @property
+    def label(self) -> str:
+        """Name and version: what identifies the engine in outcomes and corpus records."""
+        return f"{self.name} {self.version}"
+
+
+def describe_harness(harness_bin: os.PathLike[str] | str = HARNESS_BIN, timeout_s: float = 60.0) -> HarnessInfo:
+    """Asks a harness launcher what it is (`--info`, one short-lived process), before choosing
+    how to start it."""
+    if not os.path.exists(harness_bin):
+        raise HarnessError(f"harness launcher not found: {harness_bin} (build with: cd harness-java && ./gradlew fatJar)")
+    try:
+        out = subprocess.run([str(harness_bin), "--info"], capture_output=True, text=True, encoding="utf-8",
+                             timeout=timeout_s, check=True).stdout
+        return HarnessInfo.from_json(json.loads(out))
+    except (subprocess.SubprocessError, json.JSONDecodeError) as e:
+        raise HarnessError(f"{harness_bin} --info failed: {e}") from e
+
+
 class HarnessClient:
     """One long-lived JVM. Not thread-safe; use one client per worker. With `mode`, the JVM is
     pinned to that mode (`--serve --mode m`) and runs nothing else."""
@@ -136,6 +176,10 @@ class HarnessClient:
 
     def info(self) -> dict[str, Any]:
         return self._request({"cmd": "info"})["info"]
+
+    def harness_info(self) -> HarnessInfo:
+        """The running process's declared name, version, modes and capabilities."""
+        return HarnessInfo.from_json(self.info())
 
     def coverage_save(self, path: str) -> int:
         resp = self._request({"cmd": "coverage-save", "path": str(path)})

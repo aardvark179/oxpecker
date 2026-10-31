@@ -14,7 +14,7 @@ SEEDS = Path(__file__).parent / "seeds"
 
 def test_info(harness):
     info = harness.info()
-    assert "rhino" in info and "compiled" in info["modes"]
+    assert info["name"] == "Rhino" and "compiled" in info["modes"]
 
 
 def test_self_consistency(harness):

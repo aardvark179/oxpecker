@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ public final class Harness {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
     /** Version of the JSON-lines protocol spoken by {@link #serve}. */
     static final int PROTOCOL = 1;
+    /** The name this harness declares in {@link #info}: which engine it runs. */
+    static final String NAME = "Rhino";
 
     public static void main(String[] args) throws IOException {
         if (args.length == 0 || args[0].equals("--serve")) {
@@ -62,8 +65,9 @@ public final class Harness {
 
     /**
      * What this harness is. {@code protocol} versions the JSON-lines wire format, so that a
-     * harness for another engine (an oracle) can implement it; {@code capabilities} lists the
-     * optional Outcome fields this harness fills in, which the client compares only when both
+     * harness for another engine (an oracle) can implement it; {@code name} and {@code modes}
+     * declare the engine and the execution modes it can be pinned to; {@code capabilities} lists
+     * the optional Outcome fields this harness fills in, which the client compares only when both
      * sides report them.
      */
     static Map<String, Object> info(Mode pinned, Coverage coverage) {
@@ -81,13 +85,13 @@ public final class Harness {
             version = bundled != null ? bundled + " (" + impl + ")" : impl;
         }
         m.put("protocol", PROTOCOL);
-        m.put("engine", "rhino");
+        m.put("name", NAME);
         m.put("version", version);
         m.put("rhino", version);
         m.put("java", System.getProperty("java.version"));
         m.put("harness", "0.1.0");
         // Every mode this harness can run; `mode` is the one it is pinned to (absent: any).
-        m.put("modes", List.of(Mode.INTERPRETED.wire, Mode.COMPILED.wire, Mode.DEBUGGER.wire));
+        m.put("modes", Arrays.stream(Mode.values()).map(mode -> mode.wire).toList());
         m.put("mode", pinned == null ? null : pinned.wire);
         List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace", "continuations"));
         if (coverage.enabled()) capabilities.add("coverage");
