@@ -14,7 +14,9 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.SerializableCallable;
+import org.mozilla.javascript.TopLevel;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.Wrapper;
 
 /**
@@ -35,7 +37,7 @@ final class Host {
     final List<String> continuations = new ArrayList<>();
     private Callable canon;
     private Callable errName;
-    private ScriptableObject scope;
+    private VarScope scope;
 
     /** Canonical rendering of a value: text, Java leaf types, soft messages. */
     record Canonical(String text, String javaTypes, String soft) {}
@@ -44,12 +46,12 @@ final class Host {
      * Installs the host functions into {@code scope}. Compiles canon.js and prelude.js in
      * interpreter mode whatever {@code cx}'s mode is, then restores the mode.
      */
-    void install(Context cx, ScriptableObject scope, long seed) {
+    void install(Context cx, TopLevel scope, long seed) {
         this.scope = scope;
-        boolean wasInterpreted = cx.isInterpretedMode();
-        RhinoCompat.setInterpreted(cx, true);
+        Context.EvaluationMethod was = cx.getEvaluationMethod();
+        cx.setEvaluationMethod(Context.EvaluationMethod.Interpreter);
         try {
-            ScriptableObject global = RhinoCompat.globalThis(scope);
+            ScriptableObject global = scope.getGlobalThis();
 
             define(scope, "print", 1, (c, s, thisObj, args) -> {
                 StringBuilder sb = new StringBuilder();
@@ -114,7 +116,7 @@ final class Host {
             Callable prelude = (Callable) preludeScript.exec(cx, scope, global);
             prelude.call(cx, scope, global, new Object[] {(double) seed});
         } finally {
-            RhinoCompat.setInterpreted(cx, wasInterpreted);
+            cx.setEvaluationMethod(was);
         }
     }
 
@@ -142,9 +144,9 @@ final class Host {
         return v != null && v.getClass().getName().startsWith("org.mozilla.javascript.NativeProxy");
     }
 
-    private static void define(ScriptableObject scope, String name, int length, SerializableCallable target) {
+    private static void define(TopLevel scope, String name, int length, SerializableCallable target) {
         LambdaFunction f = new LambdaFunction(scope, name, length, target);
-        ScriptableObject.putProperty(RhinoCompat.globalThis(scope), name, f);
+        ScriptableObject.putProperty(scope.getGlobalThis(), name, f);
     }
 
     private static String resource(String name) {

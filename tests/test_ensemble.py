@@ -102,6 +102,14 @@ def test_sides_from_different_engines_are_labelled_by_harness():
     assert v.coarse_signature().endswith(":old crashed: java.lang.NullPointerException")
 
 
+def test_the_same_mode_pausing_in_two_engines_is_compared_not_skipped():
+    a = Outcome(mode="interpreted", status="ok", value="3", continuations=["pause(1)", "end"], engine="Rhino2.0 2.0")
+    b = Outcome(mode="interpreted", status="ok", value="3", continuations=["pause(1)", "end"], engine="Rhino1.9 1.9.2")
+    assert compare_run(_run("new", new=a, old=b)).kind == EQUAL
+    b.continuations = ["pause(1)", "abandoned"]
+    assert compare_run(_run("new", new=a, old=b)).kind == HARD
+
+
 def test_fields_outside_a_harness_capabilities_are_not_compared():
     a = Outcome(mode="interpreted", status="ok", value="1", javaTrace=["x"], valueJavaTypes="Integer")
     b = Outcome(mode="interpreted", status="ok", value="1", engine="other", capabilities=[])
@@ -135,13 +143,13 @@ def test_resuming_coverage_of_another_guide_is_refused(tmp_path: Path):
 @needs_harness
 def test_the_harness_declares_its_name_and_modes():
     d = describe_harness()
-    assert d.name in ("Rhino1.9", "Rhino2.0") and set(d.modes) == {"interpreted", "compiled", "debugger"} and d.mode is None
+    assert d.name in ("Rhino1.9", "Rhino2.0") and {"interpreted", "compiled", "debugger"} <= set(d.modes) and d.mode is None
 
 
 @needs_harness
 def test_a_mode_the_harness_does_not_declare_is_refused_before_starting():
     e = Ensemble([HarnessSpec("x", GUIDE, "bytecode-v2")])
-    with pytest.raises(HarnessError, match="does not support mode 'bytecode-v2'.*interpreted, compiled, debugger"):
+    with pytest.raises(HarnessError, match="does not support mode 'bytecode-v2'; it declares .*interpreted"):
         e.start()
     assert all(c.proc is None for c in e.clients.values())
 
@@ -202,4 +210,7 @@ def test_two_rhino_versions_side_by_side():
         v = compare_run(run)
         assert v.kind == EQUAL and v.pairs[names["rhino1.9"]].pair_class.startswith("engine:Rhino1.9 1.9.2")
         assert run.results[names["rhino1.9"]].capabilities == ["javaTypes", "javaTrace", "continuations"]
-        assert "continuations" not in run.results[names["rhino2.0"]].capabilities
+        assert run.results[names["rhino2.0"]].capabilities == ["javaTypes", "javaTrace", "continuations"]
+        paused = e.run("function f() { var a = __pause(1); return a + __pause(2); } f();")
+        assert paused.results[names["rhino2.0"]].continuations == ["pause(1)", "pause(2)", "end"]
+        assert compare_run(paused).kind == EQUAL

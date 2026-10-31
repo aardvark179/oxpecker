@@ -4,13 +4,17 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.JSCode;
+import org.mozilla.javascript.JSDescriptor;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.TopLevel;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.WrappedException;
 
 /** Runs one case in one mode, on a dedicated thread with a fixed stack size and a watchdog. */
@@ -59,7 +63,6 @@ final class ModeRunner {
             o.newProbes = d.fresh;
             o.newProbeIds = d.newIds;
             o.requiredReached = d.requiredReached;
-            o.hitProbes = d.hits;
         }
         return o;
     }
@@ -78,12 +81,13 @@ final class ModeRunner {
             if (req.instructionBudget() > 0) cx.setInstructionObserverThreshold(10_000);
             // The interpreter keeps its frames on the heap and would otherwise recurse until
             // the JVM runs out of memory; compiled code hits the Java stack instead.
-            if (mode.interpreted) RhinoCompat.setInterpreterStackDepth(cx, INTERPRETER_STACK_DEPTH);
+            if (mode.interpreted) cx.setMaximumInterpreterStackDepth(INTERPRETER_STACK_DEPTH);
             cx.putThreadLocal(HarnessFactory.BUDGET_KEY, new Budget(req.instructionBudget(), req.wallMs()));
 
             // No LiveConnect, no shared state: a fresh scope per case and per mode.
-            ScriptableObject scope = RhinoCompat.newTopLevel(cx);
-            ScriptableObject global = RhinoCompat.globalThis(scope);
+            TopLevel scope = cx.initSafeStandardObjects(new TopLevel());
+            // The 2.0 line splits the object top-level `this` and global declarations land on from the scope.
+            ScriptableObject global = scope.getGlobalThis();
             host.install(cx, scope, req.seed());
 
             String src = req.source;
@@ -106,13 +110,13 @@ final class ModeRunner {
                     return o;
                 }
                 o.compiledActually = wasCompiled(script, mode);
-                if (mode == Mode.COMPILED && Boolean.FALSE.equals(o.compiledActually)) {
+                if (!mode.interpreted && Boolean.FALSE.equals(o.compiledActually)) {
                     o.status = Outcome.FALLBACK;
                     return o;
                 }
 
                 Object r = execute(cx, scope, global, script, req, host, o);
-                RhinoCompat.drainMicrotasks(cx);
+                cx.processMicrotasks();
                 Host.Canonical k = host.canon(cx, r);
                 o.value = k.text();
                 o.valueJavaTypes = k.javaTypes();
@@ -190,7 +194,7 @@ final class ModeRunner {
      * value, logging every round. A compiled script runs plainly: its __pause() calls fail
      * inside Rhino, which the normal exception classification reports.
      */
-    private static Object execute(Context cx, ScriptableObject scope, ScriptableObject global, Script script,
+    private static Object execute(Context cx, VarScope scope, ScriptableObject global, Script script,
             Request req, Host host, Outcome o) {
         if (!req.continuations() || !Boolean.FALSE.equals(o.compiledActually)) {
             return script.exec(cx, scope, global);
@@ -255,9 +259,16 @@ final class ModeRunner {
         return o;
     }
 
-    /** Delegates to RhinoCompat; falls back to the mode's nominal answer when Rhino can't tell. */
+    /**
+     * Whether the script really came from the bytecode compiler: Rhino silently falls back to the
+     * interpreter when codegen hits a class-file limit, so the mode cannot simply be assumed.
+     * Compiled code is an MHJSCode (or an OptJSCode); interpreted code is an InterpreterData. A
+     * script without a descriptor gets the mode's nominal answer.
+     */
     static Boolean wasCompiled(Script script, Mode mode) {
-        Boolean b = RhinoCompat.wasCompiled(script);
-        return b != null ? b : !mode.interpreted;
+        JSDescriptor<?> descriptor = script.getDescriptor();
+        if (descriptor == null) return !mode.interpreted;
+        JSCode<?> code = descriptor.getCode();
+        return code instanceof org.mozilla.javascript.optimizer.MHJSCode;
     }
 }

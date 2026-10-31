@@ -11,12 +11,24 @@ repositories {
     mavenCentral()
 }
 
+// Build against a local Rhino jar instead of the rhinoVersion artifact:
+//   ./gradlew fatJar -PrhinoJar=/path/to/rhino-2.0.0-SNAPSHOT.jar
+// A relative path resolves against this directory.
+def rhinoJarFile = providers.gradleProperty('rhinoJar').map { file(it) }.orNull
+if (rhinoJarFile != null && !rhinoJarFile.isFile()) {
+    throw new GradleException("rhinoJar does not point to a file: ${rhinoJarFile}")
+}
+
 configurations {
     jacocoAgent
 }
 
 dependencies {
-    implementation "org.mozilla:rhino:${rhinoVersion}"
+    if (rhinoJarFile != null) {
+        implementation files(rhinoJarFile)
+    } else {
+        implementation "org.mozilla:rhino:${rhinoVersion}"
+    }
     implementation 'com.google.code.gson:gson:2.11.0'
     // Coverage of Rhino itself (brief §9.9): the agent is attached by bin/harness when
     // OXPECKER_COVERAGE=1; core analyses the exec data against the Rhino classes.
@@ -42,7 +54,7 @@ tasks.register('fatJar', Jar) {
     archiveBaseName = 'oxpecker-harness'
     archiveClassifier = 'all'
     archiveVersion = ''
-    manifest { attributes 'Main-Class': 'dev.oxpecker.harness.Harness', 'Rhino-Version': rhinoVersion }
+    manifest { attributes 'Main-Class': 'dev.oxpecker.harness.Harness', 'Rhino-Version': rhinoJarFile != null ? "local:${rhinoJarFile.name}" : rhinoVersion }
     from sourceSets.main.output
     dependsOn configurations.runtimeClasspath
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }

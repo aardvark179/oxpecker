@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,10 +90,9 @@ public final class Harness {
         m.put("java", System.getProperty("java.version"));
         m.put("harness", "0.1.0");
         // Every mode this harness can run; `mode` is the one it is pinned to (absent: any).
-        m.put("modes", Arrays.stream(Mode.values()).map(mode -> mode.wire).toList());
+        m.put("modes", Mode.ALL.stream().map(mode -> mode.wire).toList());
         m.put("mode", pinned == null ? null : pinned.wire);
-        // No "continuations": this Rhino line has no executeScriptWithContinuations, so __pause never pauses.
-        List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace"));
+        List<String> capabilities = new ArrayList<>(List.of("javaTypes", "javaTrace", "continuations"));
         if (coverage.enabled()) capabilities.add("coverage");
         m.put("capabilities", capabilities);
         m.put("coverage", coverage.enabled());

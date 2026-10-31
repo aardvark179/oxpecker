@@ -138,7 +138,7 @@ def compare(a: Outcome, b: Outcome, *, strict_java_types: bool = False, strict_m
         # frame, or captured at all in the compiled mode): the partial traces differ by construction
         return Verdict(SKIP, [f"both unsupported ({a.reason} / {b.reason})"])
     paused = {o.mode: bool(o.continuations) for o in (a, b)}
-    if continuations and paused.get("interpreted") and not paused.get("compiled") and "unsupported" not in (a.status, b.status):
+    if continuations and a.mode != b.mode and paused.get("interpreted") and not paused.get("compiled") and "unsupported" not in (a.status, b.status):
         # the interpreter paused; the compiled mode recorded no continuation and did not report the
         # refusal, so the program's own try/catch swallowed it (G42): everything after that point
         # differs by construction, like the both-unsupported case

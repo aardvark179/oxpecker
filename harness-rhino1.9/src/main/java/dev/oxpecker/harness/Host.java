@@ -47,9 +47,10 @@ final class Host {
     void install(Context cx, ScriptableObject scope, long seed) {
         this.scope = scope;
         boolean wasInterpreted = cx.isInterpretedMode();
-        RhinoCompat.setInterpreted(cx, true);
+        cx.setInterpretedMode(true);
         try {
-            ScriptableObject global = RhinoCompat.globalThis(scope);
+            // On the 1.x line top-level `this` and global declarations land on the scope itself.
+            ScriptableObject global = scope;
 
             define(scope, "print", 1, (c, s, thisObj, args) -> {
                 StringBuilder sb = new StringBuilder();
@@ -114,7 +115,7 @@ final class Host {
             Callable prelude = (Callable) preludeScript.exec(cx, scope, global);
             prelude.call(cx, scope, global, new Object[] {(double) seed});
         } finally {
-            RhinoCompat.setInterpreted(cx, wasInterpreted);
+            cx.setInterpretedMode(wasInterpreted);
         }
     }
 
@@ -144,7 +145,7 @@ final class Host {
 
     private static void define(ScriptableObject scope, String name, int length, SerializableCallable target) {
         LambdaFunction f = new LambdaFunction(scope, name, length, target);
-        ScriptableObject.putProperty(RhinoCompat.globalThis(scope), name, f);
+        ScriptableObject.putProperty(scope, name, f);
     }
 
     private static String resource(String name) {

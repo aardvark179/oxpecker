@@ -30,7 +30,7 @@ made); 33 reproducers in `tests/regressions/` show on 1.9.2, 7 more under `maste
 | continuations out of scope | in: `__pause()` host function, `continuations` toggle | interpreter-only feature = mode difference |
 | Java-type differences folded into "soft" | own verdict kind `java-types`, always reported, deduplicated, own property test | user: "don't discard it"; also: don't make it the only thing |
 | JS canonicaliser as the only option | JS canonicaliser (`canon.js`) plus Java-side runtime class recording | the representation is only visible from Java |
-| Rhino as composite build | Rhino built from `../rhino` and published to Maven local; `rhinoVersion` is one Gradle property; every version-sensitive call goes through `RhinoCompat` (reflective) | easy version bumps |
+| Rhino as composite build | Rhino built from `../rhino` and published to Maven local; `rhinoVersion` is one Gradle property; one harness project per Rhino line (`harness-rhino1.9/`, `harness-rhino2.0/`), each calling its line's APIs directly | no reflection; a new line is a new project |
 | pytest-xdist for throughput | not needed yet: ~15–60 cases/s per JVM | — |
 
 ## 3. Architecture
@@ -44,7 +44,7 @@ Python (Hypothesis)                                       Java harness (one JVM,
     environment/       Rhino capability probe (API model)     Host           print/__probe/__pause/J, canon.js, prelude.js
   oxpecker/harness/                                           Coverage       JaCoCo exec data per bucket (optional)
     client.py          JVM lifecycle, restarts, coverage       JavaProbe      the Java side of the interop boundary
-    compare.py         verdicts + dedup signatures             RhinoCompat    all version-sensitive Rhino calls
+    compare.py         verdicts + dedup signatures
   oxpecker/corpora/    test262, rhino-jstests, rhino-mozilla
   oxpecker/inspector.py  export for the UI
   oxpecker/cli.py      gen | run | diff | list | corpus | probe | export | metrics
@@ -86,7 +86,7 @@ reports the modes that did not run as `timeout(not-run-after-watchdog)` or `cras
 
 On a dedicated thread (64 MB stack, same in all modes):
 
-1. Fresh `Context` from `HarnessFactory`; mode (`RhinoCompat.setInterpreted`), language version,
+1. Fresh `Context` from `HarnessFactory`; mode (`Mode.configure`), language version,
    `Locale.ROOT`, UTC, instruction observer every 10k instructions (in all modes, so the compiler
    emits the same observer code; `instructionBudget <= 0` disables it for attribution runs),
    interpreter frame cap 20k.

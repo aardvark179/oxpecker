@@ -25,7 +25,7 @@ public enum Mode {
     }
 
     void configure(Context cx) {
-        RhinoCompat.setInterpreted(cx, interpreted);
+        cx.setInterpretedMode(interpreted);
         if (this == DEBUGGER) cx.setDebugger(new NoOpDebugger(), null);
     }
 }
