@@ -142,6 +142,24 @@ def test_lineage_cache_serves_added_entries_and_replays_loaded_ones():
     assert cache.get(lineages[0][0], OPTIONS, STEPS) is not lineages[0][1] and cache.misses == 3
 
 
+def test_a_missed_entry_is_rebuilt_from_its_parent_exactly_as_a_full_replay(tmp_path: Path):
+    """A cache miss replays only the entry's own round on top of its parent's lineage; on the
+    three-hour corpus a full replay cost about 0.23 s per mutation step (lineages to 19 steps)."""
+    fuzz(corpus_dir=tmp_path / "corpus", options=OPTIONS, iterations=150, steps=STEPS, seed=4, runner=FakeRunner(),
+         findings_dir=tmp_path / "findings", shrink_budget=5, quiet=True)
+    corpus = Corpus(tmp_path / "corpus")
+    children = [e for e in corpus.entries if e.parent is not None]
+    assert len(children) >= 5 and max(len(e.steps) for e in children) > STEPS      # more than one round deep
+    cache = LineageCache(capacity=4)                       # small: ancestors get evicted and rebuilt too
+    for e in reversed(corpus.entries):
+        rebuilt = cache.get(e, OPTIONS, STEPS, corpus.by_id)
+        full = replay(decode(e.choices), OPTIONS, e.cap)
+        assert rebuilt is not None and full is not None
+        assert rebuilt.source == full.source and rebuilt.depth == full.depth and rebuilt.at_cap == full.at_cap
+        assert [s.name for s in rebuilt.steps] == e.steps
+    assert cache.incremental >= len(children)
+
+
 def test_loop_grows_the_corpus_and_finds_and_shrinks_the_planted_bug(tmp_path: Path):
     runner = FakeRunner()
     corpus_dir = tmp_path / "corpus"
