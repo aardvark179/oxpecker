@@ -38,8 +38,17 @@ start)
     SECONDS_TOTAL=$(awk "BEGIN { printf \"%d\", $HOURS * 3600 }")
     FUZZ="oxpecker fuzz -o $OUT/corpus --seconds $SECONDS_TOTAL --findings-dir $OUT/findings $*"
     if [ -n "$PREV" ]; then
-        SEED="oxpecker cmin runs/$PREV/corpus -o $OUT/corpus"
-        echo "seeded from runs/$PREV/corpus, minimised" > "$OUT/seed.txt"
+        # The minimised corpus is kept next to the campaign it came from (corpus.min) and reused
+        # while it is newer than that campaign's corpus; the new campaign gets a copy to grow.
+        MIN="runs/$PREV/corpus.min"
+        if [ -f "$MIN/corpus.jsonl" ] && [ "$MIN/corpus.jsonl" -nt "runs/$PREV/corpus/corpus.jsonl" ]; then
+            SEED="cp -R $MIN $OUT/corpus"
+            echo "seeded from $MIN (minimised earlier)" > "$OUT/seed.txt"
+        else
+            rm -rf "$MIN"
+            SEED="oxpecker cmin runs/$PREV/corpus -o $MIN && cp -R $MIN $OUT/corpus"
+            echo "seeded from runs/$PREV/corpus, minimised into $MIN" > "$OUT/seed.txt"
+        fi
     else
         SEED="true"
         echo "fresh (empty corpus)" > "$OUT/seed.txt"

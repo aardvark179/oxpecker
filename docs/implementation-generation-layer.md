@@ -306,8 +306,9 @@ JVM, so a watchdog restart costs one run; a first version that kept the choice i
 restarted five times in 1 200 entries of the three-hour corpus. DEST gets the kept entries, a
 `coverage.exec` from re-running them alone in a fresh JVM, and `cmin.json` (with
 `probes_not_reached`: the few timing- or history-dependent probes that re-run missed, and
-rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
-from the previous one (`runs/.last-campaign`); `--fresh` starts from an empty corpus.
+rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds a campaign from the
+previous one (`runs/.last-campaign`) through `runs/PREV/corpus.min`, minimised once and reused
+while it is newer than that campaign's corpus; `--fresh` starts from an empty corpus.
 
 ## 4. A worked example
 
