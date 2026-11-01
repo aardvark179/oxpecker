@@ -35,29 +35,37 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
         raise FileExistsError(f"{dest_dir} already holds a corpus")
     t0 = time.time()
     undecodable: list[int] = []
-    sources: dict[int, tuple[str, str]] = {}      # entry id -> (program text, template)
-    for i, e in enumerate(src.entries):
-        lineage = src.replay(i, options, steps)
-        if lineage is None:
-            undecodable.append(e.id)
-        else:
-            sources[e.id] = (lineage.source, lineage.template)
-    excluded: list[int] = []        # entries whose run restarted the JVM
+    sources: dict[int, tuple[str, str]] = {}      # entry id -> (program text, template), once rebuilt
+    replay_ms: dict[int, float] = {}              # entry id -> time to rebuild its program from its choices
+    excluded: list[int] = []                      # entries whose run restarted the JVM
     for attempt in range(1, MAX_PASSES + 1):
         restarts_before = client.restarts
         culprit = None
-        for n, (eid, (source, template)) in enumerate(sources.items(), 1):
+        # Rebuild and run each entry in turn (not all rebuilt first): rebuilding a deep lineage is
+        # the slow part, and progress should show from the first entry.
+        for n, (i, e) in enumerate(enumerate(src.entries), 1):
+            if e.id in excluded or e.id in undecodable:
+                continue
+            if e.id not in sources:
+                t = time.perf_counter()
+                lineage = src.replay(i, options, steps)
+                replay_ms[e.id] = (time.perf_counter() - t) * 1000
+                if lineage is None:
+                    undecodable.append(e.id)
+                    continue
+                sources[e.id] = (lineage.source, lineage.template)
+            source, template = sources[e.id]
             client.run(source, language_version=language_version, seed=1, coverage_bucket=template,
-                       cmin_key=str(eid), cmin_size=len(source))
+                       cmin_key=str(e.id), cmin_size=len(source))
             if client.restarts != restarts_before:
-                culprit = eid
+                culprit = e.id
                 break
-            if not quiet and n % 500 == 0:
-                print(f"  {n}/{len(sources)} replayed ({time.time() - t0:.0f}s)", file=sys.stderr)
+            if not quiet and n % 250 == 0:
+                print(f"  {n}/{len(src.entries)} ({time.time() - t0:.0f}s; rebuilding "
+                      f"{sum(replay_ms.values()) / 1000:.0f}s so far)", file=sys.stderr)
         if culprit is None:
             break
         excluded.append(culprit)
-        del sources[culprit]
         if not quiet:      # the client already restarted the JVM: the next pass starts clean
             print(f"  entry {culprit} restarted the JVM; pass {attempt + 1} without it", file=sys.stderr)
     else:
@@ -70,7 +78,23 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
     covered = client.coverage_save(str(dest.exec))
     summary = {"source": str(source_dir), "entries": len(src.entries), "kept": len(dest.entries),
                "undecodable": undecodable, "excluded": excluded, "covered_probes": covered,
-               "seconds": round(time.time() - t0, 1),
+               "seconds": round(time.time() - t0, 1), "rebuild": _rebuild_stats(src, replay_ms),
                "wins": {str(k): v for k, v in sorted(wins.items(), key=lambda kv: -kv[1])}}
     (dest_dir / "cmin.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     return summary
+
+
+def _rebuild_stats(src: Corpus, replay_ms: dict[int, float]) -> dict[str, Any]:
+    """How long rebuilding entries from their choices took, overall and by lineage depth (steps):
+    the cost the fuzz loop pays on every LineageCache miss."""
+    if not replay_ms:
+        return {}
+    ms = sorted(replay_ms.values())
+    by_depth: dict[int, list[float]] = {}
+    for e in src.entries:
+        if e.id in replay_ms:
+            by_depth.setdefault(len(e.steps), []).append(replay_ms[e.id])
+    return {"seconds": round(sum(ms) / 1000, 1), "mean_ms": round(sum(ms) / len(ms), 1),
+            "median_ms": round(ms[len(ms) // 2], 1), "p90_ms": round(ms[int(len(ms) * 0.9)], 1),
+            "max_ms": round(ms[-1], 1),
+            "by_depth": {str(d): {"n": len(v), "mean_ms": round(sum(v) / len(v), 1)} for d, v in sorted(by_depth.items())}}
