@@ -58,34 +58,12 @@ final class Coverage {
         int fresh;
         Map<String, List<Integer>> newIds;          // only when requested
         Map<String, List<Integer>> requiredReached; // only when a required set was sent
+        Map<String, String> hits;                   // only when requested: every probe this run hit
     }
 
     /** Drains the agent and merges into {@code bucket}; returns probes newly covered overall. */
     synchronized int drain(String bucket) {
-        return drain(bucket, false, null, null, 0L).fresh;
-    }
-
-    /** Per class (JaCoCo class id): for each probe, the smallest cmin entry that hit it and its size. */
-    private static final class CminSlot {
-        final long[] size;
-        final String[] key;
-
-        CminSlot(int n) {
-            size = new long[n];
-            key = new String[n];
-            java.util.Arrays.fill(size, Long.MAX_VALUE);
-        }
-    }
-
-    private final Map<Long, CminSlot> cmin = new java.util.HashMap<>();
-
-    /** afl-cmin's choice: the entries that are the smallest to hit at least one probe, with how
-     *  many probes each wins. Ties go to the entry credited first. */
-    synchronized Map<String, Integer> cminResult() {
-        Map<String, Integer> wins = new TreeMap<>();
-        for (CminSlot s : cmin.values())
-            for (String k : s.key) if (k != null) wins.merge(k, 1, Integer::sum);
-        return wins;
+        return drain(bucket, false, null, false).fresh;
     }
 
     /**
@@ -94,14 +72,15 @@ final class Coverage {
      * this JVM -- with {@code wantIds}, also which ones -- and, for {@code required}, the subset of
      * it this run reached. Shrinking a corpus entry needs the latter: on a re-run its probes are no
      * longer new, so "new probes > 0" cannot be the property; "reaches P" can. With
-     * {@code cminKey}, every probe hit is also credited to that entry where its {@code cminSize}
-     * is the smallest so far (cminResult).
+     * {@code wantHits}, also every probe the run hit, new or not, per class as a base64 bitmap
+     * (bit i of byte i/8, least significant first): what corpus minimisation chooses on.
      */
     synchronized Drained drain(String bucket, boolean wantIds, Map<String, List<Integer>> required,
-            String cminKey, long cminSize) {
+            boolean wantHits) {
         Drained d = new Drained();
         if (wantIds) d.newIds = new TreeMap<>();
         if (required != null) d.requiredReached = new TreeMap<>();
+        if (wantHits) d.hits = new TreeMap<>();
         if (agent == null) return d;
         byte[] data = ((org.jacoco.agent.rt.IAgent) agent).getExecutionData(true);
         ExecutionDataStore store = buckets.computeIfAbsent(bucket, k -> new ExecutionDataStore());
@@ -123,14 +102,16 @@ final class Coverage {
                 }
             }
             if (ids != null) d.newIds.put(ed.getName(), ids);
-            if (cminKey != null) {
-                CminSlot slot = cmin.computeIfAbsent(ed.getId(), k -> new CminSlot(probes.length));
-                for (int i = 0; i < probes.length && i < slot.size.length; i++) {
-                    if (probes[i] && cminSize < slot.size[i]) {
-                        slot.size[i] = cminSize;
-                        slot.key[i] = cminKey;
+            if (wantHits) {
+                byte[] bits = new byte[(probes.length + 7) / 8];
+                boolean any = false;
+                for (int i = 0; i < probes.length; i++) {
+                    if (probes[i]) {
+                        bits[i >> 3] |= (byte) (1 << (i & 7));
+                        any = true;
                     }
                 }
+                if (any) d.hits.put(ed.getName(), java.util.Base64.getEncoder().encodeToString(bits));
             }
             if (required != null) {
                 List<Integer> want = required.get(ed.getName());

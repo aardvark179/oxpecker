@@ -100,10 +100,6 @@ public final class Harness {
                         resp.put("error", cmd + " failed: " + e);
                     }
                 }
-                case "cmin-result" -> {
-                    if (!runner.coverage.enabled()) resp.put("error", "coverage agent not attached");
-                    else resp.put("cmin", runner.coverage.cminResult());
-                }
                 case "coverage" -> {
                     try {
                         resp.put("coverage", runner.coverage.report());

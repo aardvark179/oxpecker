@@ -48,6 +48,9 @@ public final class Outcome {
     public java.util.Map<String, java.util.List<Integer>> newProbeIds;
     /** With Request.coverageRequire: the subset of the required probes this run reached. */
     public java.util.Map<String, java.util.List<Integer>> requiredReached;
+    /** With Request.coverageHits: every probe this run hit (class name -> base64 bitmap, bit i of
+     *  byte i/8, least significant first). */
+    public java.util.Map<String, String> hitProbes;
 
     public static final class Thrown {
         /** "js-value" for a JS throw, "ecma-error" for a Rhino runtime error, "evaluator" for EvaluatorException. */

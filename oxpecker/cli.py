@@ -370,8 +370,11 @@ def cmd_cmin(args: argparse.Namespace) -> int:
             return 2
         s = minimise(Path(args.corpus), Path(args.out), client=client, language_version=args.language_version,
                      quiet=args.quiet)
-    print(f"{s['entries']} -> {s['kept']} entries, {s['covered_probes']} probes covered, {s['seconds']}s; "
-          f"{len(s['undecodable'])} no longer decode, {len(s['excluded'])} restarted the JVM: {args.out}")
+    r = s["rebuild"]
+    print(f"{s['entries']} -> {s['kept']} entries; probes: {s['probes_chosen']} chosen on, {s['covered_probes']} "
+          f"covered by the kept entries alone; {s['seconds']}s, {r.get('seconds', 0)}s of it rebuilding "
+          f"(median {r.get('median_ms')} ms, p90 {r.get('p90_ms')} ms); {len(s['undecodable'])} no longer "
+          f"decode, {len(s['restarted'])} restarted the JVM: {args.out}")
     return 0
 
 

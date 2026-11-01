@@ -297,13 +297,16 @@ would also hide new bugs with a shared symptom. `oxpecker related FILE|DIR` labe
 findings the same way.
 
 Corpus minimisation (`oxpecker/cmin.py`, `oxpecker cmin SRC -o DEST`): afl-cmin's choice. Every
-entry of SRC is replayed once in a fresh coverage JVM, credited with its program-text length;
-the JVM keeps, per probe, the smallest entry that hit it (`Coverage.cminResult`, request fields
-`cminKey`/`cminSize`, command `cmin-result`); DEST gets the entries that win at least one probe,
-the coverage of the whole pass as `coverage.exec`, and `cmin.json`. In-order replay ("keep
-what adds coverage") would keep nearly everything, since each entry was added for adding
-coverage at its time. A JVM restart loses the per-probe state, so the pass starts over without
-the entry that caused it. `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
+entry of SRC is rebuilt and run once with `coverage_hits` (request `coverageHits`: every probe
+the run hit, one base64 bitmap per class, `Outcome.hitProbes`); `choose` then takes the entries
+in order of program-text length and keeps each that hits a probe no smaller entry hit, the
+smallest entry per probe. In-order replay ("keep what adds coverage") would keep nearly
+everything, since each entry was added for adding coverage at its time. No state lives in the
+JVM, so a watchdog restart costs one run; a first version that kept the choice in the JVM
+restarted five times in 1 200 entries of the three-hour corpus. DEST gets the kept entries, a
+`coverage.exec` from re-running them alone in a fresh JVM, and `cmin.json` (with
+`probes_not_reached`: the few timing- or history-dependent probes that re-run missed, and
+rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
 from the previous one (`runs/.last-campaign`); `--fresh` starts from an empty corpus.
 
 ## 4. A worked example

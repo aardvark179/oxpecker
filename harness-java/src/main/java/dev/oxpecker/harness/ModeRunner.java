@@ -55,10 +55,11 @@ final class ModeRunner {
         if (coverage.enabled()) {
             String bucket = (req.coverageBucket == null ? "*" : req.coverageBucket) + "|" + mode.wire;
             Coverage.Drained d = coverage.drain(bucket, Boolean.TRUE.equals(req.coverageNewIds), req.coverageRequire,
-                    req.cminKey, req.cminSize == null ? 0L : req.cminSize);
+                    Boolean.TRUE.equals(req.coverageHits));
             o.newProbes = d.fresh;
             o.newProbeIds = d.newIds;
             o.requiredReached = d.requiredReached;
+            o.hitProbes = d.hits;
         }
         return o;
     }
