@@ -37,6 +37,7 @@ class Outcome:
     newProbes: int | None = None
     newProbeIds: dict[str, list[int]] | None = None        # with coverage_new_ids: which probes were new
     requiredReached: dict[str, list[int]] | None = None    # with coverage_require: the subset reached
+    hitProbes: dict[str, str] | None = None                # with coverage_hits: every probe hit (base64 bitmaps)
 
     @classmethod
     def from_json(cls, d: dict[str, Any]) -> "Outcome":
@@ -175,9 +176,10 @@ class HarnessClient:
             strict: bool = False, instruction_budget: int = 5_000_000, wall_ms: int = 5000, seed: int = 1,
             id: str | None = None, source_name: str = "case.js", continuations: bool | None = None,
             coverage_bucket: str | None = None, coverage_new_ids: bool = False,
-            coverage_require: dict[str, list[int]] | None = None) -> RunResult:
+            coverage_require: dict[str, list[int]] | None = None, coverage_hits: bool = False) -> RunResult:
         """Runs one case in every mode. If the JVM dies or asks to be restarted, the missing modes
-        are reported as crash/timeout and the JVM is restarted."""
+        are reported as crash/timeout and the JVM is restarted. `coverage_hits` asks for every probe
+        the run hit (Outcome.hitProbes), for corpus minimisation."""
         case_id = id or uuid.uuid4().hex[:12]
         req = {"id": case_id, "source": source, "modes": list(modes), "languageVersion": language_version,
                "strict": strict, "instructionBudget": instruction_budget, "wallMs": wall_ms, "seed": seed,
@@ -189,6 +191,8 @@ class HarnessClient:
             req["coverageNewIds"] = True
         if coverage_require is not None:
             req["coverageRequire"] = coverage_require
+        if coverage_hits:
+            req["coverageHits"] = True
         if self.cases_since_start >= self.recycle_every:
             self.restart()
         self.cases_since_start += 1

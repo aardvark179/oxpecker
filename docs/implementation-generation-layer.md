@@ -286,6 +286,29 @@ verdict with an unknown signature is shrunk by `Shrinker` (G36) and recorded wit
 [--shrink-budget N] [--compact-budget N] [--findings-dir D] [--ignore-known]` plus the
 generation options of `gen`.
 
+Known signatures and related regressions (`oxpecker/related.py`): at start the loop runs every
+`tests/regressions/*.js` and takes their signatures (plus `tests/known_signatures.txt`) as
+known; an exact match is logged, not shrunk. Everything else is a new finding, and its
+reproducer gets `// Related:` lines naming the regressions it shares evidence with: the Rhino
+frames of an engine crash, an error message (digits masked), rare source constructs (weighted
+by rarity among the regressions, with class tokens such as `<compound-assign>` and
+`<TypedArray>`), the coarse signature. Nothing is filtered on that evidence: a looser match
+would also hide new bugs with a shared symptom. `oxpecker related FILE|DIR` labels existing
+findings the same way.
+
+Corpus minimisation (`oxpecker/cmin.py`, `oxpecker cmin SRC -o DEST`): afl-cmin's choice. Every
+entry of SRC is rebuilt and run once with `coverage_hits` (request `coverageHits`: every probe
+the run hit, one base64 bitmap per class, `Outcome.hitProbes`); `choose` then takes the entries
+in order of program-text length and keeps each that hits a probe no smaller entry hit, the
+smallest entry per probe. In-order replay ("keep what adds coverage") would keep nearly
+everything, since each entry was added for adding coverage at its time. No state lives in the
+JVM, so a watchdog restart costs one run; a first version that kept the choice in the JVM
+restarted five times in 1 200 entries of the three-hour corpus. DEST gets the kept entries, a
+`coverage.exec` from re-running them alone in a fresh JVM, and `cmin.json` (with
+`probes_not_reached`: the few timing- or history-dependent probes that re-run missed, and
+rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
+from the previous one (`runs/.last-campaign`); `--fresh` starts from an empty corpus.
+
 ## 4. A worked example
 
 `generate(seed=1, min_statements=2, max_statements=3, max_depth=1, probe_every=0)`:
@@ -479,7 +502,8 @@ Every reproducer the loop found is a file under `tests/regressions/` and an entr
 `docs/findings-explained.md`. `oxpecker shrink FILE` reduces a reproducer at statement level
 while its coarse signature holds (G40); the loop does the same after Hypothesis's shrink.
 Expected mode differences (continuations are interpreter-only) are listed in
-`tests/known_signatures.txt` and logged, not shrunk.
+`tests/known_signatures.txt` and logged, not shrunk. After a campaign, `oxpecker related` on
+its findings directory says which reproducers are probably known bugs in a new shape.
 
 ### `oxpecker/inspector.py` — the export for the UI
 
