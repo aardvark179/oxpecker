@@ -54,7 +54,8 @@ final class ModeRunner {
         o.ms = (System.nanoTime() - start) / 1_000_000;
         if (coverage.enabled()) {
             String bucket = (req.coverageBucket == null ? "*" : req.coverageBucket) + "|" + mode.wire;
-            Coverage.Drained d = coverage.drain(bucket, Boolean.TRUE.equals(req.coverageNewIds), req.coverageRequire);
+            Coverage.Drained d = coverage.drain(bucket, Boolean.TRUE.equals(req.coverageNewIds), req.coverageRequire,
+                    req.cminKey, req.cminSize == null ? 0L : req.cminSize);
             o.newProbes = d.fresh;
             o.newProbeIds = d.newIds;
             o.requiredReached = d.requiredReached;

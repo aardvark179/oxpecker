@@ -47,7 +47,7 @@ difference). §5.7 has the example.
 
 ## 2. The map
 
-Forty-three entries (41 reproducers, two of them symptoms of one cause, plus the two seeds,
+Forty-five entries (43 reproducers, two of them symptoms of one cause, plus the two seeds,
 the continuation difference and the soft record), grouped by the part of Rhino that is wrong.
 "Right" names the mode that follows the spec; "both wrong" means neither does.
 
@@ -59,11 +59,12 @@ the continuation difference and the soft record), grouped by the part of Rhino t
 | 5.2 Interpreter frames and argument arrays | `apply` with an array-like into a rest parameter, re-entrant generator `next()`, object-rest from a Proxy with a Symbol key | compiled (object-rest: both wrong) |
 | 5.3 Compiled code the JVM rejects | relational argument stack underflow, `z((yield 3))`, `obj[p] &&= v`, `yield` in a default parameter, `yield` from a `catch` inside `for-of` | interpreted |
 | 5.4 Compiled generators and `finally` | nested `finally`/`throw` escapes the `catch`, abrupt `finally` completion (seed) | interpreted |
-| 5.5 Java exceptions escaping both modes | 13 reproducers, from `Array.find()` to `new Int8Array({length: 2**53})` | neither |
+| 5.5 Java exceptions escaping both modes | 14 reproducers, from `Array.find()` to `new Int8Array({length: 2**53})` and a Java array's `__proto__` | neither |
 | 5.6 Expected differences | continuations | by design |
 | 5.7 Soft | Symbol comparison message | neither |
 | 5.8 Compiled `super` in a block with `let`/`const` | `ClassCastException` at the super reference | interpreted |
 | 5.9 Compiled `with` over a Java object | `ClassCastException` at the first name read in the block | interpreted |
+| 5.10 Compiled rest parameter of a direct-call target | `rest` is the first extra argument, not an array | interpreted |
 
 ## 3. Compiled mode's integer typing
 
@@ -411,7 +412,7 @@ escape. A plain (non-generator) function behaves. Rhino's own expectation file t
 
 ### 5.5 Java exceptions escaping both modes
 
-Thirteen reproducers where the bug is in a builtin, the parser or the front end shared by both
+Fourteen reproducers where the bug is in a builtin, the parser or the front end shared by both
 modes, and a raw Java exception comes out of the engine past any JS `try/catch`. They are not
 mode divergences; the harness classes a crash as `hard` so they surface anyway. Grouped by what
 should have happened instead.
@@ -451,6 +452,17 @@ The first entry of `tests/findings/hard.jsonl`, `Array.indexOf()` crashing in
 Spread in call position is the one most likely to bite real code: array spread works, call
 spread parses and then neither code generator knows the node. The two JS 1.7 forms are
 non-Ecma syntax upstream has discussed removing (#1056).
+
+**Should work or throw a catchable error** (LiveConnect wrapper cast):
+
+| file | program | exception |
+|---|---|---|
+| `java-array-set-prototype-classcast.js` | `J.intArray(2).__proto__ = {}` | `ClassCastException: NativeJavaArray cannot be cast to ScriptableObject` (`NativeObject.js_protoSetter`) |
+
+`Object.setPrototypeOf(a, {})` on the same array succeeds and the next read of `a.__proto__`
+crashes in `js_protoGetter` instead; the wrapper of a plain Java object (`J.__proto__ = {}`)
+throws a catchable `InternalError`. The `__proto__` accessor casts its receiver to
+`ScriptableObject`, which the Java wrappers are not: the cast family of §5.9.
 
 ### 5.6 Expected differences
 
@@ -516,6 +528,28 @@ name reads through `ConstAwareLinker`, which looks for a frozen `const` it can f
 45-line program to `with (J) { v36 in Math; }`; the interpreter is right. Not checked on master
 `b95f75d`.
 
+### 5.10 Compiled rest parameter of a direct-call target
+
+`compiled-rest-param-direct-call-target.js`
+
+```js
+function f(a, ...rest) { return rest; }
+function g() { return f(0, 7); }
+f(0, 7);      // interpreted [7], compiled 7
+f(0, 7, 8);   // interpreted [7, 8], compiled 7
+```
+
+Once a function with a rest parameter is called by name from inside another function, compiled
+code binds `rest` to the first extra argument itself instead of an array of all of them, for
+every call of the function: top-level calls, `f.call(...)`, calls through an alias or a
+property. Extra arguments past the first are lost; an array argument arrives as the caller's
+own array, so `rest.length = 0` empties it (the form the fuzzer saw). The same function with no
+caller inside a function agrees, which points at the optimizer's direct-call entry point, where
+a called-by-name function gets its parameters as JVM arguments and the rest array is
+presumably never built. Found by `oxpecker fuzz` on 1.9.2 (three-hour campaign, 2026-10-29) as
+a global array emptied after a warm-up loop; reduced by hand, the interpreter is right. Not
+checked on master `b95f75d`.
+
 ## 6. Where the findings came from, and what is left unsorted
 
 | source | findings |
@@ -532,6 +566,7 @@ name reads through `ConstAwareLinker`, which looks for a frozen `const` it can f
 | `oxpecker fuzz`, 2026-10-26 and 27 campaigns | 3.3 second form, 3.4 second form, 5.1 write-back and receiver |
 | `oxpecker fuzz`, 2026-10-28 campaign | 5.8, the wider triggers of 3.4's second form |
 | `oxpecker fuzz` on 1.9.2, 2026-10-28 | 5.3 last row; hour-long campaign: 5.9, the ToPrimitive form of 5.1's receiver bug |
+| `oxpecker fuzz` on 1.9.2, three-hour campaign, 2026-10-29 | 5.10, 5.5 Java array `__proto__` |
 
 Everything still under `tests/findings/` maps to a family above:
 
@@ -570,21 +605,22 @@ issues.
 
 ## 7. The hour-long campaigns
 
-Three hour-long `oxpecker fuzz` campaigns so far, same settings (five mutation steps per round,
-`--p-new 0.2`, shrink budget 150 runs), each from an empty corpus. The 1.9.2 campaign was the
+Four `oxpecker fuzz` campaigns of an hour or more so far, same settings (five mutation steps
+per round, `--p-new 0.2`, shrink budget 150 runs), each from an empty corpus; from 2026-11-01
+`scripts/campaign.sh start` seeds a campaign with the previous one's corpus after `oxpecker cmin`. The 1.9.2 campaign was the
 first with the lineage shrinker firing in the loop (it had been silenced by a known-signature
 check that ran before the shrink; fixed the same day).
 
-| | 2026-10-27, master `b95f75d`, seed 11 | 2026-10-28, master, seed 12 | 2026-10-28, Rhino 1.9.2, seed 15 |
-|---|---|---|---|
-| runs (each in both modes) | 7 343 | 7 275 | 7 038 |
-| corpus entries | 4 517 | 4 227 | 4 928 |
-| probes covered / total | 18 081 / 46 447 | 14 717 / 45 562 | 14 138 / 42 935 |
-| hard verdicts (continuations) | 609 (582) | 426 (357) | 285 (258) |
-| lineage cache misses | 58 % | 56 % | 61 % |
-| reproducers written | 3 | 5 | 6 |
-| new root causes | 3.4 second form | 5.8 | 5.9 |
-| kept under | `runs/` (not kept) | `runs/fuzz-2026-10-28/` | `runs/fuzz-2026-10-28-r192-1h/` |
+| | 2026-10-27, master `b95f75d`, seed 11 | 2026-10-28, master, seed 12 | 2026-10-28, Rhino 1.9.2, seed 15 | 2026-10-29, 1.9.2, three hours, no seed |
+|---|---|---|---|---|
+| runs (each in both modes) | 7 343 | 7 275 | 7 038 | 16 393 |
+| corpus entries | 4 517 | 4 227 | 4 928 | 7 333 |
+| probes covered / total | 18 081 / 46 447 | 14 717 / 45 562 | 14 138 / 42 935 | 17 484 / 43 543 |
+| hard verdicts (continuations) | 609 (582) | 426 (357) | 285 (258) | 979 (839) |
+| lineage cache misses | 58 % | 56 % | 61 % | 74 % |
+| reproducers written | 3 | 5 | 6 | 6 (5 files) |
+| new root causes | 3.4 second form | 5.8 | 5.9 | 5.10, 5.5 Java array `__proto__` |
+| kept under | `runs/` (not kept) | `runs/fuzz-2026-10-28/` | `runs/fuzz-2026-10-28-r192-1h/` | `runs/fuzz-2026-10-29-r192-3h/` |
 
 What the reproducers were, per campaign, after triage with `oxpecker shrink` on each one and
 on the first program per coarse signature in `findings/hard.jsonl`:
@@ -603,6 +639,15 @@ on the first program per coarse signature in `findings/hard.jsonl`:
   The coarse signatures: `true vs false` is 3.3 under `Object.is`; `NegativeArraySizeException`
   is the string-doubling crash of 5.5; `ok vs throw` is 5.1's wrong receiver in a form where it
   shows as a missing `TypeError` (now in that regression).
+- **Three hours (1.9.2):** throughput fell from 3.5 to 1.5 runs a second as the corpus grew
+  (cause not yet established). Of the six new signatures, three were known bugs in new shapes:
+  5.1's wrong receiver (a `TypeError` interpreted, from `super.__proto__ <<= 0` over a
+  `Float64Array`), 5.1's write-back, 3.4's BigInt local (shown as a missing trace step). The new
+  ones: the Java array `__proto__` crash (5.5, shrunk by the loop to four lines) and, from a
+  global array emptied after a warm-up loop, 5.10 (reduced by hand). The known-signature
+  entries without a reproducer replay and shrink to known regressions too (the generator crash
+  of 5.3, 3.2, 3.3, the `NativeJavaArray` form of the new 5.5 row). Since then a new finding's
+  reproducer names the regressions it shares evidence with (`// Related:`, `oxpecker related`).
 
 Two lessons that repeat: exact signatures are too fine when the probe prints an object (every
 prototype shape is a new signature for one bug) and too coarse when only the status differs

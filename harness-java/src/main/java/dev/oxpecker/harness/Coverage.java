@@ -62,7 +62,30 @@ final class Coverage {
 
     /** Drains the agent and merges into {@code bucket}; returns probes newly covered overall. */
     synchronized int drain(String bucket) {
-        return drain(bucket, false, null).fresh;
+        return drain(bucket, false, null, null, 0L).fresh;
+    }
+
+    /** Per class (JaCoCo class id): for each probe, the smallest cmin entry that hit it and its size. */
+    private static final class CminSlot {
+        final long[] size;
+        final String[] key;
+
+        CminSlot(int n) {
+            size = new long[n];
+            key = new String[n];
+            java.util.Arrays.fill(size, Long.MAX_VALUE);
+        }
+    }
+
+    private final Map<Long, CminSlot> cmin = new java.util.HashMap<>();
+
+    /** afl-cmin's choice: the entries that are the smallest to hit at least one probe, with how
+     *  many probes each wins. Ties go to the entry credited first. */
+    synchronized Map<String, Integer> cminResult() {
+        Map<String, Integer> wins = new TreeMap<>();
+        for (CminSlot s : cmin.values())
+            for (String k : s.key) if (k != null) wins.merge(k, 1, Integer::sum);
+        return wins;
     }
 
     /**
@@ -70,9 +93,12 @@ final class Coverage {
      * {@code bucket} and the cumulative store, and reports the probes hit for the first time in
      * this JVM -- with {@code wantIds}, also which ones -- and, for {@code required}, the subset of
      * it this run reached. Shrinking a corpus entry needs the latter: on a re-run its probes are no
-     * longer new, so "new probes > 0" cannot be the property; "reaches P" can.
+     * longer new, so "new probes > 0" cannot be the property; "reaches P" can. With
+     * {@code cminKey}, every probe hit is also credited to that entry where its {@code cminSize}
+     * is the smallest so far (cminResult).
      */
-    synchronized Drained drain(String bucket, boolean wantIds, Map<String, List<Integer>> required) {
+    synchronized Drained drain(String bucket, boolean wantIds, Map<String, List<Integer>> required,
+            String cminKey, long cminSize) {
         Drained d = new Drained();
         if (wantIds) d.newIds = new TreeMap<>();
         if (required != null) d.requiredReached = new TreeMap<>();
@@ -97,6 +123,15 @@ final class Coverage {
                 }
             }
             if (ids != null) d.newIds.put(ed.getName(), ids);
+            if (cminKey != null) {
+                CminSlot slot = cmin.computeIfAbsent(ed.getId(), k -> new CminSlot(probes.length));
+                for (int i = 0; i < probes.length && i < slot.size.length; i++) {
+                    if (probes[i] && cminSize < slot.size[i]) {
+                        slot.size[i] = cminSize;
+                        slot.key[i] = cminKey;
+                    }
+                }
+            }
             if (required != null) {
                 List<Integer> want = required.get(ed.getName());
                 if (want != null) {

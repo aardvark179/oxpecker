@@ -10,6 +10,8 @@
   oxpecker gen -o out/ -n 50 --evolve 4  ... each case the end of a 4-step mutation lineage
   oxpecker fuzz -o runs/c1 --seconds 600  the loop: coverage corpus of lineages, findings shrunk and recorded
   oxpecker shrink finding.js           statement-level shrinking of a reproducer (writes finding.min.js)
+  oxpecker cmin runs/c1/corpus -o runs/c2/corpus   minimise a corpus (smallest entry per probe) to seed the next run
+  oxpecker related findings/          which checked-in regressions each finding probably connects to
   oxpecker export -o ui/data --per-generator 20   sample every generator/template for the UI; oxpecker metrics DIR
   oxpecker list [--family F] [--templates]   the registered generators (name, family, weight, doc)
 
@@ -357,6 +359,44 @@ def cmd_shrink(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_cmin(args: argparse.Namespace) -> int:
+    """Minimise a corpus the way afl-cmin does (oxpecker.cmin)."""
+    from .cmin import minimise
+    from .harness.client import HarnessClient
+
+    with HarnessClient(quiet=True, coverage=True) as client:
+        if not client.info().get("coverage"):
+            print("coverage agent not attached: the harness build must include jacocoagent.jar", file=sys.stderr)
+            return 2
+        s = minimise(Path(args.corpus), Path(args.out), client=client, language_version=args.language_version,
+                     quiet=args.quiet)
+    print(f"{s['entries']} -> {s['kept']} entries, {s['covered_probes']} probes covered, {s['seconds']}s; "
+          f"{len(s['undecodable'])} no longer decode, {len(s['excluded'])} restarted the JVM: {args.out}")
+    return 0
+
+
+def cmd_related(args: argparse.Namespace) -> int:
+    """Which checked-in regressions each finding probably connects to (oxpecker.related)."""
+    from .harness.client import HarnessClient
+    from .harness.compare import compare_run
+    from .related import Fingerprint, known_index
+
+    files = _js_files([Path(p) for p in args.paths])
+    with HarnessClient(quiet=True) as client:
+        index = known_index(client)
+        for f in files:
+            src = f.read_text(encoding="utf-8")
+            run = client.run(src, language_version=args.language_version, source_name=f.name)
+            v = compare_run(run)
+            print(f"{f}\n  {v.pretty()[:160]}" + ("  [known signature]" if v.signature() in index.signatures else ""))
+            related = index.related(Fingerprint.of(f.name, src, run, v), limit=args.limit)
+            for r in related:
+                print(f"  related: {r}")
+            if not related:
+                print("  related: none")
+    return 0
+
+
 def cmd_export(args: argparse.Namespace) -> int:
     from . import inspector
 
@@ -378,15 +418,17 @@ def cmd_fuzz(args: argparse.Namespace) -> int:
     from . import findings
     from .fuzz import fuzz
     from .harness.client import HarnessClient
+    from .related import known_index
 
     options = _gen_options(args)
     with HarnessClient(quiet=True, coverage=True) as client:
         if not client.info().get("coverage"):
             print("coverage agent not attached: the harness build must include jacocoagent.jar", file=sys.stderr)
             return 2
-        known = findings.known_signatures(client) if not args.ignore_known else set()
+        index = known_index(client)
+        known = index.signatures if not args.ignore_known else set()
         summary = fuzz(corpus_dir=Path(args.corpus), options=options, iterations=args.iterations, seconds=args.seconds,
-                       steps=args.steps, p_new=args.p_new, seed=args.seed, known=known,
+                       steps=args.steps, p_new=args.p_new, seed=args.seed, known=known, related_index=index,
                        findings_dir=Path(args.findings_dir) if args.findings_dir else findings.DEFAULT_DIR,
                        shrink_budget=args.shrink_budget, compact_budget=args.compact_budget,
                        source_shrink_budget=args.source_shrink_budget,
@@ -487,6 +529,19 @@ def main(argv: list[str] | None = None) -> int:
     sh.add_argument("--language-version", type=int, default=200)
     sh.add_argument("--wall-ms", type=int, default=5000)
     sh.set_defaults(fn=cmd_shrink)
+
+    cm = sub.add_parser("cmin", help="minimise a corpus: the smallest entry per coverage probe (afl-cmin)")
+    cm.add_argument("corpus", help="corpus directory to minimise")
+    cm.add_argument("-o", "--out", required=True, help="new corpus directory")
+    cm.add_argument("--language-version", type=int, default=200)
+    cm.add_argument("-q", "--quiet", action="store_true")
+    cm.set_defaults(fn=cmd_cmin)
+
+    rl = sub.add_parser("related", help="which checked-in regressions each finding probably connects to")
+    rl.add_argument("paths", nargs="+")
+    rl.add_argument("--limit", type=int, default=3)
+    rl.add_argument("--language-version", type=int, default=200)
+    rl.set_defaults(fn=cmd_related)
 
     ex = sub.add_parser("export", help="sample every generator and template, run them, write a run directory for the UI")
     ex.add_argument("-o", "--out", default="ui/data", help="run directories go under here (default ui/data)")

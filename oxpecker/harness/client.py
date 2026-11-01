@@ -141,6 +141,14 @@ class HarnessClient:
             raise HarnessError(resp["error"])
         return resp["coverage"]
 
+    def cmin_result(self) -> dict[str, int]:
+        """Corpus minimisation: the cmin keys that are the smallest entry for at least one probe,
+        with how many probes each wins (since this JVM started)."""
+        resp = self._request({"cmd": "cmin-result"})
+        if "error" in resp:
+            raise HarnessError(resp["error"])
+        return {k: int(v) for k, v in resp["cmin"].items()}
+
     # -- requests -------------------------------------------------------------------------
     def _request(self, req: dict[str, Any]) -> dict[str, Any]:
         if self.proc is None:
@@ -175,9 +183,11 @@ class HarnessClient:
             strict: bool = False, instruction_budget: int = 5_000_000, wall_ms: int = 5000, seed: int = 1,
             id: str | None = None, source_name: str = "case.js", continuations: bool | None = None,
             coverage_bucket: str | None = None, coverage_new_ids: bool = False,
-            coverage_require: dict[str, list[int]] | None = None) -> RunResult:
+            coverage_require: dict[str, list[int]] | None = None,
+            cmin_key: str | None = None, cmin_size: int = 0) -> RunResult:
         """Runs one case in every mode. If the JVM dies or asks to be restarted, the missing modes
-        are reported as crash/timeout and the JVM is restarted."""
+        are reported as crash/timeout and the JVM is restarted. `cmin_key`/`cmin_size` credit the
+        run's probes to a corpus entry for minimisation (cmin_result)."""
         case_id = id or uuid.uuid4().hex[:12]
         req = {"id": case_id, "source": source, "modes": list(modes), "languageVersion": language_version,
                "strict": strict, "instructionBudget": instruction_budget, "wallMs": wall_ms, "seed": seed,
@@ -189,6 +199,9 @@ class HarnessClient:
             req["coverageNewIds"] = True
         if coverage_require is not None:
             req["coverageRequire"] = coverage_require
+        if cmin_key is not None:
+            req["cminKey"] = cmin_key
+            req["cminSize"] = cmin_size
         if self.cases_since_start >= self.recycle_every:
             self.restart()
         self.cases_since_start += 1

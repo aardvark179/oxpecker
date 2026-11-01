@@ -286,6 +286,26 @@ verdict with an unknown signature is shrunk by `Shrinker` (G36) and recorded wit
 [--shrink-budget N] [--compact-budget N] [--findings-dir D] [--ignore-known]` plus the
 generation options of `gen`.
 
+Known signatures and related regressions (`oxpecker/related.py`): at start the loop runs every
+`tests/regressions/*.js` and takes their signatures (plus `tests/known_signatures.txt`) as
+known; an exact match is logged, not shrunk. Everything else is a new finding, and its
+reproducer gets `// Related:` lines naming the regressions it shares evidence with: the Rhino
+frames of an engine crash, an error message (digits masked), rare source constructs (weighted
+by rarity among the regressions, with class tokens such as `<compound-assign>` and
+`<TypedArray>`), the coarse signature. Nothing is filtered on that evidence: a looser match
+would also hide new bugs with a shared symptom. `oxpecker related FILE|DIR` labels existing
+findings the same way.
+
+Corpus minimisation (`oxpecker/cmin.py`, `oxpecker cmin SRC -o DEST`): afl-cmin's choice. Every
+entry of SRC is replayed once in a fresh coverage JVM, credited with its program-text length;
+the JVM keeps, per probe, the smallest entry that hit it (`Coverage.cminResult`, request fields
+`cminKey`/`cminSize`, command `cmin-result`); DEST gets the entries that win at least one probe,
+the coverage of the whole pass as `coverage.exec`, and `cmin.json`. In-order replay ("keep
+what adds coverage") would keep nearly everything, since each entry was added for adding
+coverage at its time. A JVM restart loses the per-probe state, so the pass starts over without
+the entry that caused it. `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
+from the previous one (`runs/.last-campaign`); `--fresh` starts from an empty corpus.
+
 ## 4. A worked example
 
 `generate(seed=1, min_statements=2, max_statements=3, max_depth=1, probe_every=0)`:
@@ -479,7 +499,8 @@ Every reproducer the loop found is a file under `tests/regressions/` and an entr
 `docs/findings-explained.md`. `oxpecker shrink FILE` reduces a reproducer at statement level
 while its coarse signature holds (G40); the loop does the same after Hypothesis's shrink.
 Expected mode differences (continuations are interpreter-only) are listed in
-`tests/known_signatures.txt` and logged, not shrunk.
+`tests/known_signatures.txt` and logged, not shrunk. After a campaign, `oxpecker related` on
+its findings directory says which reproducers are probably known bugs in a new shape.
 
 ### `oxpecker/inspector.py` — the export for the UI
 

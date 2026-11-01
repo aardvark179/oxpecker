@@ -35,6 +35,11 @@ public final class Request {
     /** A probe set (class name -> probe indices); report the subset this run reached
      *  (Outcome.requiredReached). Used to shrink a corpus entry while it keeps reaching its probes. */
     public java.util.Map<String, java.util.List<Integer>> coverageRequire;
+    /** Corpus minimisation (afl-cmin): credit every probe this run hits to entry {@code cminKey}
+     *  of size {@code cminSize} where it is the smallest entry so far; cmd cmin-result reports
+     *  the entries that are smallest for at least one probe. */
+    public String cminKey;
+    public Long cminSize;
     /** For cmd coverage-save / coverage-load: the .exec file path. */
     public String path;
 

@@ -21,21 +21,16 @@ def short_sig(verdict: Verdict) -> str:
 def known_signatures(client: Any, regressions: Path = DEFAULT_DIR.parent / "regressions") -> set[str]:
     """Signatures of the checked-in regressions (run through the harness) plus
     tests/known_signatures.txt."""
-    from .harness.compare import compare_run
-    sigs: set[str] = set()
-    for path in sorted(regressions.glob("*.js")):
-        run = client.run(path.read_text(encoding="utf-8"), source_name=path.name)
-        sigs.add(compare_run(run).signature())
-    extra = regressions.parent / "known_signatures.txt"
-    if extra.exists():
-        sigs |= {ln.split("#", 1)[0].strip() for ln in extra.read_text().splitlines() if ln.split("#", 1)[0].strip()}
-    return sigs
+    from .related import known_index
+    return known_index(client, regressions).signatures
 
 
 def record(prog: Any, run: RunResult, verdict: Verdict, *, out_dir: Path = DEFAULT_DIR,
-           reproducer: bool = False, choices: list[int] | None = None, replay_cmd: str = "oxpecker diff") -> Path | None:
+           reproducer: bool = False, choices: list[int] | None = None, replay_cmd: str = "oxpecker diff",
+           related: list[Any] | None = None) -> Path | None:
     """Appends to <kind>.jsonl once per signature. With `reproducer`, (over)writes
-    <kind>-<sig>.js with the probed source (trace findings need the probes) and returns its path."""
+    <kind>-<sig>.js with the probed source (trace findings need the probes) and returns its path.
+    `related` (oxpecker.related.Related) names the regressions the finding probably connects to."""
     out_dir.mkdir(parents=True, exist_ok=True)
     log = out_dir / f"{verdict.kind}.jsonl"
     sig = verdict.signature()
@@ -46,12 +41,16 @@ def record(prog: Any, run: RunResult, verdict: Verdict, *, out_dir: Path = DEFAU
         with log.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"signature": sig, "verdict": verdict.to_json(), "source": prog.source,
                                 "template": prog.template, "choices": choices,
+                                "related": [{"regression": r.name, "score": r.score, "shared": list(r.shared)}
+                                            for r in related or ()],
                                 "results": run.to_json()["results"]}) + "\n")
     if not reproducer:
         return None
     path = out_dir / f"{verdict.kind}-{short_sig(verdict)}.js"
     body = f"// oxpecker-expect: {verdict.kind}\n// " + verdict.pretty().replace("\n", " ") + "\n"
     body += "// " + json.dumps({m: {"status": o.status, "value": o.value} for m, o in run.results.items()}) + "\n"
+    for r in related or ():
+        body += f"// Related: {r}\n"
     body += f"// Replay: {replay_cmd} {path}\n" + prog.source
     path.write_text(body, encoding="utf-8")
     return path
