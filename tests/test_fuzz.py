@@ -5,14 +5,15 @@ real harness for a few iterations."""
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 from random import Random
 
 import pytest
 
 from oxpecker.fuzz import (Corpus, Entry, LineageCache, Observation, Shrinker, compact, decode, draw_lineage,
-                           encode, extend, fuzz, replay)
-from oxpecker.harness.compare import EQUAL, HARD, Verdict
+                           encode, extend, fuzz, parent_weights, replay, speed_weight)
+from oxpecker.harness.compare import DISCARD, EQUAL, HARD, Verdict
 from oxpecker.il import ops
 from oxpecker.il.mutate import Lineage
 from oxpecker.il.options import GenOptions
@@ -53,6 +54,18 @@ class FakeRunner:
         bug = any(isinstance(i.op, ops.Update) for i in code)
         verdict = Verdict(HARD, ["planted: a compound assignment"]) if bug else Verdict(EQUAL)
         return Observation(verdict, FakeRun(), len(new), new_ids, reached)
+
+
+class HangingRunner(FakeRunner):
+    """FakeRunner where a program with a while loop runs past the watchdog: slow, timed out."""
+
+    def __call__(self, lineage: Lineage, require=None) -> Observation:
+        obs = super().__call__(lineage, require)
+        if any(isinstance(i.op, ops.BeginWhileLoopBody) for i in lineage.code):
+            obs.verdict, obs.ms, obs.timed_out = Verdict(DISCARD, ["both timeout"]), 8000, True
+        else:
+            obs.ms = 10 + len(lineage.code)
+        return obs
 
 
 def test_draw_replay_and_extend_round_trip():
@@ -158,6 +171,39 @@ def test_a_missed_entry_is_rebuilt_from_its_parent_exactly_as_a_full_replay(tmp_
         assert rebuilt.source == full.source and rebuilt.depth == full.depth and rebuilt.at_cap == full.at_cap
         assert [s.name for s in rebuilt.steps] == e.steps
     assert cache.incremental >= len(children)
+
+
+def test_speed_weight_is_afls_exec_time_factor():
+    assert speed_weight(1100, 100) == 0.1 and speed_weight(500, 100) == 0.25 and speed_weight(150, 100) == 0.75
+    assert speed_weight(100, 100) == 1.0 and speed_weight(20, 100) == 3.0 and speed_weight(40, 100) == 1.5
+    assert speed_weight(0, 100) == 1.0                      # no time recorded (older corpora): average
+
+
+def test_parents_whose_children_time_out_are_picked_less():
+    es = [Entry(i, "", "t", [], 1, ms=20) for i in range(3)]
+    w = parent_weights(es, Counter({1: 2, 2: 10}))
+    assert w[0] == 1.0 and w[1] == 0.25 and w[2] == 0.5 ** 6
+
+
+def test_a_timed_out_run_is_not_added_to_the_corpus(tmp_path: Path):
+    """AFL keeps hangs out of its queue: a hang's children inherit the runaway. On the fresh
+    three-hour campaign of 2026-11-02 the 7 % of entries past the watchdog took 97 % of the time."""
+    runner = HangingRunner()
+    hung: list[str] = []
+    real = runner.__call__
+
+    def run(lineage, require=None):
+        obs = real(lineage, require)
+        if obs.timed_out and obs.new_probes:
+            hung.append(lineage.source)
+        return obs
+    summary = fuzz(corpus_dir=tmp_path / "corpus", options=OPTIONS, iterations=150, steps=STEPS, seed=5, runner=run,
+                   findings_dir=tmp_path / "findings", shrink_budget=5, quiet=True)
+    corpus = Corpus(tmp_path / "corpus")
+    assert hung and summary["stats"]["timed-out-not-added"] == len(hung)
+    sources = {replay(decode(e.choices), OPTIONS, e.cap).source for e in corpus.entries}
+    assert not sources & set(hung)
+    assert all(0 < e.ms < 8000 for e in corpus.entries)
 
 
 def test_cmin_builds_every_entry_depth_first_exactly_as_a_full_replay(tmp_path: Path):

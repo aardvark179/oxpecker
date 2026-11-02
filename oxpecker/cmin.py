@@ -10,6 +10,8 @@ Each run reports every probe it hit as one bitmap per class (`coverage_hits`, ab
 Rhino's 43k probes), and the choice is made here: entries in order of size, each kept if it hits a
 probe no smaller entry hit. That is the smallest entry per probe, ties going to the earlier entry.
 No state lives in the JVM, so a restart (a program the watchdog had to kill) costs only that run.
+Entries that time out are dropped, as the fuzz loop no longer adds them: a hang's children
+inherit the runaway.
 The kept entries are then run once more in a fresh JVM to write the new corpus's coverage.exec,
 which also checks that they alone reach what the whole corpus reached: all but a few probes
 (about 0.15 % on a small corpus) whose hits depend on timing or on what the JVM ran before.
@@ -24,7 +26,7 @@ import time
 from pathlib import Path
 from typing import Any, Iterator
 
-from .fuzz import Corpus, Entry, Lineage, continue_lineage, decode, replay
+from .fuzz import SLOW, Corpus, Entry, Lineage, continue_lineage, decode, replay
 from .harness.client import RunResult
 from .il.options import GenOptions
 
@@ -68,7 +70,8 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
         raise FileExistsError(f"{dest_dir} already holds a corpus")
     t0 = time.time()
     undecodable: list[int] = []
-    restarted: list[int] = []                     # entries whose run restarted the JVM (hits kept)
+    restarted: list[int] = []                     # entries whose run restarted the JVM
+    timed_out: list[int] = []                     # entries that hang now: dropped, as the fuzz loop does
     replay_ms: dict[int, float] = {}              # entry id -> time to rebuild its program from its choices
     sources: dict[int, tuple[str, str]] = {}      # entry id -> (program text, template)
     sized: list[tuple[int, int, Bits]] = []
@@ -84,6 +87,9 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
                          coverage_bucket=lineage.template, coverage_hits=True)
         if run.restarted:
             restarted.append(e.id)
+        if any(o.status in SLOW for o in run.results.values()):
+            timed_out.append(e.id)
+            continue
         sized.append((len(lineage.source), e.id, run_hits(run)))
         if not quiet and (i + 1) % 250 == 0:
             print(f"  {i + 1}/{len(src.entries)} ({time.time() - t0:.0f}s, rebuilding "
@@ -101,7 +107,7 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
             client.run(source, language_version=language_version, seed=1, coverage_bucket=template)
     covered = client.coverage_save(str(dest.exec))
     summary = {"source": str(source_dir), "entries": len(src.entries), "kept": len(dest.entries),
-               "undecodable": undecodable, "restarted": restarted,
+               "undecodable": undecodable, "restarted": restarted, "timed_out": timed_out,
                "probes_chosen": chosen_probes, "covered_probes": covered, "probes_not_reached": chosen_probes - covered,
                "seconds": round(time.time() - t0, 1), "rebuild": _rebuild_stats(src, replay_ms),
                "rebuilt_from_parent": from_parent,
