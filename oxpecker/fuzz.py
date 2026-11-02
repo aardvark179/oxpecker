@@ -382,7 +382,7 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
          seconds: float | None = None, steps: int = 5, p_new: float = 0.2, seed: int | None = None,
          known: set[str] | None = None, related_index=None, findings_dir: Path = findings.DEFAULT_DIR, shrink_budget: int = 150,
          compact_budget: int = 0, source_shrink_budget: int = 300, language_version: int = 200,
-         runner: Runner | None = None, client=None, save_every: int = 100, quiet: bool = False,
+         runner: Runner | None = None, client=None, quiet: bool = False,
          max_depth: int = MAX_DEPTH) -> dict[str, Any]:
     """Run the loop. `runner` (or a `HarnessClient` in `client`) runs programs; without either a
     coverage-enabled client is started. `steps` is the mutation steps per round (a fresh lineage
@@ -406,6 +406,8 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                 client.stop()
                 raise RuntimeError("coverage agent not attached; the harness build must include jacocoagent.jar")
         runner = harness_runner(client, language_version)
+    if client is not None:
+        client.coverage_checkpoint = str(corpus.exec)
         if corpus.exec.exists():
             covered = client.coverage_load(str(corpus.exec))
             if not quiet:
@@ -514,8 +516,10 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                     productive[step.name] += 1
                 stats["corpus-added"] += 1
                 stats["new-probes"] += obs.new_probes
-            if client is not None and i % save_every == 0:
-                client.coverage_save(str(corpus.exec))
+                if client is not None:
+                    # the checkpoint a restarted JVM resumes from (HarnessClient.coverage_checkpoint):
+                    # only runs with new probes move the frontier, and each of those is added here
+                    client.coverage_save(str(corpus.exec))
             if not quiet and time.time() - last_report > 10:
                 last_report = time.time()
                 rate = i / (last_report - t0)

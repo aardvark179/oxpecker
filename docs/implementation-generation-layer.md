@@ -310,6 +310,13 @@ rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds a 
 previous one (`runs/.last-campaign`) through `runs/PREV/corpus.min`, minimised once and reused
 while it is newer than that campaign's corpus; `--fresh` starts from an empty corpus.
 
+Coverage across JVM restarts: the "new probes" a run reports are relative to the cumulative
+store in the harness JVM, which a restart (watchdog, `OutOfMemoryError`) empties, after which
+every probe is new again and the loop adds nearly every run to the corpus (71 % of the runs of
+the seeded three-hour campaign). `fuzz` sets `HarnessClient.coverage_checkpoint` to the
+corpus's `coverage.exec` and saves it after every corpus addition, the only runs that move the
+frontier; a restarted client loads it before its next run.
+
 ## 4. A worked example
 
 `generate(seed=1, min_statements=2, max_statements=3, max_depth=1, probe_every=0)`:
