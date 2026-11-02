@@ -78,6 +78,7 @@ def test_kept_entries_cover_what_the_corpus_covers_whatever_the_order(tmp_path: 
         finally:
             c.stop()
         assert not s["undecodable"]
+        assert s["rebuilt_from_parent"] > 0         # children are rebuilt from their parent, not replayed
         # the kept entries' own re-run reaches what they were chosen on, but for a few probes that
         # depend on timing or on what the JVM ran before (one-time initialisation, the budget observer)
         assert s["covered_probes"] >= s["probes_chosen"] * 0.995, s
