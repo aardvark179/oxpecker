@@ -68,3 +68,19 @@ def test_a_different_program_reaches_much_less_of_the_set(cov):
     full = cov.run(PROGRAM + "\nvar third = [].concat([1n]);", coverage_require=p)
     other = cov.run("var z = 2;", coverage_require=p)
     assert size(union(other.results, "requiredReached")) < size(union(full.results, "requiredReached"))
+
+
+def test_a_restarted_jvm_resumes_from_the_coverage_checkpoint(cov, tmp_path):
+    # Without it every probe is new again after a restart, and the fuzz loop adds whatever runs
+    # next to the corpus: 71 % of the runs of a three-hour campaign (2026-11-01).
+    def new_after_restart() -> int:
+        cov.run(PROGRAM)
+        cov.coverage_save(str(tmp_path / "coverage.exec"))
+        cov.restart()
+        return sum(o.newProbes or 0 for o in cov.run(PROGRAM).results.values())
+    lost = new_after_restart()
+    cov.coverage_checkpoint = str(tmp_path / "coverage.exec")
+    resumed = new_after_restart()
+    print(f"new probes after a restart: {lost} without the checkpoint, {resumed} with it")
+    assert lost > 1000
+    assert resumed <= lost // 20

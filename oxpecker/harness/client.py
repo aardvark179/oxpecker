@@ -73,6 +73,9 @@ class HarnessClient:
         self.recycle_every = recycle_every
         self.hard_timeout_s = hard_timeout_s
         self.quiet = quiet
+        # Coverage lives in the JVM: a restart would start from nothing, and every probe would be
+        # new again. With a checkpoint (.exec) set, a restarted JVM loads it first.
+        self.coverage_checkpoint: str | None = None
         self.proc: subprocess.Popen[str] | None = None
         self.cases_since_start = 0
         self.restarts = 0
@@ -112,6 +115,8 @@ class HarnessClient:
         self.stop()
         self.restarts += 1
         self.start()
+        if self.coverage and self.coverage_checkpoint and os.path.exists(self.coverage_checkpoint):
+            self.coverage_load(self.coverage_checkpoint)
 
     def __enter__(self) -> "HarnessClient":
         self.start()

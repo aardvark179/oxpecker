@@ -22,9 +22,9 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
-from .fuzz import Corpus
+from .fuzz import Corpus, Entry, Lineage, continue_lineage, decode, replay
 from .harness.client import RunResult
 from .il.options import GenOptions
 
@@ -72,10 +72,10 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
     replay_ms: dict[int, float] = {}              # entry id -> time to rebuild its program from its choices
     sources: dict[int, tuple[str, str]] = {}      # entry id -> (program text, template)
     sized: list[tuple[int, int, Bits]] = []
-    for i, e in enumerate(src.entries):
-        t = time.perf_counter()
-        lineage = src.replay(i, options, steps)
-        replay_ms[e.id] = (time.perf_counter() - t) * 1000
+    from_parent = 0
+    for i, (e, lineage, ms, rebuilt) in enumerate(_lineages_depth_first(src, options, steps)):
+        replay_ms[e.id] = ms
+        from_parent += rebuilt
         if lineage is None:
             undecodable.append(e.id)
             continue
@@ -88,6 +88,7 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
         if not quiet and (i + 1) % 250 == 0:
             print(f"  {i + 1}/{len(src.entries)} ({time.time() - t0:.0f}s, rebuilding "
                   f"{sum(replay_ms.values()) / 1000:.0f}s of it)", file=sys.stderr)
+    sized.sort(key=lambda t: t[1])                # ties to the earlier entry, whatever the visiting order
     wins = choose(sized)
     chosen_probes = sum(wins.values())
     # coverage.exec of the new corpus: the kept entries alone, in a fresh JVM
@@ -103,14 +104,52 @@ def minimise(source_dir: Path, dest_dir: Path, *, client, options: GenOptions = 
                "undecodable": undecodable, "restarted": restarted,
                "probes_chosen": chosen_probes, "covered_probes": covered, "probes_not_reached": chosen_probes - covered,
                "seconds": round(time.time() - t0, 1), "rebuild": _rebuild_stats(src, replay_ms),
+               "rebuilt_from_parent": from_parent,
                "wins": {str(k): v for k, v in sorted(wins.items(), key=lambda kv: -kv[1])}}
     (dest_dir / "cmin.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     return summary
 
 
+def _lineages_depth_first(src: Corpus, options: GenOptions, steps: int
+                          ) -> Iterator[tuple[Entry, Lineage | None, float, bool]]:
+    """Every entry's lineage, (entry, lineage or None if it no longer decodes, ms to build it,
+    whether it was built from its parent's), visiting the lineage tree depth first: a child is
+    built from its parent's lineage by replaying only its own round (continue_lineage), as the
+    fuzz loop does on a cache miss, since a full replay costs ~0.23 s per mutation step. In corpus
+    order a parent is usually thousands of entries back (on the seeded three-hour corpus 7 % of
+    children are within 512 of it), so a cache would have to hold thousands of lineages (~0.3 MB
+    each); depth first holds only the ancestors of the entry being built."""
+    children: dict[int, list[Entry]] = {}
+    roots: list[Entry] = []
+    for e in src.entries:
+        if e.parent is not None and e.parent != e.id and e.parent in src.by_id:
+            children.setdefault(e.parent, []).append(e)
+        else:
+            roots.append(e)
+    stack: list[tuple[Entry, tuple[Lineage, Entry] | None]] = [(e, None) for e in reversed(roots)]
+    while stack:
+        e, parent = stack.pop()
+        t = time.perf_counter()
+        lineage = None
+        rebuilt = False
+        choices = decode(e.choices)
+        if choices is not None:
+            cap = e.cap if e.cap is not None else steps
+            if parent is not None:
+                parent_choices = decode(parent[1].choices)
+                if parent_choices is not None:
+                    lineage = continue_lineage(parent[0], parent_choices, choices, options, cap)
+                    rebuilt = lineage is not None
+            if lineage is None:
+                lineage = replay(choices, options, cap)
+        yield e, lineage, (time.perf_counter() - t) * 1000, rebuilt
+        below = (lineage, e) if lineage is not None else None
+        stack.extend((c, below) for c in reversed(children.get(e.id, ())))
+
+
 def _rebuild_stats(src: Corpus, replay_ms: dict[int, float]) -> dict[str, Any]:
-    """How long rebuilding entries from their choices took, overall and by lineage depth (steps):
-    the cost the fuzz loop pays on every LineageCache miss."""
+    """How long rebuilding entries took (from the parent's lineage where possible), overall and
+    by lineage depth (steps): the cost the fuzz loop pays on every LineageCache miss."""
     if not replay_ms:
         return {}
     ms = sorted(replay_ms.values())

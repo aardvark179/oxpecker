@@ -84,6 +84,23 @@ def replay(choices: Choices, options: GenOptions = GenOptions(), steps: int = 5)
         return None
 
 
+def continue_lineage(parent: Lineage, parent_choices: Choices, choices: Choices, options: GenOptions,
+                     cap: int) -> Lineage | None:
+    """The lineage `choices` draws, given `parent`, the lineage `parent_choices` draws, when
+    `choices` extends it the way `extend` does: only the child's own draws are replayed, not the
+    whole history. None when `choices` does not continue `parent_choices` (a compacted entry) or no
+    longer decodes; the caller falls back to `replay`."""
+    kept = tuple(parent_choices) if parent.at_cap else tuple(parent_choices[:-1])
+    if tuple(choices[:len(kept)]) != kept or len(choices) <= len(kept):
+        return None
+    try:
+        data = ConjectureData.for_choices(tuple(choices[len(kept):]))
+        with BuildContext(data, wrapped_test=lambda: None):
+            return data.draw(evolved(options, cap, parent=parent))
+    except (StopTest, UnsatisfiedAssumption, IndexError, ValueError):
+        return None
+
+
 def extend(choices: Choices, options: GenOptions, steps: int, rng: Random,
            parent: Lineage | None = None, *, cap: int | None = None,
            max_depth: int = MAX_DEPTH) -> tuple[Lineage, Choices] | None:
@@ -161,9 +178,11 @@ class Corpus:
                 if ln.strip():
                     d = json.loads(ln)
                     self.entries.append(Entry(**{k: d[k] for k in Entry.__dataclass_fields__ if k in d}))
+        self.by_id: dict[int, Entry] = {e.id: e for e in self.entries}
 
     def add(self, e: Entry) -> None:
         self.entries.append(e)
+        self.by_id[e.id] = e
         with self.file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(e.to_json()) + "\n")
 
@@ -188,6 +207,7 @@ class LineageCache:
         self._lineages: OrderedDict[int, Lineage] = OrderedDict()
         self.hits = 0
         self.misses = 0
+        self.incremental = 0           # misses (or their ancestors) rebuilt from a parent's lineage
 
     def put(self, entry_id: int, lineage: Lineage) -> None:
         self._lineages[entry_id] = lineage
@@ -195,17 +215,39 @@ class LineageCache:
         while len(self._lineages) > self.capacity:
             self._lineages.popitem(last=False)
 
-    def get(self, entry: Entry, options: GenOptions, steps: int) -> Lineage | None:
-        """The entry's lineage, replayed from its choices on a miss (None if it no longer decodes)."""
+    def get(self, entry: Entry, options: GenOptions, steps: int,
+            by_id: dict[int, Entry] | None = None) -> Lineage | None:
+        """The entry's lineage (None if it no longer decodes). On a miss it is rebuilt from its
+        parent's lineage when `by_id` has the parent (itself cached, or rebuilt the same way), so
+        only the entry's own round is replayed: a full replay costs about 0.23 s per mutation step,
+        and the three-hour campaign's lineages reached 19 steps. Otherwise, or when the entry no
+        longer continues its parent's choices, it is replayed from its choices."""
         cached = self._lineages.get(entry.id)
         if cached is not None:
             self.hits += 1
             self._lineages.move_to_end(entry.id)
             return cached
         self.misses += 1
+        return self._rebuild(entry, options, steps, by_id or {})
+
+    def _rebuild(self, entry: Entry, options: GenOptions, steps: int, by_id: dict[int, Entry]) -> Lineage | None:
         choices = decode(entry.choices)
+        if choices is None:
+            return None
         cap = entry.cap if entry.cap is not None else steps
-        lineage = replay(choices, options, cap) if choices is not None else None
+        lineage = None
+        parent_entry = by_id.get(entry.parent) if entry.parent is not None else None
+        if parent_entry is not None and parent_entry.id != entry.id:
+            parent = self._lineages.get(parent_entry.id)
+            if parent is None:
+                parent = self._rebuild(parent_entry, options, steps, by_id)
+            parent_choices = decode(parent_entry.choices) if parent is not None else None
+            if parent is not None and parent_choices is not None:
+                lineage = continue_lineage(parent, parent_choices, choices, options, cap)
+                if lineage is not None:
+                    self.incremental += 1
+        if lineage is None:
+            lineage = replay(choices, options, cap)
         if lineage is not None:
             self.put(entry.id, lineage)
         return lineage
@@ -340,7 +382,7 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
          seconds: float | None = None, steps: int = 5, p_new: float = 0.2, seed: int | None = None,
          known: set[str] | None = None, related_index=None, findings_dir: Path = findings.DEFAULT_DIR, shrink_budget: int = 150,
          compact_budget: int = 0, source_shrink_budget: int = 300, language_version: int = 200,
-         runner: Runner | None = None, client=None, save_every: int = 100, quiet: bool = False,
+         runner: Runner | None = None, client=None, quiet: bool = False,
          max_depth: int = MAX_DEPTH) -> dict[str, Any]:
     """Run the loop. `runner` (or a `HarnessClient` in `client`) runs programs; without either a
     coverage-enabled client is started. `steps` is the mutation steps per round (a fresh lineage
@@ -364,6 +406,8 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                 client.stop()
                 raise RuntimeError("coverage agent not attached; the harness build must include jacocoagent.jar")
         runner = harness_runner(client, language_version)
+    if client is not None:
+        client.coverage_checkpoint = str(corpus.exec)
         if corpus.exec.exists():
             covered = client.coverage_load(str(corpus.exec))
             if not quiet:
@@ -387,7 +431,7 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
             if corpus.entries and rng.random() > p_new:
                 parent = rng.choice(corpus.entries)
                 parent_choices = decode(parent.choices)
-                parent_lineage = lineages.get(parent, options, steps) if parent_choices else None
+                parent_lineage = lineages.get(parent, options, steps, corpus.by_id) if parent_choices else None
                 if parent_lineage is not None and parent_lineage.depth >= max_depth:
                     stats["at-max-depth"] += 1
                     drawn = None
@@ -472,8 +516,10 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                     productive[step.name] += 1
                 stats["corpus-added"] += 1
                 stats["new-probes"] += obs.new_probes
-            if client is not None and i % save_every == 0:
-                client.coverage_save(str(corpus.exec))
+                if client is not None:
+                    # the checkpoint a restarted JVM resumes from (HarnessClient.coverage_checkpoint):
+                    # only runs with new probes move the frontier, and each of those is added here
+                    client.coverage_save(str(corpus.exec))
             if not quiet and time.time() - last_report > 10:
                 last_report = time.time()
                 rate = i / (last_report - t0)
@@ -493,6 +539,7 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
             own_client.stop()
     stats["lineage-cache-hits"] = lineages.hits
     stats["lineage-cache-misses"] = lineages.misses
+    stats["lineage-rebuilt-from-parent"] = lineages.incremental
     stats["steps-attempted"] = sum(attempted.values())
     stats["steps-rejected"] = sum(rejected.values())
     mutator_stats = {name: {"attempted": attempted[name], "rejected": rejected[name], "corpus": productive[name]}

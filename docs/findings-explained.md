@@ -47,7 +47,7 @@ difference). §5.7 has the example.
 
 ## 2. The map
 
-Forty-five entries (43 reproducers, two of them symptoms of one cause, plus the two seeds,
+Forty-six entries (44 reproducers, two of them symptoms of one cause, plus the two seeds,
 the continuation difference and the soft record), grouped by the part of Rhino that is wrong.
 "Right" names the mode that follows the spec; "both wrong" means neither does.
 
@@ -65,6 +65,7 @@ the continuation difference and the soft record), grouped by the part of Rhino t
 | 5.8 Compiled `super` in a block with `let`/`const` | `ClassCastException` at the super reference | interpreted |
 | 5.9 Compiled `with` over a Java object | `ClassCastException` at the first name read in the block | interpreted |
 | 5.10 Compiled rest parameter of a direct-call target | `rest` is the first extra argument, not an array | interpreted |
+| 5.11 Labelled `for` with a loop in a function in its head | `continue L`: compiled "unlocated label", interpreted skips the update | both wrong |
 
 ## 3. Compiled mode's integer typing
 
@@ -550,6 +551,29 @@ presumably never built. Found by `oxpecker fuzz` on 1.9.2 (three-hour campaign, 
 a global array emptied after a warm-up loop; reduced by hand, the interpreter is right. Not
 checked on master `b95f75d`.
 
+### 5.11 Labelled `for` with a loop in a function in its head
+
+`labelled-for-head-function-loop-continue.js`
+
+```js
+L: for (var a = function () { while (false) {} }, i = 0; i < 2; i++) {
+    r.push(i);
+    continue L;       // interpreted: never reaches i++; compiled: "unlocated label"
+}
+```
+
+A labelled `for` or `for-in` whose head holds a function containing a loop, with `continue L`
+in the body, is wrong in both modes. Compiled code does not compile: Codegen throws "unlocated
+label" before a line runs. The interpreter runs, but `continue L` jumps past the update, so the
+loop above never ends (`[0,0,0,0,0]` with a guard; the spec gives `[0,1]`). With `for (;;) {
+break; }` as the inner loop the interpreter's CodeGenerator fails an assertion instead. The label, `continue L` (`break L` and a bare
+`continue` compile), the function in the head and the loop inside it are all needed; the same
+function in a `while` condition or in the body compiles. The inner loop apparently takes over
+the label's continue target, which the parser assigns to the next loop it finishes after the
+label. Found by `oxpecker fuzz` on 1.9.2 (seeded three-hour campaign, 2026-11-01: a
+destructuring `for (let [a, b] = (() => { ... for (let i ...) {} })(); ...)` with `continue
+L85`); the loop's shrinker left 24 lines, reduced by hand. Not checked on master `b95f75d`.
+
 ## 6. Where the findings came from, and what is left unsorted
 
 | source | findings |
@@ -567,6 +591,7 @@ checked on master `b95f75d`.
 | `oxpecker fuzz`, 2026-10-28 campaign | 5.8, the wider triggers of 3.4's second form |
 | `oxpecker fuzz` on 1.9.2, 2026-10-28 | 5.3 last row; hour-long campaign: 5.9, the ToPrimitive form of 5.1's receiver bug |
 | `oxpecker fuzz` on 1.9.2, three-hour campaign, 2026-10-29 | 5.10, 5.5 Java array `__proto__` |
+| `oxpecker fuzz` on 1.9.2, seeded three-hour campaign, 2026-11-01 | 5.11 |
 
 Everything still under `tests/findings/` maps to a family above:
 
@@ -605,22 +630,22 @@ issues.
 
 ## 7. The hour-long campaigns
 
-Four `oxpecker fuzz` campaigns of an hour or more so far, same settings (five mutation steps
-per round, `--p-new 0.2`, shrink budget 150 runs), each from an empty corpus; from 2026-11-01
+Five `oxpecker fuzz` campaigns of an hour or more so far, same settings (five mutation steps
+per round, `--p-new 0.2`, shrink budget 150 runs), the first four from an empty corpus; from 2026-11-01
 `scripts/campaign.sh start` seeds a campaign with the previous one's corpus after `oxpecker cmin`. The 1.9.2 campaign was the
 first with the lineage shrinker firing in the loop (it had been silenced by a known-signature
 check that ran before the shrink; fixed the same day).
 
-| | 2026-10-27, master `b95f75d`, seed 11 | 2026-10-28, master, seed 12 | 2026-10-28, Rhino 1.9.2, seed 15 | 2026-10-29, 1.9.2, three hours, no seed |
-|---|---|---|---|---|
-| runs (each in both modes) | 7 343 | 7 275 | 7 038 | 16 393 |
-| corpus entries | 4 517 | 4 227 | 4 928 | 7 333 |
-| probes covered / total | 18 081 / 46 447 | 14 717 / 45 562 | 14 138 / 42 935 | 17 484 / 43 543 |
-| hard verdicts (continuations) | 609 (582) | 426 (357) | 285 (258) | 979 (839) |
-| lineage cache misses | 58 % | 56 % | 61 % | 74 % |
-| reproducers written | 3 | 5 | 6 | 6 (5 files) |
-| new root causes | 3.4 second form | 5.8 | 5.9 | 5.10, 5.5 Java array `__proto__` |
-| kept under | `runs/` (not kept) | `runs/fuzz-2026-10-28/` | `runs/fuzz-2026-10-28-r192-1h/` | `runs/fuzz-2026-10-29-r192-3h/` |
+| | 2026-10-27, master `b95f75d`, seed 11 | 2026-10-28, master, seed 12 | 2026-10-28, Rhino 1.9.2, seed 15 | 2026-10-29, 1.9.2, three hours, no seed | 2026-11-01, 1.9.2, three hours, seeded |
+|---|---|---|---|---|---|
+| runs (each in both modes) | 7 343 | 7 275 | 7 038 | 16 393 | 21 275 |
+| corpus entries | 4 517 | 4 227 | 4 928 | 7 333 | 1 032 seeded, 16 085 at the end |
+| probes covered / total | 18 081 / 46 447 | 14 717 / 45 562 | 14 138 / 42 935 | 17 484 / 43 543 | 12 712 / 42 300 (understated, see below) |
+| hard verdicts (continuations) | 609 (582) | 426 (357) | 285 (258) | 979 (839) | 1 351 |
+| lineage cache misses | 58 % | 56 % | 61 % | 74 % | 91 % (rebuilt from the parent) |
+| reproducers written | 3 | 5 | 6 | 6 (5 files) | 12 (11 files) |
+| new root causes | 3.4 second form | 5.8 | 5.9 | 5.10, 5.5 Java array `__proto__` | 5.11 |
+| kept under | `runs/` (not kept) | `runs/fuzz-2026-10-28/` | `runs/fuzz-2026-10-28-r192-1h/` | `runs/fuzz-2026-10-29-r192-3h/` | `runs/fuzz-2026-11-01-r192-3h-seeded/` |
 
 What the reproducers were, per campaign, after triage with `oxpecker shrink` on each one and
 on the first program per coarse signature in `findings/hard.jsonl`:
@@ -640,7 +665,8 @@ on the first program per coarse signature in `findings/hard.jsonl`:
   is the string-doubling crash of 5.5; `ok vs throw` is 5.1's wrong receiver in a form where it
   shows as a missing `TypeError` (now in that regression).
 - **Three hours (1.9.2):** throughput fell from 3.5 to 1.5 runs a second as the corpus grew
-  (cause not yet established). Of the six new signatures, three were known bugs in new shapes:
+  (lineage cache misses, each a full replay of the entry's history; a miss now rebuilds from
+  the parent's lineage). Of the six new signatures, three were known bugs in new shapes:
   5.1's wrong receiver (a `TypeError` interpreted, from `super.__proto__ <<= 0` over a
   `Float64Array`), 5.1's write-back, 3.4's BigInt local (shown as a missing trace step). The new
   ones: the Java array `__proto__` crash (5.5, shrunk by the loop to four lines) and, from a
@@ -648,6 +674,17 @@ on the first program per coarse signature in `findings/hard.jsonl`:
   entries without a reproducer replay and shrink to known regressions too (the generator crash
   of 5.3, 3.2, 3.3, the `NativeJavaArray` form of the new 5.5 row). Since then a new finding's
   reproducer names the regressions it shares evidence with (`// Related:`, `oxpecker related`).
+- **Three hours, seeded (1.9.2):** started from the previous campaign's corpus minimised to
+  1 032 entries; 2.0 runs a second at the end, 30 % more runs than the unseeded campaign. The
+  corpus grew to 16 085 entries because 71 % of runs were added: a JVM restart (the watchdog
+  killing a runaway program) lost the harness's cumulative coverage, so every probe the next
+  runs hit was new again, and the final 12 712 probes count only what the last JVM saw. The
+  same restarts probably inflated the earlier campaigns' corpora. A restarted JVM now reloads the
+  corpus's `coverage.exec`, saved after every corpus addition. Of the eleven reproducers, ten
+  are known bugs: 5.1's write-back three times (`super.__proto__ ??=`, `||=`, `&&=`), 5.1's
+  wrong receiver twice (`super.__proto__ +=` over an `Int8Array`), 3.2, 3.3, 3.4 twice
+  (`var m = ~p` with a BigInt argument; a captured relop), and 5.6's continuations (`new
+  Continuation()` compiled). The new one is 5.11, which the shrinker left at 24 lines.
 
 Two lessons that repeat: exact signatures are too fine when the probe prints an object (every
 prototype shape is a new signature for one bug) and too coarse when only the status differs

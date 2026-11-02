@@ -306,8 +306,16 @@ JVM, so a watchdog restart costs one run; a first version that kept the choice i
 restarted five times in 1 200 entries of the three-hour corpus. DEST gets the kept entries, a
 `coverage.exec` from re-running them alone in a fresh JVM, and `cmin.json` (with
 `probes_not_reached`: the few timing- or history-dependent probes that re-run missed, and
-rebuild times by lineage depth). `scripts/campaign.sh start NAME HOURS` seeds every campaign this way
-from the previous one (`runs/.last-campaign`); `--fresh` starts from an empty corpus.
+rebuild times by lineage depth). Entries are built depth first over the lineage tree, each child from its parent's lineage (`continue_lineage`), holding only the ancestors of the entry being built: in corpus order a parent is usually thousands of entries back. `scripts/campaign.sh start NAME HOURS` seeds a campaign from the
+previous one (`runs/.last-campaign`) through `runs/PREV/corpus.min`, minimised once and reused
+while it is newer than that campaign's corpus; `--fresh` starts from an empty corpus.
+
+Coverage across JVM restarts: the "new probes" a run reports are relative to the cumulative
+store in the harness JVM, which a restart (watchdog, `OutOfMemoryError`) empties, after which
+every probe is new again and the loop adds nearly every run to the corpus (71 % of the runs of
+the seeded three-hour campaign). `fuzz` sets `HarnessClient.coverage_checkpoint` to the
+corpus's `coverage.exec` and saves it after every corpus addition, the only runs that move the
+frontier; a restarted client loads it before its next run.
 
 ## 4. A worked example
 
