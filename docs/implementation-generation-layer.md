@@ -317,6 +317,17 @@ the seeded three-hour campaign). `fuzz` sets `HarnessClient.coverage_checkpoint`
 corpus's `coverage.exec` and saves it after every corpus addition, the only runs that move the
 frontier; a restarted client loads it before its next run.
 
+Hangs and slow parents (AFL's treatment): a run that timed out in either mode (instruction
+budget, watchdog, resource limit) is not added to the corpus even when it reached new probes
+(`timed-out-not-added`); `oxpecker cmin` drops entries that time out on replay (`timed_out` in
+cmin.json). Parents are picked by `parent_weights`: AFL's exec-time factor against the corpus
+mean (`speed_weight`, from 0.1 for ten times slower to 3 for four times faster; `Entry.ms` is the
+slowest mode's run time when the entry was found), halved for every child of the entry that
+timed out in this run. On the fresh three-hour campaign of 2026-11-02 the 7 % of entries that had
+themselves run past the watchdog had 84 % of their children time out, 97 % of the time spent on
+children (`scripts/entry_speed.py CORPUS`); the JVM restarted about twice a minute and the loop
+ran at 1.2 runs/s.
+
 ## 4. A worked example
 
 `generate(seed=1, min_statements=2, max_statements=3, max_depth=1, probe_every=0)`:

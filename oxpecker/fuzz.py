@@ -159,6 +159,7 @@ class Entry:
     found: list[str] = field(default_factory=list)
     added_at: float = field(default_factory=time.time)
     cap: int | None = None            # the lineage's step cap (G49); None in corpora from before it
+    ms: int = 0                       # run time when found (slowest mode); 0 in corpora from before it
 
     def to_json(self) -> dict[str, Any]:
         return dict(self.__dict__)
@@ -262,6 +263,8 @@ class Observation:
     new_probes: int = 0
     new_probe_ids: ProbeSet = field(default_factory=dict)
     required_reached: ProbeSet = field(default_factory=dict)
+    ms: int = 0                       # run time of the slowest mode
+    timed_out: bool = False           # a mode hit the instruction budget, the watchdog or a resource limit
 
 
 class Runner(Protocol):
@@ -280,8 +283,39 @@ def harness_runner(client, language_version: int = 200) -> Runner:
             new += o.newProbes or 0
             union(new_ids, o.newProbeIds or {})
             union(reached, o.requiredReached or {})
-        return Observation(compare_run(res), res, new, new_ids, reached)
+        return Observation(compare_run(res), res, new, new_ids, reached,
+                           ms=max((o.ms or 0 for o in res.results.values()), default=0),
+                           timed_out=any(o.status in SLOW for o in res.results.values()))
     return run
+
+
+SLOW = ("timeout", "resource")
+
+
+def speed_weight(ms: int, mean_ms: float) -> float:
+    """AFL's exec-time factor in calculate_score: an entry ten times slower than the corpus mean
+    is picked a tenth as often, one four times faster three times as often. Entries without a
+    recorded time (corpora from before it) count as average."""
+    if ms <= 0 or mean_ms <= 0:
+        return 1.0
+    r = ms / mean_ms
+    for over, w in ((10, 0.1), (4, 0.25), (2, 0.5), (1.33, 0.75)):
+        if r > over:
+            return w
+    for under, w in ((0.25, 3.0), (0.33, 2.0), (0.5, 1.5)):
+        if r < under:
+            return w
+    return 1.0
+
+
+def parent_weights(entries: list[Entry], child_timeouts: Counter[int]) -> list[float]:
+    """How likely each entry is to be extended: its speed factor, halved for every child of it
+    that timed out this run (to 1/64). On the fresh three-hour campaign of 2026-11-02 the 7 % of
+    entries that ran past the watchdog themselves had 84 % of their children time out, 97 % of
+    the time spent on children (scripts/entry_speed.py)."""
+    timed = [e.ms for e in entries if e.ms > 0]
+    mean = sum(timed) / len(timed) if timed else 0.0
+    return [speed_weight(e.ms, mean) * 0.5 ** min(child_timeouts[e.id], 6) for e in entries]
 
 
 def union(into: ProbeSet, more: ProbeSet) -> None:
@@ -414,6 +448,8 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                 print(f"resumed: {len(corpus.entries)} corpus entries, {covered} probes already covered", file=sys.stderr)
 
     lineages = LineageCache()
+    child_timeouts: Counter[int] = Counter()   # entry id -> its children that timed out this run
+    weights: list[float] | None = None         # parent_weights, recomputed when either changes
     attempted: Counter[str] = Counter()      # mutation steps tried this run, per mutator (G51)
     rejected: Counter[str] = Counter()       # of those, the ones whose child did not verify
     productive: Counter[str] = Counter()     # steps of the entries added to the corpus this run
@@ -429,7 +465,9 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
             parent_lineage: Lineage | None = None
             drawn = None
             if corpus.entries and rng.random() > p_new:
-                parent = rng.choice(corpus.entries)
+                if weights is None:
+                    weights = parent_weights(corpus.entries, child_timeouts)
+                parent = rng.choices(corpus.entries, weights)[0]
                 parent_choices = decode(parent.choices)
                 parent_lineage = lineages.get(parent, options, steps, corpus.by_id) if parent_choices else None
                 if parent_lineage is not None and parent_lineage.depth >= max_depth:
@@ -454,6 +492,9 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
             obs = runner(lineage)
             v = obs.verdict
             stats[v.kind] += 1
+            if obs.timed_out and parent is not None:
+                child_timeouts[parent.id] += 1
+                weights = None
             if v.kind in (SOFT, JAVA_TYPES):
                 findings.record(lineage, obs.run, v, out_dir=findings_dir)
             elif v.kind == HARD:
@@ -499,7 +540,11 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                               f"{len(record_as.source.splitlines())} lines)", file=sys.stderr)
                         for r in related:
                             print(f"          related: {r}", file=sys.stderr)
-            if obs.new_probes > 0:
+            if obs.new_probes > 0 and obs.timed_out:
+                # a hang is not a parent (AFL keeps them out of its queue): its children inherit the
+                # runaway, and one past the watchdog costs the wall limit plus a JVM restart
+                stats["timed-out-not-added"] += 1
+            elif obs.new_probes > 0:
                 entry = (choices, lineage, obs.new_probe_ids)
                 if compact_budget and obs.new_probe_ids:
                     compacted = compact(runner, options, lineage.cap, choices, obs.new_probe_ids, compact_budget)
@@ -509,8 +554,9 @@ def fuzz(*, corpus_dir: Path, options: GenOptions = GenOptions(), iterations: in
                 e_choices, e_lineage, probes = entry
                 new_entry = Entry(corpus.next_id(), encode(e_choices), e_lineage.template, [s.name for s in e_lineage.steps],
                                   obs.new_probes, probes, parent.id if parent else None, len(e_lineage.code),
-                                  cap=e_lineage.cap)
+                                  cap=e_lineage.cap, ms=obs.ms)
                 corpus.add(new_entry)
+                weights = None
                 lineages.put(new_entry.id, e_lineage)
                 for step in e_lineage.steps[len(base_lineage.steps) if base_lineage else 0:]:
                     productive[step.name] += 1
