@@ -5,6 +5,7 @@ real harness for a few iterations."""
 from __future__ import annotations
 
 import json
+import zlib
 from collections import Counter
 from pathlib import Path
 from random import Random
@@ -57,11 +58,17 @@ class FakeRunner:
 
 
 class HangingRunner(FakeRunner):
-    """FakeRunner where a program with a while loop runs past the watchdog: slow, timed out."""
+    """FakeRunner where one program in three (by a checksum of its text) runs past the watchdog:
+    slow, timed out. Not tied to an operation: the shrinker's runs are not seeded, and when one of
+    them is the first to use it, the loop's own runs of it bring no new probes."""
+
+    @staticmethod
+    def hangs(source: str) -> bool:
+        return zlib.crc32(source.encode()) % 3 == 0
 
     def __call__(self, lineage: Lineage, require=None) -> Observation:
         obs = super().__call__(lineage, require)
-        if any(isinstance(i.op, ops.BeginWhileLoopBody) for i in lineage.code):
+        if self.hangs(lineage.source):
             obs.verdict, obs.ms, obs.timed_out = Verdict(DISCARD, ["both timeout"]), 8000, True
         else:
             obs.ms = 10 + len(lineage.code)
@@ -188,21 +195,12 @@ def test_parents_whose_children_time_out_are_picked_less():
 def test_a_timed_out_run_is_not_added_to_the_corpus(tmp_path: Path):
     """AFL keeps hangs out of its queue: a hang's children inherit the runaway. On the fresh
     three-hour campaign of 2026-11-02 the 7 % of entries past the watchdog took 97 % of the time."""
-    runner = HangingRunner()
-    hung: list[str] = []
-    real = runner.__call__
-
-    def run(lineage, require=None):
-        obs = real(lineage, require)
-        if obs.timed_out and obs.new_probes:
-            hung.append(lineage.source)
-        return obs
-    summary = fuzz(corpus_dir=tmp_path / "corpus", options=OPTIONS, iterations=150, steps=STEPS, seed=5, runner=run,
-                   findings_dir=tmp_path / "findings", shrink_budget=5, quiet=True)
+    summary = fuzz(corpus_dir=tmp_path / "corpus", options=OPTIONS, iterations=150, steps=STEPS, seed=5,
+                   runner=HangingRunner(), findings_dir=tmp_path / "findings", shrink_budget=5, quiet=True)
     corpus = Corpus(tmp_path / "corpus")
-    assert hung and summary["stats"]["timed-out-not-added"] == len(hung)
-    sources = {replay(decode(e.choices), OPTIONS, e.cap).source for e in corpus.entries}
-    assert not sources & set(hung)
+    assert summary["stats"]["timed-out-not-added"] > 0
+    assert not any(HangingRunner.hangs(replay(decode(e.choices), OPTIONS, e.cap).source) for e in corpus.entries)
+    assert all(0 < e.ms < 8000 for e in corpus.entries)
     assert all(0 < e.ms < 8000 for e in corpus.entries)
 
 
