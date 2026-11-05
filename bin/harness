@@ -1,6 +1,5 @@
 #!/bin/sh
 # Runs the Java harness with the JDK Rhino needs. Build first: (cd harness-java && ./gradlew fatJar)
-JAVA="${OXPECKER_JAVA:-/usr/local/opt/openjdk@21/bin/java}"
 LIBS="$(dirname "$0")/../harness-java/build/libs"
 AGENT=""
 # OXPECKER_COVERAGE=1 attaches the JaCoCo agent so the harness can report which Rhino code each
@@ -8,4 +7,4 @@ AGENT=""
 if [ -n "$OXPECKER_COVERAGE" ]; then
   AGENT="-javaagent:$LIBS/jacocoagent.jar=output=none,includes=org.mozilla.javascript.*,excludes=org.mozilla.javascript.gen.*"
 fi
-exec "$JAVA" -Xss64m $AGENT -jar "$LIBS/oxpecker-harness-all.jar" "$@"
+exec java -Xss64m $AGENT -jar "$LIBS/oxpecker-harness-all.jar" "$@"
