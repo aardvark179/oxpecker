@@ -1,0 +1,4 @@
+// The Java orchestrator (generation, mutation, the fuzz loop, comparison). The harnesses are
+// separate builds (harness-rhino1.9/, harness-rhino2.0/): Rhino never shares a classpath with this.
+rootProject.name = 'oxpecker'
+include 'oxpecker-core', 'oxpecker-fuzz'

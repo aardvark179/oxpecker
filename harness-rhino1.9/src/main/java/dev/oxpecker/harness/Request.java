@@ -35,6 +35,8 @@ public final class Request {
     /** A probe set (class name -> probe indices); report the subset this run reached
      *  (Outcome.requiredReached). Used to shrink a corpus entry while it keeps reaching its probes. */
     public java.util.Map<String, java.util.List<Integer>> coverageRequire;
+    /** Also report EVERY probe this run hit, new or not (Outcome.hitProbes): corpus minimisation. */
+    public Boolean coverageHits;
     /** For cmd coverage-save / coverage-load: the .exec file path. */
     public String path;
 

@@ -1,0 +1,23 @@
+subprojects {
+    apply plugin: 'java-library'
+    group = 'dev.oxpecker'
+    version = '0.1.0'
+    repositories { mavenCentral() }
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.11.3')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 21
+        options.compilerArgs += ['-Xlint:unchecked']
+    }
+    test {
+        // -Pslow also runs the tests that need a built harness and run programs through Rhino
+        useJUnitPlatform { if (!project.hasProperty('slow')) excludeTags 'slow' }
+        systemProperty 'file.encoding', 'UTF-8'
+        systemProperty 'oxpecker.root', rootDir.absolutePath
+        testLogging { events 'failed'; exceptionFormat 'full' }
+    }
+}

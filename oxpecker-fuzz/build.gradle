@@ -1,0 +1,25 @@
+// The loop and the tools around it: harness client and ensemble, comparison, corpus, shrinkers,
+// findings, the CLI.
+plugins { id 'application' }
+dependencies {
+    api project(':oxpecker-core')
+}
+application { mainClass = 'dev.oxpecker.cli.Main' }
+
+// Single runnable jar for bin/oxpecker: java -jar build/libs/oxpecker-all.jar gen -n 5 -o out
+tasks.register('fatJar', Jar) {
+    archiveBaseName = 'oxpecker'
+    archiveClassifier = 'all'
+    archiveVersion = ''
+    manifest { attributes 'Main-Class': 'dev.oxpecker.cli.Main' }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// bin/oxpecker's smoke test needs the jar
+test {
+    if (project.hasProperty('slow')) dependsOn 'fatJar'
+}

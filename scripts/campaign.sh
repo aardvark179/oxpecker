@@ -32,9 +32,9 @@ start)
             echo "previous campaign $PREV is still running; stop it first or use --fresh"; exit 1
         fi
     fi
-    (cd harness-java && ./gradlew -q fatJar) || exit 1
+    (cd harness-rhino2.0 && ./gradlew -q fatJar) && ./gradlew -q :oxpecker-fuzz:fatJar || exit 1
     mkdir -p "$OUT"
-    . .venv/bin/activate
+    PATH="$PWD/bin:$PATH"; export PATH
     SECONDS_TOTAL=$(awk "BEGIN { printf \"%d\", $HOURS * 3600 }")
     FUZZ="oxpecker fuzz -o $OUT/corpus --seconds $SECONDS_TOTAL --findings-dir $OUT/findings $*"
     if [ -n "$PREV" ]; then
@@ -75,8 +75,9 @@ stop)
         || echo "$NAME not running"
     ;;
 extract)
-    # One .js per recorded signature, named by a hash of the signature, the signature in the header.
-    .venv/bin/python - "$OUT" <<'EOF'
+    # One .js per recorded signature, named by a hash of the signature, the signature in the header
+    # (the standard library's json and hashlib: no oxpecker code involved).
+    python3 -I - "$OUT" <<'EOF'
 import hashlib, json, sys
 from pathlib import Path
 out = Path(sys.argv[1])
@@ -96,7 +97,7 @@ EOF
 reduce)
     shift 2
     BUDGET=300
-    . .venv/bin/activate
+    PATH="$PWD/bin:$PATH"; export PATH
     for f in "$@"; do
         case "$f" in --) continue ;; esac
         if [ "$f" -eq "$f" ] 2>/dev/null; then BUDGET="$f"; continue; fi

@@ -1,0 +1,10 @@
+// The generation layer: the IL, its typed registries, the generators and mutators (jetCheck
+// generators over the Draws layer), the lifter and the static analysis.
+dependencies {
+    api 'org.jetbrains:jetCheck:0.3.0'
+    api 'com.google.code.gson:gson:2.11.0'
+}
+// The capability table is written by `oxpecker probe` into environment/ at the repository root.
+processResources {
+    from("${rootDir}/environment/rhino-capabilities.json") { into 'dev/oxpecker/il' }
+}

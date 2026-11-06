@@ -63,6 +63,7 @@ final class ModeRunner {
             o.newProbes = d.fresh;
             o.newProbeIds = d.newIds;
             o.requiredReached = d.requiredReached;
+            o.hitProbes = d.hits;
         }
         return o;
     }

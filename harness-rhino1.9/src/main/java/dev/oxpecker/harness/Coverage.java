@@ -58,11 +58,12 @@ final class Coverage {
         int fresh;
         Map<String, List<Integer>> newIds;          // only when requested
         Map<String, List<Integer>> requiredReached; // only when a required set was sent
+        Map<String, String> hits;                   // only when requested: every probe this run hit
     }
 
     /** Drains the agent and merges into {@code bucket}; returns probes newly covered overall. */
     synchronized int drain(String bucket) {
-        return drain(bucket, false, null).fresh;
+        return drain(bucket, false, null, false).fresh;
     }
 
     /**
@@ -70,12 +71,16 @@ final class Coverage {
      * {@code bucket} and the cumulative store, and reports the probes hit for the first time in
      * this JVM -- with {@code wantIds}, also which ones -- and, for {@code required}, the subset of
      * it this run reached. Shrinking a corpus entry needs the latter: on a re-run its probes are no
-     * longer new, so "new probes > 0" cannot be the property; "reaches P" can.
+     * longer new, so "new probes > 0" cannot be the property; "reaches P" can. With
+     * {@code wantHits}, also every probe the run hit, new or not, per class as a base64 bitmap
+     * (bit i of byte i/8, least significant first): what corpus minimisation chooses on.
      */
-    synchronized Drained drain(String bucket, boolean wantIds, Map<String, List<Integer>> required) {
+    synchronized Drained drain(String bucket, boolean wantIds, Map<String, List<Integer>> required,
+            boolean wantHits) {
         Drained d = new Drained();
         if (wantIds) d.newIds = new TreeMap<>();
         if (required != null) d.requiredReached = new TreeMap<>();
+        if (wantHits) d.hits = new TreeMap<>();
         if (agent == null) return d;
         byte[] data = ((org.jacoco.agent.rt.IAgent) agent).getExecutionData(true);
         ExecutionDataStore store = buckets.computeIfAbsent(bucket, k -> new ExecutionDataStore());
@@ -104,6 +109,17 @@ final class Coverage {
                     for (int i : want) if (i < probes.length && probes[i]) got.add(i);
                     if (!got.isEmpty()) d.requiredReached.put(ed.getName(), got);
                 }
+            }
+            if (wantHits) {
+                byte[] bits = new byte[(probes.length + 7) / 8];
+                boolean any = false;
+                for (int i = 0; i < probes.length; i++) {
+                    if (probes[i]) {
+                        bits[i >> 3] |= (byte) (1 << (i & 7));
+                        any = true;
+                    }
+                }
+                if (any) d.hits.put(ed.getName(), java.util.Base64.getEncoder().encodeToString(bits));
             }
             cumulative.put(copy(ed));
             store.put(copy(ed));

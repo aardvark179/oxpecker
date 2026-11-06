@@ -12,8 +12,8 @@ came out, and treats any difference as a bug candidate. The
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", "lineColor": "#64748b", "edgeLabelBackground": "#ffffff", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8"}}}%%
 flowchart LR
-    subgraph py["Python"]
-        G["generate or mutate<br/>Hypothesis strategies over the IL"] --> L["lift<br/>IL to JavaScript"] --> C["harness client"]
+    subgraph py["Java orchestrator"]
+        G["generate or mutate<br/>jetCheck generators over the IL"] --> L["lift<br/>IL to JavaScript"] --> C["harness client"]
         V["compare<br/>equal · java-types · soft · hard"] --> K["corpus + findings<br/>new coverage kept, bugs shrunk"]
         K -. next round .-> G
     end
@@ -35,14 +35,22 @@ flowchart LR
 
 ## Install
 
-JDK 21 and Python 3.13.
+JDK 21.
 
 ```bash
 (cd harness-rhino2.0 && ./gradlew fatJar)          # Rhino 2.0 harness: needs ../rhino published to mavenLocal
 (cd harness-rhino1.9 && ./gradlew fatJar)          # Rhino 1.9 harness: bundles Rhino 1.9.2 from Maven Central
-python3.13 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-source .venv/bin/activate
+./gradlew :oxpecker-fuzz:fatJar                    # the orchestrator; bin/oxpecker runs it
+export PATH="$PWD/bin:$PATH"
 ```
+
+The orchestrator (generation, mutation, the loop, comparison) is the Java build at the root:
+`oxpecker-core/` (the IL, generators and mutators as [jetCheck](https://github.com/JetBrains/jetCheck)
+generators, the lifter, the analysis) and `oxpecker-fuzz/` (harness client, comparison, corpus,
+shrinkers, the CLI). Rhino never shares its classpath: each mode runs in its own harness process.
+oxpecker was first written in Python on Hypothesis; that implementation is in the git history
+(removed after the port). The two generate different programs from the same seed, and corpora from
+before the port do not resume.
 
 There is one harness project per Rhino line, `harness-rhino1.9/` and `harness-rhino2.0/`, each
 with its launcher `bin/harness-<name>`; their Rhino version is `rhinoVersion` in the project's
@@ -124,7 +132,7 @@ This is the loop in the diagram. It keeps a corpus of programs that each reached
 nothing before them had (JaCoCo probes over Rhino's classes), extends a corpus entry by a few
 mutation steps or draws a fresh program, runs it, and keeps it if it covered something new. A hard
 verdict with a signature no regression already has is shrunk, first at the IL level by
-Hypothesis, then statement by statement on the source, and written to `tests/findings/` as a
+jetCheck, then statement by statement on the source, and written to `tests/findings/` as a
 small reproducer. The corpus and coverage persist in `-o`, so a second run continues.
 
 An hour runs about seven thousand programs and has so far turned up one new Rhino bug per
@@ -134,7 +142,8 @@ campaign; the numbers are in
 ## The IL underneath
 
 Programs are not built as text. Generators and mutators are
-[Hypothesis](https://hypothesis.readthedocs.io/) strategies over a small typed intermediate
+[jetCheck](https://github.com/JetBrains/jetCheck) generators (`Gen`s over the `Draw` layer in
+`oxpecker-core/src/main/java/dev/oxpecker/gen/`) over a small typed intermediate
 language in the style of [Fuzzilli](https://github.com/googleprojectzero/fuzzilli)'s FuzzIL;
 a lifter turns it into JavaScript at the end. The `.il` file next to each case shows it:
 
@@ -149,10 +158,12 @@ EndForEachLoop()
 ```
 
 Because mutation happens on the generator's choices rather than on JavaScript text, every
-mutant is a valid program, and Hypothesis's shrinker works on findings for free. A program's
-whole history is a choice sequence, which is what the corpus stores.
+mutant is a valid program, and jetCheck's shrinker works on findings for free: the engine
+force-feeds a finding's recorded choices to jetCheck as its starting example and shrinks from
+there, within a run budget. A program's whole history is a choice sequence, which is what the
+corpus stores.
 
-To play with the pieces from a Python shell (generate, print the IL, lift, analyse, mutate, run in
+To play with the pieces from `jshell` (generate, print the IL, lift, analyse, mutate, run in
 Rhino), follow [`docs/repl-tutorial.md`](docs/repl-tutorial.md). `oxpecker gen --evolve 4` writes
 cases that are the end of a four-step mutation lineage; `oxpecker list` prints the generators.
 
@@ -179,6 +190,6 @@ release.
 ## Tests
 
 ```bash
-pytest                        # about three minutes; needs the harness jar
-pytest tests/il               # the generation layer alone, mostly without a JVM
+./gradlew test                                     # everything that needs no harness
+OXPECKER_HARNESS=rhino1.9 ./gradlew test -Pslow    # also the tests that run programs through Rhino
 ```

@@ -31,20 +31,13 @@ jobs:
         # gradle.properties pins org.gradle.java.home to a local path; the command line wins.
         run: ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" fatJar
 
-      - name: Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-
-      - name: Install oxpecker
-        run: pip install -e '.[dev]'
-
-      - name: Run the tests
+      - name: Run the tests (fast, then the ones that run programs through Rhino)
         env:
           OXPECKER_JAVA: ${{ env.JAVA_HOME }}/bin/java
           OXPECKER_HARNESS: rhino1.9
-        run: pytest -q
+        run: |
+          ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" test
+          ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" test -Pslow
 
       - name: Keep the harness jar
         if: success()

@@ -1,0 +1,8441 @@
+{
+ "ops": {
+  "LoadInteger": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadBigInt": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadFloat": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadString": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadBoolean": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadUndefined": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadNull": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadThis": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadArguments": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 3,
+   "opened": 0
+  },
+  "LoadNewTarget": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 3,
+   "opened": 0
+  },
+  "LoadRegExp": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "LoadBuiltin": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "CreateNamedVariable": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "Declare": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteral": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 32
+  },
+  "ObjectLiteralAddProperty": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 32,
+   "opened": 0
+  },
+  "ObjectLiteralAddElement": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 32,
+   "opened": 0
+  },
+  "ObjectLiteralAddComputedProperty": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 32,
+   "opened": 0
+  },
+  "ObjectLiteralCopyProperties": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 32,
+   "opened": 0
+  },
+  "ObjectLiteralSetPrototype": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 64,
+   "required": 32,
+   "opened": 0
+  },
+  "BeginObjectLiteralMethod": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 5,
+   "required": 32,
+   "opened": 0
+  },
+  "EndObjectLiteralMethod": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteralComputedMethod": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 32,
+   "opened": 0
+  },
+  "EndObjectLiteralComputedMethod": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteralGetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 5,
+   "required": 32,
+   "opened": 11
+  },
+  "EndObjectLiteralGetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteralComputedGetter": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 32,
+   "opened": 11
+  },
+  "EndObjectLiteralComputedGetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteralSetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 2,
+   "firstVariadic": -1,
+   "attrs": 5,
+   "required": 32,
+   "opened": 11
+  },
+  "EndObjectLiteralSetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginObjectLiteralComputedSetter": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 2,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 32,
+   "opened": 11
+  },
+  "EndObjectLiteralComputedSetter": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "EndObjectLiteral": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 32,
+   "opened": 0
+  },
+  "CreateArray": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 0,
+   "attrs": 32,
+   "required": 1,
+   "opened": 0
+  },
+  "CreateIntArray": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "CreateFloatArray": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "CreateArrayWithSpread": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 0,
+   "attrs": 33,
+   "required": 1,
+   "opened": 0
+  },
+  "CreateTemplateString": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 0,
+   "attrs": 33,
+   "required": 1,
+   "opened": 0
+  },
+  "GetProperty": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "SetProperty": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "UpdateProperty": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "DeleteProperty": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "ConfigureProperty": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "GetElement": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "SetElement": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "UpdateElement": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "DeleteElement": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "ConfigureElement": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "GetComputedProperty": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "SetComputedProperty": {
+   "inputs": 3,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "UpdateComputedProperty": {
+   "inputs": 3,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "DeleteComputedProperty": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "ConfigureComputedProperty": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "TypeOf": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "Void": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "TestInstanceOf": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "TestIn": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginPlainFunction": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 3
+  },
+  "EndPlainFunction": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginArrowFunction": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 3
+  },
+  "EndArrowFunction": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginGeneratorFunction": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 7
+  },
+  "EndGeneratorFunction": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "Directive": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "Return": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 3,
+   "opened": 0
+  },
+  "Yield": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 5,
+   "opened": 0
+  },
+  "YieldEach": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 5,
+   "opened": 0
+  },
+  "CallFunction": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 34,
+   "required": 1,
+   "opened": 0
+  },
+  "CallFunctionWithSpread": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 35,
+   "required": 1,
+   "opened": 0
+  },
+  "Construct": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 34,
+   "required": 1,
+   "opened": 0
+  },
+  "ConstructWithSpread": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 35,
+   "required": 1,
+   "opened": 0
+  },
+  "CallMethod": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 35,
+   "required": 1,
+   "opened": 0
+  },
+  "CallMethodWithSpread": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 1,
+   "attrs": 35,
+   "required": 1,
+   "opened": 0
+  },
+  "CallComputedMethod": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 2,
+   "attrs": 34,
+   "required": 1,
+   "opened": 0
+  },
+  "CallComputedMethodWithSpread": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 2,
+   "attrs": 35,
+   "required": 1,
+   "opened": 0
+  },
+  "UnaryOperation": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "BinaryOperation": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "TernaryOperation": {
+   "inputs": 3,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "Reassign": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  },
+  "Update": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "Compare": {
+   "inputs": 2,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "CallSuperMethod": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": 0,
+   "attrs": 35,
+   "required": 9,
+   "opened": 0
+  },
+  "GetSuperProperty": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 9,
+   "opened": 0
+  },
+  "SetSuperProperty": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 9,
+   "opened": 0
+  },
+  "SetComputedSuperProperty": {
+   "inputs": 2,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 9,
+   "opened": 0
+  },
+  "GetComputedSuperProperty": {
+   "inputs": 1,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 9,
+   "opened": 0
+  },
+  "UpdateSuperProperty": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 9,
+   "opened": 0
+  },
+  "BeginIf": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 133,
+   "required": 1,
+   "opened": 1
+  },
+  "BeginElse": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 1
+  },
+  "EndIf": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginWhileLoopHeader": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 1
+  },
+  "BeginWhileLoopBody": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 17
+  },
+  "EndWhileLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginDoWhileLoopBody": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 17
+  },
+  "BeginDoWhileLoopHeader": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 1
+  },
+  "EndDoWhileLoop": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginForLoopInitializer": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 1
+  },
+  "BeginForLoopCondition": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 1
+  },
+  "BeginForLoopAfterthought": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 1
+  },
+  "BeginForLoopBody": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 17
+  },
+  "EndForLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginForEachLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 16
+  },
+  "EndForEachLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginRepeatLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 17
+  },
+  "EndRepeatLoop": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "LoopBreak": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 17,
+   "opened": 0
+  },
+  "LoopContinue": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 17,
+   "opened": 0
+  },
+  "BeginTry": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginCatch": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginFinally": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 140,
+   "required": 1,
+   "opened": 0
+  },
+  "EndTryCatchFinally": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "ThrowException": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginBlockStatement": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 1
+  },
+  "EndBlockStatement": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BlockBreak": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginSwitch": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 1,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 64
+  },
+  "BeginSwitchCase": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 260,
+   "required": 64,
+   "opened": 129
+  },
+  "BeginSwitchDefaultCase": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 324,
+   "required": 64,
+   "opened": 129
+  },
+  "EndSwitchCase": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "EndSwitch": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 64,
+   "opened": 0
+  },
+  "SwitchBreak": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 16,
+   "required": 129,
+   "opened": 0
+  },
+  "BeginWith": {
+   "inputs": 1,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 132,
+   "required": 1,
+   "opened": 257
+  },
+  "EndWith": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "BeginCodeString": {
+   "inputs": 0,
+   "outputs": 1,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 4,
+   "required": 1,
+   "opened": 1
+  },
+  "EndCodeString": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 8,
+   "required": 1,
+   "opened": 0
+  },
+  "Destruct": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "DestructAndReassign": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 1,
+   "required": 1,
+   "opened": 0
+  },
+  "Probe": {
+   "inputs": 0,
+   "outputs": 0,
+   "inner": 0,
+   "firstVariadic": -1,
+   "attrs": 0,
+   "required": 1,
+   "opened": 0
+  }
+ },
+ "builtins": {
+  "ARRAY": {
+   "name": "Array",
+   "type": "function(ArrayCtor)",
+   "constructs": "object(Array)",
+   "calls": "object(Array {length})",
+   "signature": null,
+   "group": "Array"
+  },
+  "ARRAY_BUFFER": {
+   "name": "ArrayBuffer",
+   "type": "function(ArrayBufferCtor)",
+   "constructs": "object(ArrayBuffer)",
+   "calls": null,
+   "signature": null,
+   "group": "ArrayBuffer"
+  },
+  "BIG_INT": {
+   "name": "BigInt",
+   "type": "function(BigIntCtor)",
+   "constructs": null,
+   "calls": "bigint",
+   "signature": null,
+   "group": "BigInt"
+  },
+  "BIG_INT64_ARRAY": {
+   "name": "BigInt64Array",
+   "type": "function(BigInt64ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "BIG_UINT64_ARRAY": {
+   "name": "BigUint64Array",
+   "type": "function(BigUint64ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "BOOLEAN": {
+   "name": "Boolean",
+   "type": "function(BooleanCtor)",
+   "constructs": "object(Boolean)",
+   "calls": "boolean",
+   "signature": null,
+   "group": "Boolean"
+  },
+  "CALL": {
+   "name": "Call",
+   "type": "function(CallCtor)",
+   "constructs": "object(Call)",
+   "calls": null,
+   "signature": null,
+   "group": "Call"
+  },
+  "DATA_VIEW": {
+   "name": "DataView",
+   "type": "function(DataViewCtor)",
+   "constructs": "object(DataView)",
+   "calls": null,
+   "signature": null,
+   "group": "DataView"
+  },
+  "DATE": {
+   "name": "Date",
+   "type": "function(DateCtor)",
+   "constructs": "object(Date)",
+   "calls": "string",
+   "signature": null,
+   "group": "Date"
+  },
+  "ERROR": {
+   "name": "Error",
+   "type": "function(ErrorCtor)",
+   "constructs": "object(Error)",
+   "calls": "object(Error)",
+   "signature": null,
+   "group": "Error"
+  },
+  "EVAL_ERROR": {
+   "name": "EvalError",
+   "type": "function(EvalErrorCtor)",
+   "constructs": "object(EvalError)",
+   "calls": "object(EvalError)",
+   "signature": null,
+   "group": "EvalError"
+  },
+  "FLOAT32_ARRAY": {
+   "name": "Float32Array",
+   "type": "function(Float32ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "FLOAT64_ARRAY": {
+   "name": "Float64Array",
+   "type": "function(Float64ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "INFINITY": {
+   "name": "Infinity",
+   "type": "float",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": null
+  },
+  "INT16_ARRAY": {
+   "name": "Int16Array",
+   "type": "function(Int16ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "INT32_ARRAY": {
+   "name": "Int32Array",
+   "type": "function(Int32ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "INT8_ARRAY": {
+   "name": "Int8Array",
+   "type": "function(Int8ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "JSON": {
+   "name": "JSON",
+   "type": "object(JSON)",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "JSON"
+  },
+  "MAP": {
+   "name": "Map",
+   "type": "function(MapCtor)",
+   "constructs": "object(Map)",
+   "calls": null,
+   "signature": null,
+   "group": "Map"
+  },
+  "MATH": {
+   "name": "Math",
+   "type": "object(Math)",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "Math"
+  },
+  "NAN": {
+   "name": "NaN",
+   "type": "float",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": null
+  },
+  "NUMBER": {
+   "name": "Number",
+   "type": "function(NumberCtor)",
+   "constructs": "object(Number)",
+   "calls": "integer|float",
+   "signature": null,
+   "group": "Number"
+  },
+  "OBJECT": {
+   "name": "Object",
+   "type": "function(ObjectCtor)",
+   "constructs": "object(Object)",
+   "calls": "object",
+   "signature": null,
+   "group": "Object"
+  },
+  "PROMISE": {
+   "name": "Promise",
+   "type": "function(PromiseCtor)",
+   "constructs": "object(Promise)",
+   "calls": null,
+   "signature": null,
+   "group": "Promise"
+  },
+  "PROXY": {
+   "name": "Proxy",
+   "type": "function(ProxyCtor)",
+   "constructs": "object(Proxy)",
+   "calls": null,
+   "signature": null,
+   "group": "Proxy"
+  },
+  "RANGE_ERROR": {
+   "name": "RangeError",
+   "type": "function(RangeErrorCtor)",
+   "constructs": "object(RangeError)",
+   "calls": "object(RangeError)",
+   "signature": null,
+   "group": "RangeError"
+  },
+  "REFERENCE_ERROR": {
+   "name": "ReferenceError",
+   "type": "function(ReferenceErrorCtor)",
+   "constructs": "object(ReferenceError)",
+   "calls": "object(ReferenceError)",
+   "signature": null,
+   "group": "ReferenceError"
+  },
+  "REFLECT": {
+   "name": "Reflect",
+   "type": "object(Reflect)",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "Reflect"
+  },
+  "REG_EXP": {
+   "name": "RegExp",
+   "type": "function(RegExpCtor)",
+   "constructs": "object(RegExp)",
+   "calls": "object(RegExp)",
+   "signature": null,
+   "group": "RegExp"
+  },
+  "SET": {
+   "name": "Set",
+   "type": "function(SetCtor)",
+   "constructs": "object(Set)",
+   "calls": null,
+   "signature": null,
+   "group": "Set"
+  },
+  "STRING": {
+   "name": "String",
+   "type": "function(StringCtor)",
+   "constructs": "object(String)",
+   "calls": "string",
+   "signature": null,
+   "group": "String"
+  },
+  "SYMBOL": {
+   "name": "Symbol",
+   "type": "function(SymbolCtor)",
+   "constructs": null,
+   "calls": "symbol",
+   "signature": null,
+   "group": "Symbol"
+  },
+  "SYNTAX_ERROR": {
+   "name": "SyntaxError",
+   "type": "function(SyntaxErrorCtor)",
+   "constructs": "object(SyntaxError)",
+   "calls": "object(SyntaxError)",
+   "signature": null,
+   "group": "SyntaxError"
+  },
+  "TYPE_ERROR": {
+   "name": "TypeError",
+   "type": "function(TypeErrorCtor)",
+   "constructs": "object(TypeError)",
+   "calls": "object(TypeError)",
+   "signature": null,
+   "group": "TypeError"
+  },
+  "URI_ERROR": {
+   "name": "URIError",
+   "type": "function(URIErrorCtor)",
+   "constructs": "object(URIError)",
+   "calls": "object(URIError)",
+   "signature": null,
+   "group": "URIError"
+  },
+  "UINT16_ARRAY": {
+   "name": "Uint16Array",
+   "type": "function(Uint16ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "UINT32_ARRAY": {
+   "name": "Uint32Array",
+   "type": "function(Uint32ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "UINT8_ARRAY": {
+   "name": "Uint8Array",
+   "type": "function(Uint8ArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "UINT8_CLAMPED_ARRAY": {
+   "name": "Uint8ClampedArray",
+   "type": "function(Uint8ClampedArrayCtor)",
+   "constructs": "object(TypedArray)",
+   "calls": null,
+   "signature": null,
+   "group": "TypedArray"
+  },
+  "WEAK_MAP": {
+   "name": "WeakMap",
+   "type": "function(WeakMapCtor)",
+   "constructs": "object(WeakMap)",
+   "calls": null,
+   "signature": null,
+   "group": "WeakMap"
+  },
+  "WEAK_SET": {
+   "name": "WeakSet",
+   "type": "function(WeakSetCtor)",
+   "constructs": "object(WeakSet)",
+   "calls": null,
+   "signature": null,
+   "group": "WeakSet"
+  },
+  "WITH": {
+   "name": "With",
+   "type": "function(WithCtor)",
+   "constructs": "object(With)",
+   "calls": null,
+   "signature": null,
+   "group": "With"
+  },
+  "GENERATOR_FUNCTION": {
+   "name": "__GeneratorFunction",
+   "type": "function(__GeneratorFunctionCtor)",
+   "constructs": "object(__GeneratorFunction)",
+   "calls": null,
+   "signature": null,
+   "group": "__GeneratorFunction"
+  },
+  "DECODE_URI": {
+   "name": "decodeURI",
+   "type": "function(decodeURICtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "DECODE_URI_COMPONENT": {
+   "name": "decodeURIComponent",
+   "type": "function(decodeURIComponentCtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "ENCODE_URI": {
+   "name": "encodeURI",
+   "type": "function(encodeURICtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "ENCODE_URI_COMPONENT": {
+   "name": "encodeURIComponent",
+   "type": "function(encodeURIComponentCtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "ESCAPE": {
+   "name": "escape",
+   "type": "function(escapeCtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "GLOBAL": {
+   "name": "global",
+   "type": "object(global)",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "global"
+  },
+  "IS_FINITE": {
+   "name": "isFinite",
+   "type": "function(isFiniteCtor)",
+   "constructs": null,
+   "calls": "boolean",
+   "signature": null,
+   "group": null
+  },
+  "IS_NAN": {
+   "name": "isNaN",
+   "type": "function(isNaNCtor)",
+   "constructs": null,
+   "calls": "boolean",
+   "signature": null,
+   "group": null
+  },
+  "IS_XML_NAME": {
+   "name": "isXMLName",
+   "type": "function(isXMLNameCtor)",
+   "constructs": null,
+   "calls": "any",
+   "signature": null,
+   "group": null
+  },
+  "PARSE_FLOAT": {
+   "name": "parseFloat",
+   "type": "function(parseFloatCtor)",
+   "constructs": null,
+   "calls": "integer|float",
+   "signature": null,
+   "group": null
+  },
+  "PARSE_INT": {
+   "name": "parseInt",
+   "type": "function(parseIntCtor)",
+   "constructs": null,
+   "calls": "integer|float",
+   "signature": null,
+   "group": null
+  },
+  "UNDEFINED": {
+   "name": "undefined",
+   "type": "undefined",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": null
+  },
+  "UNESCAPE": {
+   "name": "unescape",
+   "type": "function(unescapeCtor)",
+   "constructs": null,
+   "calls": "string",
+   "signature": null,
+   "group": null
+  },
+  "J": {
+   "name": "J",
+   "type": "object(J {PI_ISH,field,staticCounter})",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "J"
+  },
+  "PAUSE": {
+   "name": "__pause",
+   "type": "function",
+   "constructs": null,
+   "calls": "any",
+   "signature": [
+    "any:plain",
+    "any"
+   ],
+   "group": null
+  },
+  "CONTINUATION": {
+   "name": "Continuation",
+   "type": "function(ContinuationCtor)",
+   "constructs": "function(Continuation)",
+   "calls": null,
+   "signature": null,
+   "group": "Continuation"
+  },
+  "EVAL": {
+   "name": "eval",
+   "type": "function",
+   "constructs": null,
+   "calls": "any",
+   "signature": [
+    "string:plain",
+    "any"
+   ],
+   "group": null
+  },
+  "FUNCTION": {
+   "name": "Function",
+   "type": "function",
+   "constructs": "function",
+   "calls": "function",
+   "signature": null,
+   "group": "Function"
+  },
+  "GLOBAL_THIS": {
+   "name": "globalThis",
+   "type": "object",
+   "constructs": null,
+   "calls": null,
+   "signature": null,
+   "group": "GlobalThis"
+  }
+ },
+ "keys": {
+  "AT": [
+   "at",
+   "ordinary"
+  ],
+  "CONCAT": [
+   "concat",
+   "ordinary"
+  ],
+  "COPY_WITHIN": [
+   "copyWithin",
+   "ordinary"
+  ],
+  "ENTRIES": [
+   "entries",
+   "ordinary"
+  ],
+  "EVERY": [
+   "every",
+   "ordinary"
+  ],
+  "FILL": [
+   "fill",
+   "ordinary"
+  ],
+  "FILTER": [
+   "filter",
+   "ordinary"
+  ],
+  "FIND": [
+   "find",
+   "ordinary"
+  ],
+  "FIND_INDEX": [
+   "findIndex",
+   "ordinary"
+  ],
+  "FIND_LAST": [
+   "findLast",
+   "ordinary"
+  ],
+  "FIND_LAST_INDEX": [
+   "findLastIndex",
+   "ordinary"
+  ],
+  "FLAT": [
+   "flat",
+   "ordinary"
+  ],
+  "FLAT_MAP": [
+   "flatMap",
+   "ordinary"
+  ],
+  "FOR_EACH": [
+   "forEach",
+   "ordinary"
+  ],
+  "INCLUDES": [
+   "includes",
+   "ordinary"
+  ],
+  "INDEX_OF": [
+   "indexOf",
+   "ordinary"
+  ],
+  "JOIN": [
+   "join",
+   "ordinary"
+  ],
+  "KEYS": [
+   "keys",
+   "ordinary"
+  ],
+  "LAST_INDEX_OF": [
+   "lastIndexOf",
+   "ordinary"
+  ],
+  "LENGTH": [
+   "length",
+   "length"
+  ],
+  "MAP": [
+   "Map",
+   "ordinary"
+  ],
+  "POP": [
+   "pop",
+   "ordinary"
+  ],
+  "PUSH": [
+   "push",
+   "ordinary"
+  ],
+  "REDUCE": [
+   "reduce",
+   "ordinary"
+  ],
+  "REDUCE_RIGHT": [
+   "reduceRight",
+   "ordinary"
+  ],
+  "REVERSE": [
+   "reverse",
+   "ordinary"
+  ],
+  "SHIFT": [
+   "shift",
+   "ordinary"
+  ],
+  "SLICE": [
+   "slice",
+   "ordinary"
+  ],
+  "SOME": [
+   "some",
+   "ordinary"
+  ],
+  "SORT": [
+   "sort",
+   "ordinary"
+  ],
+  "SPLICE": [
+   "splice",
+   "ordinary"
+  ],
+  "TO_LOCALE_STRING": [
+   "toLocaleString",
+   "ordinary"
+  ],
+  "TO_REVERSED": [
+   "toReversed",
+   "ordinary"
+  ],
+  "TO_SORTED": [
+   "toSorted",
+   "ordinary"
+  ],
+  "TO_SOURCE": [
+   "toSource",
+   "ordinary"
+  ],
+  "TO_SPLICED": [
+   "toSpliced",
+   "ordinary"
+  ],
+  "TO_STRING": [
+   "toString",
+   "well-known"
+  ],
+  "UNSHIFT": [
+   "unshift",
+   "ordinary"
+  ],
+  "VALUES": [
+   "values",
+   "ordinary"
+  ],
+  "WITH": [
+   "With",
+   "ordinary"
+  ],
+  "TRANSFER": [
+   "transfer",
+   "ordinary"
+  ],
+  "TRANSFER_TO_FIXED_LENGTH": [
+   "transferToFixedLength",
+   "ordinary"
+  ],
+  "VALUE_OF": [
+   "valueOf",
+   "well-known"
+  ],
+  "BYTES_PER_ELEMENT": [
+   "BYTES_PER_ELEMENT",
+   "ordinary"
+  ],
+  "GET_FLOAT32": [
+   "getFloat32",
+   "ordinary"
+  ],
+  "GET_FLOAT64": [
+   "getFloat64",
+   "ordinary"
+  ],
+  "GET_INT16": [
+   "getInt16",
+   "ordinary"
+  ],
+  "GET_INT32": [
+   "getInt32",
+   "ordinary"
+  ],
+  "GET_INT8": [
+   "getInt8",
+   "ordinary"
+  ],
+  "GET_UINT16": [
+   "getUint16",
+   "ordinary"
+  ],
+  "GET_UINT32": [
+   "getUint32",
+   "ordinary"
+  ],
+  "GET_UINT8": [
+   "getUint8",
+   "ordinary"
+  ],
+  "SET_FLOAT32": [
+   "setFloat32",
+   "ordinary"
+  ],
+  "SET_FLOAT64": [
+   "setFloat64",
+   "ordinary"
+  ],
+  "SET_INT16": [
+   "setInt16",
+   "ordinary"
+  ],
+  "SET_INT32": [
+   "setInt32",
+   "ordinary"
+  ],
+  "SET_INT8": [
+   "setInt8",
+   "ordinary"
+  ],
+  "SET_UINT16": [
+   "setUint16",
+   "ordinary"
+  ],
+  "SET_UINT32": [
+   "setUint32",
+   "ordinary"
+  ],
+  "SET_UINT8": [
+   "setUint8",
+   "ordinary"
+  ],
+  "GET_DATE": [
+   "getDate",
+   "ordinary"
+  ],
+  "GET_DAY": [
+   "getDay",
+   "ordinary"
+  ],
+  "GET_FULL_YEAR": [
+   "getFullYear",
+   "ordinary"
+  ],
+  "GET_HOURS": [
+   "getHours",
+   "ordinary"
+  ],
+  "GET_MILLISECONDS": [
+   "getMilliseconds",
+   "ordinary"
+  ],
+  "GET_MINUTES": [
+   "getMinutes",
+   "ordinary"
+  ],
+  "GET_MONTH": [
+   "getMonth",
+   "ordinary"
+  ],
+  "GET_SECONDS": [
+   "getSeconds",
+   "ordinary"
+  ],
+  "GET_TIME": [
+   "getTime",
+   "ordinary"
+  ],
+  "GET_TIMEZONE_OFFSET": [
+   "getTimezoneOffset",
+   "ordinary"
+  ],
+  "GET_UTC_DATE": [
+   "getUTCDate",
+   "ordinary"
+  ],
+  "GET_UTC_DAY": [
+   "getUTCDay",
+   "ordinary"
+  ],
+  "GET_UTC_FULL_YEAR": [
+   "getUTCFullYear",
+   "ordinary"
+  ],
+  "GET_UTC_HOURS": [
+   "getUTCHours",
+   "ordinary"
+  ],
+  "GET_UTC_MILLISECONDS": [
+   "getUTCMilliseconds",
+   "ordinary"
+  ],
+  "GET_UTC_MINUTES": [
+   "getUTCMinutes",
+   "ordinary"
+  ],
+  "GET_UTC_MONTH": [
+   "getUTCMonth",
+   "ordinary"
+  ],
+  "GET_UTC_SECONDS": [
+   "getUTCSeconds",
+   "ordinary"
+  ],
+  "GET_YEAR": [
+   "getYear",
+   "ordinary"
+  ],
+  "SET_DATE": [
+   "setDate",
+   "ordinary"
+  ],
+  "SET_FULL_YEAR": [
+   "setFullYear",
+   "ordinary"
+  ],
+  "SET_HOURS": [
+   "setHours",
+   "ordinary"
+  ],
+  "SET_MILLISECONDS": [
+   "setMilliseconds",
+   "ordinary"
+  ],
+  "SET_MINUTES": [
+   "setMinutes",
+   "ordinary"
+  ],
+  "SET_MONTH": [
+   "setMonth",
+   "ordinary"
+  ],
+  "SET_SECONDS": [
+   "setSeconds",
+   "ordinary"
+  ],
+  "SET_TIME": [
+   "setTime",
+   "ordinary"
+  ],
+  "SET_UTC_DATE": [
+   "setUTCDate",
+   "ordinary"
+  ],
+  "SET_UTC_FULL_YEAR": [
+   "setUTCFullYear",
+   "ordinary"
+  ],
+  "SET_UTC_HOURS": [
+   "setUTCHours",
+   "ordinary"
+  ],
+  "SET_UTC_MILLISECONDS": [
+   "setUTCMilliseconds",
+   "ordinary"
+  ],
+  "SET_UTC_MINUTES": [
+   "setUTCMinutes",
+   "ordinary"
+  ],
+  "SET_UTC_MONTH": [
+   "setUTCMonth",
+   "ordinary"
+  ],
+  "SET_UTC_SECONDS": [
+   "setUTCSeconds",
+   "ordinary"
+  ],
+  "SET_YEAR": [
+   "setYear",
+   "ordinary"
+  ],
+  "TO_DATE_STRING": [
+   "toDateString",
+   "ordinary"
+  ],
+  "TO_ISO_STRING": [
+   "toISOString",
+   "ordinary"
+  ],
+  "TO_JSON": [
+   "toJSON",
+   "well-known"
+  ],
+  "TO_LOCALE_DATE_STRING": [
+   "toLocaleDateString",
+   "ordinary"
+  ],
+  "TO_LOCALE_TIME_STRING": [
+   "toLocaleTimeString",
+   "ordinary"
+  ],
+  "TO_TIME_STRING": [
+   "toTimeString",
+   "ordinary"
+  ],
+  "TO_UTC_STRING": [
+   "toUTCString",
+   "ordinary"
+  ],
+  "FILE_NAME": [
+   "fileName",
+   "ordinary"
+  ],
+  "LINE_NUMBER": [
+   "lineNumber",
+   "ordinary"
+  ],
+  "MESSAGE": [
+   "message",
+   "well-known"
+  ],
+  "NAME": [
+   "name",
+   "well-known"
+  ],
+  "CLEAR": [
+   "clear",
+   "ordinary"
+  ],
+  "DELETE": [
+   "delete",
+   "ordinary"
+  ],
+  "GET": [
+   "get",
+   "well-known"
+  ],
+  "HAS": [
+   "has",
+   "well-known"
+  ],
+  "SET": [
+   "Set",
+   "ordinary"
+  ],
+  "TO_EXPONENTIAL": [
+   "toExponential",
+   "ordinary"
+  ],
+  "TO_FIXED": [
+   "toFixed",
+   "ordinary"
+  ],
+  "TO_PRECISION": [
+   "toPrecision",
+   "ordinary"
+  ],
+  "DEFINE_GETTER": [
+   "__defineGetter__",
+   "ordinary"
+  ],
+  "DEFINE_SETTER": [
+   "__defineSetter__",
+   "ordinary"
+  ],
+  "LOOKUP_GETTER": [
+   "__lookupGetter__",
+   "ordinary"
+  ],
+  "LOOKUP_SETTER": [
+   "__lookupSetter__",
+   "ordinary"
+  ],
+  "PROTO": [
+   "__proto__",
+   "proto"
+  ],
+  "HAS_OWN_PROPERTY": [
+   "hasOwnProperty",
+   "well-known"
+  ],
+  "IS_PROTOTYPE_OF": [
+   "isPrototypeOf",
+   "ordinary"
+  ],
+  "PROPERTY_IS_ENUMERABLE": [
+   "propertyIsEnumerable",
+   "ordinary"
+  ],
+  "CATCH": [
+   "catch",
+   "ordinary"
+  ],
+  "FINALLY": [
+   "finally",
+   "ordinary"
+  ],
+  "THEN": [
+   "then",
+   "well-known"
+  ],
+  "COMPILE": [
+   "compile",
+   "ordinary"
+  ],
+  "DOT_ALL": [
+   "dotAll",
+   "ordinary"
+  ],
+  "EXEC": [
+   "exec",
+   "ordinary"
+  ],
+  "FLAGS": [
+   "flags",
+   "ordinary"
+  ],
+  "GLOBAL": [
+   "global",
+   "ordinary"
+  ],
+  "IGNORE_CASE": [
+   "ignoreCase",
+   "ordinary"
+  ],
+  "LAST_INDEX": [
+   "lastIndex",
+   "ordinary"
+  ],
+  "MULTILINE": [
+   "multiline",
+   "ordinary"
+  ],
+  "PREFIX": [
+   "prefix",
+   "ordinary"
+  ],
+  "SOURCE": [
+   "source",
+   "ordinary"
+  ],
+  "STICKY": [
+   "sticky",
+   "ordinary"
+  ],
+  "TEST": [
+   "test",
+   "ordinary"
+  ],
+  "UNICODE": [
+   "unicode",
+   "ordinary"
+  ],
+  "ADD": [
+   "add",
+   "ordinary"
+  ],
+  "DIFFERENCE": [
+   "difference",
+   "ordinary"
+  ],
+  "INTERSECTION": [
+   "intersection",
+   "ordinary"
+  ],
+  "IS_DISJOINT_FROM": [
+   "isDisjointFrom",
+   "ordinary"
+  ],
+  "IS_SUBSET_OF": [
+   "isSubsetOf",
+   "ordinary"
+  ],
+  "IS_SUPERSET_OF": [
+   "isSupersetOf",
+   "ordinary"
+  ],
+  "SYMMETRIC_DIFFERENCE": [
+   "symmetricDifference",
+   "ordinary"
+  ],
+  "UNION": [
+   "union",
+   "ordinary"
+  ],
+  "ANCHOR": [
+   "anchor",
+   "ordinary"
+  ],
+  "BIG": [
+   "big",
+   "ordinary"
+  ],
+  "BLINK": [
+   "blink",
+   "ordinary"
+  ],
+  "BOLD": [
+   "bold",
+   "ordinary"
+  ],
+  "CHAR_AT": [
+   "charAt",
+   "ordinary"
+  ],
+  "CHAR_CODE_AT": [
+   "charCodeAt",
+   "ordinary"
+  ],
+  "CODE_POINT_AT": [
+   "codePointAt",
+   "ordinary"
+  ],
+  "ENDS_WITH": [
+   "endsWith",
+   "ordinary"
+  ],
+  "EQUALS": [
+   "equals",
+   "ordinary"
+  ],
+  "EQUALS_IGNORE_CASE": [
+   "equalsIgnoreCase",
+   "ordinary"
+  ],
+  "FIXED": [
+   "fixed",
+   "ordinary"
+  ],
+  "FONTCOLOR": [
+   "fontcolor",
+   "ordinary"
+  ],
+  "FONTSIZE": [
+   "fontsize",
+   "ordinary"
+  ],
+  "IS_WELL_FORMED": [
+   "isWellFormed",
+   "ordinary"
+  ],
+  "ITALICS": [
+   "italics",
+   "ordinary"
+  ],
+  "LINK": [
+   "link",
+   "ordinary"
+  ],
+  "LOCALE_COMPARE": [
+   "localeCompare",
+   "ordinary"
+  ],
+  "MATCH": [
+   "match",
+   "ordinary"
+  ],
+  "MATCH_ALL": [
+   "matchAll",
+   "ordinary"
+  ],
+  "NORMALIZE": [
+   "normalize",
+   "ordinary"
+  ],
+  "PAD_END": [
+   "padEnd",
+   "ordinary"
+  ],
+  "PAD_START": [
+   "padStart",
+   "ordinary"
+  ],
+  "REPEAT": [
+   "repeat",
+   "ordinary"
+  ],
+  "REPLACE": [
+   "replace",
+   "ordinary"
+  ],
+  "REPLACE_ALL": [
+   "replaceAll",
+   "ordinary"
+  ],
+  "SEARCH": [
+   "search",
+   "ordinary"
+  ],
+  "SMALL": [
+   "small",
+   "ordinary"
+  ],
+  "SPLIT": [
+   "split",
+   "ordinary"
+  ],
+  "STARTS_WITH": [
+   "startsWith",
+   "ordinary"
+  ],
+  "STRIKE": [
+   "strike",
+   "ordinary"
+  ],
+  "SUB": [
+   "sub",
+   "ordinary"
+  ],
+  "SUBSTR": [
+   "substr",
+   "ordinary"
+  ],
+  "SUBSTRING": [
+   "substring",
+   "ordinary"
+  ],
+  "SUP": [
+   "sup",
+   "ordinary"
+  ],
+  "TO_LOCALE_LOWER_CASE": [
+   "toLocaleLowerCase",
+   "ordinary"
+  ],
+  "TO_LOCALE_UPPER_CASE": [
+   "toLocaleUpperCase",
+   "ordinary"
+  ],
+  "TO_LOWER_CASE": [
+   "toLowerCase",
+   "ordinary"
+  ],
+  "TO_UPPER_CASE": [
+   "toUpperCase",
+   "ordinary"
+  ],
+  "TO_WELL_FORMED": [
+   "toWellFormed",
+   "ordinary"
+  ],
+  "TRIM": [
+   "trim",
+   "ordinary"
+  ],
+  "TRIM_END": [
+   "trimEnd",
+   "ordinary"
+  ],
+  "TRIM_LEFT": [
+   "trimLeft",
+   "ordinary"
+  ],
+  "TRIM_RIGHT": [
+   "trimRight",
+   "ordinary"
+  ],
+  "TRIM_START": [
+   "trimStart",
+   "ordinary"
+  ],
+  "SUBARRAY": [
+   "subarray",
+   "ordinary"
+  ],
+  "PROTOTYPE": [
+   "prototype",
+   "well-known"
+  ],
+  "ARITY": [
+   "arity",
+   "ordinary"
+  ],
+  "FROM": [
+   "from",
+   "ordinary"
+  ],
+  "IS_ARRAY": [
+   "isArray",
+   "ordinary"
+  ],
+  "OF": [
+   "of",
+   "ordinary"
+  ],
+  "IS_VIEW": [
+   "isView",
+   "ordinary"
+  ],
+  "AS_INT_N": [
+   "asIntN",
+   "ordinary"
+  ],
+  "AS_UINT_N": [
+   "asUintN",
+   "ordinary"
+  ],
+  "UTC": [
+   "UTC",
+   "ordinary"
+  ],
+  "NOW": [
+   "now",
+   "ordinary"
+  ],
+  "PARSE": [
+   "parse",
+   "ordinary"
+  ],
+  "CAPTURE_STACK_TRACE": [
+   "captureStackTrace",
+   "ordinary"
+  ],
+  "IS_ERROR": [
+   "isError",
+   "ordinary"
+  ],
+  "PREPARE_STACK_TRACE": [
+   "prepareStackTrace",
+   "ordinary"
+  ],
+  "STACK_TRACE_LIMIT": [
+   "stackTraceLimit",
+   "ordinary"
+  ],
+  "STRINGIFY": [
+   "stringify",
+   "ordinary"
+  ],
+  "GROUP_BY": [
+   "groupBy",
+   "ordinary"
+  ],
+  "E": [
+   "e",
+   "ordinary"
+  ],
+  "LN10": [
+   "LN10",
+   "ordinary"
+  ],
+  "LN2": [
+   "LN2",
+   "ordinary"
+  ],
+  "LOG10_E": [
+   "LOG10E",
+   "ordinary"
+  ],
+  "LOG2_E": [
+   "LOG2E",
+   "ordinary"
+  ],
+  "PI": [
+   "PI",
+   "ordinary"
+  ],
+  "SQRT1_2": [
+   "SQRT1_2",
+   "ordinary"
+  ],
+  "SQRT2": [
+   "SQRT2",
+   "ordinary"
+  ],
+  "ABS": [
+   "abs",
+   "ordinary"
+  ],
+  "ACOS": [
+   "acos",
+   "ordinary"
+  ],
+  "ACOSH": [
+   "acosh",
+   "ordinary"
+  ],
+  "ASIN": [
+   "asin",
+   "ordinary"
+  ],
+  "ASINH": [
+   "asinh",
+   "ordinary"
+  ],
+  "ATAN": [
+   "atan",
+   "ordinary"
+  ],
+  "ATAN2": [
+   "atan2",
+   "ordinary"
+  ],
+  "ATANH": [
+   "atanh",
+   "ordinary"
+  ],
+  "CBRT": [
+   "cbrt",
+   "ordinary"
+  ],
+  "CEIL": [
+   "ceil",
+   "ordinary"
+  ],
+  "CLZ32": [
+   "clz32",
+   "ordinary"
+  ],
+  "COS": [
+   "cos",
+   "ordinary"
+  ],
+  "COSH": [
+   "cosh",
+   "ordinary"
+  ],
+  "EXP": [
+   "exp",
+   "ordinary"
+  ],
+  "EXPM1": [
+   "expm1",
+   "ordinary"
+  ],
+  "F16ROUND": [
+   "f16round",
+   "ordinary"
+  ],
+  "FLOOR": [
+   "floor",
+   "ordinary"
+  ],
+  "FROUND": [
+   "fround",
+   "ordinary"
+  ],
+  "HYPOT": [
+   "hypot",
+   "ordinary"
+  ],
+  "IMUL": [
+   "imul",
+   "ordinary"
+  ],
+  "LOG": [
+   "log",
+   "ordinary"
+  ],
+  "LOG10": [
+   "log10",
+   "ordinary"
+  ],
+  "LOG1P": [
+   "log1p",
+   "ordinary"
+  ],
+  "LOG2": [
+   "log2",
+   "ordinary"
+  ],
+  "MAX": [
+   "max",
+   "ordinary"
+  ],
+  "MIN": [
+   "min",
+   "ordinary"
+  ],
+  "POW": [
+   "pow",
+   "ordinary"
+  ],
+  "RANDOM": [
+   "random",
+   "ordinary"
+  ],
+  "ROUND": [
+   "round",
+   "ordinary"
+  ],
+  "SIGN": [
+   "sign",
+   "ordinary"
+  ],
+  "SIN": [
+   "sin",
+   "ordinary"
+  ],
+  "SINH": [
+   "sinh",
+   "ordinary"
+  ],
+  "SQRT": [
+   "sqrt",
+   "ordinary"
+  ],
+  "TAN": [
+   "tan",
+   "ordinary"
+  ],
+  "TANH": [
+   "tanh",
+   "ordinary"
+  ],
+  "TRUNC": [
+   "trunc",
+   "ordinary"
+  ],
+  "EPSILON": [
+   "EPSILON",
+   "ordinary"
+  ],
+  "MAX_SAFE_INTEGER": [
+   "MAX_SAFE_INTEGER",
+   "ordinary"
+  ],
+  "MAX_VALUE": [
+   "MAX_VALUE",
+   "ordinary"
+  ],
+  "MIN_SAFE_INTEGER": [
+   "MIN_SAFE_INTEGER",
+   "ordinary"
+  ],
+  "MIN_VALUE": [
+   "MIN_VALUE",
+   "ordinary"
+  ],
+  "NEGATIVE_INFINITY": [
+   "NEGATIVE_INFINITY",
+   "ordinary"
+  ],
+  "NAN": [
+   "NaN",
+   "ordinary"
+  ],
+  "POSITIVE_INFINITY": [
+   "POSITIVE_INFINITY",
+   "ordinary"
+  ],
+  "IS_FINITE": [
+   "isFinite",
+   "ordinary"
+  ],
+  "IS_INTEGER": [
+   "isInteger",
+   "ordinary"
+  ],
+  "IS_NAN": [
+   "isNaN",
+   "ordinary"
+  ],
+  "IS_SAFE_INTEGER": [
+   "isSafeInteger",
+   "ordinary"
+  ],
+  "PARSE_FLOAT": [
+   "parseFloat",
+   "ordinary"
+  ],
+  "PARSE_INT": [
+   "parseInt",
+   "ordinary"
+  ],
+  "ASSIGN": [
+   "assign",
+   "ordinary"
+  ],
+  "CREATE": [
+   "create",
+   "ordinary"
+  ],
+  "DEFINE_PROPERTIES": [
+   "defineProperties",
+   "ordinary"
+  ],
+  "DEFINE_PROPERTY": [
+   "defineProperty",
+   "ordinary"
+  ],
+  "FREEZE": [
+   "freeze",
+   "ordinary"
+  ],
+  "FROM_ENTRIES": [
+   "fromEntries",
+   "ordinary"
+  ],
+  "GET_OWN_PROPERTY_DESCRIPTOR": [
+   "getOwnPropertyDescriptor",
+   "ordinary"
+  ],
+  "GET_OWN_PROPERTY_DESCRIPTORS": [
+   "getOwnPropertyDescriptors",
+   "ordinary"
+  ],
+  "GET_OWN_PROPERTY_NAMES": [
+   "getOwnPropertyNames",
+   "ordinary"
+  ],
+  "GET_OWN_PROPERTY_SYMBOLS": [
+   "getOwnPropertySymbols",
+   "ordinary"
+  ],
+  "GET_PROTOTYPE_OF": [
+   "getPrototypeOf",
+   "ordinary"
+  ],
+  "HAS_OWN": [
+   "hasOwn",
+   "ordinary"
+  ],
+  "IS": [
+   "is",
+   "ordinary"
+  ],
+  "IS_EXTENSIBLE": [
+   "isExtensible",
+   "ordinary"
+  ],
+  "IS_FROZEN": [
+   "isFrozen",
+   "ordinary"
+  ],
+  "IS_SEALED": [
+   "isSealed",
+   "ordinary"
+  ],
+  "PREVENT_EXTENSIONS": [
+   "preventExtensions",
+   "ordinary"
+  ],
+  "SEAL": [
+   "seal",
+   "ordinary"
+  ],
+  "SET_PROTOTYPE_OF": [
+   "setPrototypeOf",
+   "ordinary"
+  ],
+  "ALL": [
+   "all",
+   "ordinary"
+  ],
+  "ALL_SETTLED": [
+   "allSettled",
+   "ordinary"
+  ],
+  "ANY": [
+   "any",
+   "ordinary"
+  ],
+  "RACE": [
+   "race",
+   "ordinary"
+  ],
+  "REJECT": [
+   "reject",
+   "ordinary"
+  ],
+  "RESOLVE": [
+   "resolve",
+   "ordinary"
+  ],
+  "TRY": [
+   "try",
+   "ordinary"
+  ],
+  "WITH_RESOLVERS": [
+   "withResolvers",
+   "ordinary"
+  ],
+  "REVOCABLE": [
+   "revocable",
+   "ordinary"
+  ],
+  "APPLY": [
+   "apply",
+   "ordinary"
+  ],
+  "CONSTRUCT": [
+   "construct",
+   "ordinary"
+  ],
+  "DELETE_PROPERTY": [
+   "deleteProperty",
+   "ordinary"
+  ],
+  "OWN_KEYS": [
+   "ownKeys",
+   "ordinary"
+  ],
+  "$1": [
+   "$1",
+   "ordinary"
+  ],
+  "$2": [
+   "$2",
+   "ordinary"
+  ],
+  "$3": [
+   "$3",
+   "ordinary"
+  ],
+  "$4": [
+   "$4",
+   "ordinary"
+  ],
+  "$5": [
+   "$5",
+   "ordinary"
+  ],
+  "$6": [
+   "$6",
+   "ordinary"
+  ],
+  "$7": [
+   "$7",
+   "ordinary"
+  ],
+  "$8": [
+   "$8",
+   "ordinary"
+  ],
+  "$9": [
+   "$9",
+   "ordinary"
+  ],
+  "$": [
+   "$_",
+   "ordinary"
+  ],
+  "INPUT": [
+   "input",
+   "ordinary"
+  ],
+  "LAST_MATCH": [
+   "lastMatch",
+   "ordinary"
+  ],
+  "LAST_PAREN": [
+   "lastParen",
+   "ordinary"
+  ],
+  "LEFT_CONTEXT": [
+   "leftContext",
+   "ordinary"
+  ],
+  "RIGHT_CONTEXT": [
+   "rightContext",
+   "ordinary"
+  ],
+  "FROM_CHAR_CODE": [
+   "fromCharCode",
+   "ordinary"
+  ],
+  "FROM_CODE_POINT": [
+   "fromCodePoint",
+   "ordinary"
+  ],
+  "RAW": [
+   "raw",
+   "ordinary"
+  ],
+  "FOR": [
+   "for",
+   "ordinary"
+  ],
+  "HAS_INSTANCE": [
+   "hasInstance",
+   "ordinary"
+  ],
+  "IS_CONCAT_SPREADABLE": [
+   "isConcatSpreadable",
+   "ordinary"
+  ],
+  "IS_REG_EXP": [
+   "isRegExp",
+   "ordinary"
+  ],
+  "ITERATOR": [
+   "Iterator",
+   "ordinary"
+  ],
+  "KEY_FOR": [
+   "keyFor",
+   "ordinary"
+  ],
+  "SPECIES": [
+   "species",
+   "ordinary"
+  ],
+  "TO_PRIMITIVE": [
+   "toPrimitive",
+   "ordinary"
+  ],
+  "TO_STRING_TAG": [
+   "toStringTag",
+   "ordinary"
+  ],
+  "UNSCOPABLES": [
+   "unscopables",
+   "ordinary"
+  ],
+  "AGGREGATE_ERROR": [
+   "AggregateError",
+   "ordinary"
+  ],
+  "ARRAY": [
+   "Array",
+   "ordinary"
+  ],
+  "ARRAY_BUFFER": [
+   "ArrayBuffer",
+   "ordinary"
+  ],
+  "BIG_INT": [
+   "BigInt",
+   "ordinary"
+  ],
+  "BIG_INT64_ARRAY": [
+   "BigInt64Array",
+   "ordinary"
+  ],
+  "BIG_UINT64_ARRAY": [
+   "BigUint64Array",
+   "ordinary"
+  ],
+  "BOOLEAN": [
+   "Boolean",
+   "ordinary"
+  ],
+  "CALL": [
+   "call",
+   "ordinary"
+  ],
+  "CALL_SITE": [
+   "CallSite",
+   "ordinary"
+  ],
+  "CONTINUATION": [
+   "Continuation",
+   "ordinary"
+  ],
+  "DATA_VIEW": [
+   "DataView",
+   "ordinary"
+  ],
+  "DATE": [
+   "Date",
+   "ordinary"
+  ],
+  "ERROR": [
+   "Error",
+   "ordinary"
+  ],
+  "EVAL_ERROR": [
+   "EvalError",
+   "ordinary"
+  ],
+  "FLOAT32_ARRAY": [
+   "Float32Array",
+   "ordinary"
+  ],
+  "FLOAT64_ARRAY": [
+   "Float64Array",
+   "ordinary"
+  ],
+  "FUNCTION": [
+   "Function",
+   "ordinary"
+  ],
+  "INFINITY": [
+   "Infinity",
+   "ordinary"
+  ],
+  "INT16_ARRAY": [
+   "Int16Array",
+   "ordinary"
+  ],
+  "INT32_ARRAY": [
+   "Int32Array",
+   "ordinary"
+  ],
+  "INT8_ARRAY": [
+   "Int8Array",
+   "ordinary"
+  ],
+  "INTERNAL_ERROR": [
+   "InternalError",
+   "ordinary"
+  ],
+  "J": [
+   "J",
+   "ordinary"
+  ],
+  "JSON": [
+   "JSON",
+   "ordinary"
+  ],
+  "JAVA_EXCEPTION": [
+   "JavaException",
+   "ordinary"
+  ],
+  "MATH": [
+   "Math",
+   "ordinary"
+  ],
+  "NUMBER": [
+   "Number",
+   "ordinary"
+  ],
+  "OBJECT": [
+   "Object",
+   "ordinary"
+  ],
+  "PROMISE": [
+   "Promise",
+   "ordinary"
+  ],
+  "PROXY": [
+   "Proxy",
+   "ordinary"
+  ],
+  "RANGE_ERROR": [
+   "RangeError",
+   "ordinary"
+  ],
+  "REFERENCE_ERROR": [
+   "ReferenceError",
+   "ordinary"
+  ],
+  "REFLECT": [
+   "Reflect",
+   "ordinary"
+  ],
+  "REG_EXP": [
+   "RegExp",
+   "ordinary"
+  ],
+  "SCRIPT": [
+   "Script",
+   "ordinary"
+  ],
+  "STOP_ITERATION": [
+   "StopIteration",
+   "ordinary"
+  ],
+  "STRING": [
+   "String",
+   "ordinary"
+  ],
+  "SYMBOL": [
+   "Symbol",
+   "ordinary"
+  ],
+  "SYNTAX_ERROR": [
+   "SyntaxError",
+   "ordinary"
+  ],
+  "TYPE_ERROR": [
+   "TypeError",
+   "ordinary"
+  ],
+  "URI_ERROR": [
+   "URIError",
+   "ordinary"
+  ],
+  "UINT16_ARRAY": [
+   "Uint16Array",
+   "ordinary"
+  ],
+  "UINT32_ARRAY": [
+   "Uint32Array",
+   "ordinary"
+  ],
+  "UINT8_ARRAY": [
+   "Uint8Array",
+   "ordinary"
+  ],
+  "UINT8_CLAMPED_ARRAY": [
+   "Uint8ClampedArray",
+   "ordinary"
+  ],
+  "WEAK_MAP": [
+   "WeakMap",
+   "ordinary"
+  ],
+  "WEAK_SET": [
+   "WeakSet",
+   "ordinary"
+  ],
+  "GENERATOR_FUNCTION": [
+   "__GeneratorFunction",
+   "ordinary"
+  ],
+  "IS_PROXY": [
+   "__isProxy",
+   "ordinary"
+  ],
+  "JTYPE": [
+   "__jtype",
+   "ordinary"
+  ],
+  "PAUSE": [
+   "__pause",
+   "ordinary"
+  ],
+  "PROBE": [
+   "__probe",
+   "ordinary"
+  ],
+  "DECODE_URI": [
+   "decodeURI",
+   "ordinary"
+  ],
+  "DECODE_URI_COMPONENT": [
+   "decodeURIComponent",
+   "ordinary"
+  ],
+  "ENCODE_URI": [
+   "encodeURI",
+   "ordinary"
+  ],
+  "ENCODE_URI_COMPONENT": [
+   "encodeURIComponent",
+   "ordinary"
+  ],
+  "ESCAPE": [
+   "escape",
+   "ordinary"
+  ],
+  "EVAL": [
+   "eval",
+   "ordinary"
+  ],
+  "GLOBAL_THIS": [
+   "globalThis",
+   "ordinary"
+  ],
+  "IS_XML_NAME": [
+   "isXMLName",
+   "ordinary"
+  ],
+  "PRINT": [
+   "print",
+   "ordinary"
+  ],
+  "UNDEFINED": [
+   "undefined",
+   "ordinary"
+  ],
+  "UNESCAPE": [
+   "unescape",
+   "ordinary"
+  ],
+  "UNEVAL": [
+   "uneval",
+   "ordinary"
+  ],
+  "BIND": [
+   "bind",
+   "ordinary"
+  ],
+  "A": [
+   "a",
+   "ordinary"
+  ],
+  "B": [
+   "b",
+   "ordinary"
+  ],
+  "C": [
+   "c",
+   "ordinary"
+  ],
+  "D": [
+   "d",
+   "ordinary"
+  ],
+  "F": [
+   "f",
+   "ordinary"
+  ],
+  "X": [
+   "x",
+   "ordinary"
+  ],
+  "Y": [
+   "y",
+   "ordinary"
+  ],
+  "M": [
+   "m",
+   "ordinary"
+  ],
+  "N": [
+   "n",
+   "ordinary"
+  ],
+  "G": [
+   "g",
+   "ordinary"
+  ],
+  "FOO": [
+   "foo",
+   "ordinary"
+  ],
+  "BANG": [
+   "!",
+   "ordinary"
+  ],
+  "INDEX_0": [
+   "0",
+   "index"
+  ],
+  "INDEX_1": [
+   "1",
+   "index"
+  ],
+  "INDEX_2": [
+   "2",
+   "index"
+  ],
+  "INDEX_10": [
+   "10",
+   "index"
+  ],
+  "INDEX_42": [
+   "42",
+   "index"
+  ],
+  "CONSTRUCTOR": [
+   "constructor",
+   "well-known"
+  ],
+  "DONE": [
+   "done",
+   "well-known"
+  ],
+  "NEXT": [
+   "next",
+   "well-known"
+  ],
+  "VALUE": [
+   "value",
+   "well-known"
+  ]
+ },
+ "methods": {
+  "ARRAY_AT": [
+   "Array",
+   "at",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CONCAT": [
+   "Array",
+   "concat",
+   1,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_COPY_WITHIN": [
+   "Array",
+   "copyWithin",
+   2,
+   [],
+   "any"
+  ],
+  "ARRAY_ENTRIES": [
+   "Array",
+   "entries",
+   0,
+   [],
+   "object"
+  ],
+  "ARRAY_EVERY": [
+   "Array",
+   "every",
+   1,
+   [
+    "function"
+   ],
+   "boolean"
+  ],
+  "ARRAY_FILL": [
+   "Array",
+   "fill",
+   1,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_FILTER": [
+   "Array",
+   "filter",
+   1,
+   [
+    "function"
+   ],
+   "object(Array {length})"
+  ],
+  "ARRAY_FIND": [
+   "Array",
+   "find",
+   1,
+   [
+    "function"
+   ],
+   "any"
+  ],
+  "ARRAY_FIND_INDEX": [
+   "Array",
+   "findIndex",
+   1,
+   [],
+   "integer"
+  ],
+  "ARRAY_FIND_LAST": [
+   "Array",
+   "findLast",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_FIND_LAST_INDEX": [
+   "Array",
+   "findLastIndex",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_FLAT": [
+   "Array",
+   "flat",
+   0,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_FLAT_MAP": [
+   "Array",
+   "flatMap",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_FOR_EACH": [
+   "Array",
+   "forEach",
+   1,
+   [
+    "function"
+   ],
+   "undefined"
+  ],
+  "ARRAY_INCLUDES": [
+   "Array",
+   "includes",
+   1,
+   [],
+   "boolean"
+  ],
+  "ARRAY_INDEX_OF": [
+   "Array",
+   "indexOf",
+   1,
+   [
+    "any"
+   ],
+   "integer"
+  ],
+  "ARRAY_JOIN": [
+   "Array",
+   "join",
+   1,
+   [
+    "string"
+   ],
+   "string"
+  ],
+  "ARRAY_KEYS": [
+   "Array",
+   "keys",
+   0,
+   [],
+   "object"
+  ],
+  "ARRAY_LAST_INDEX_OF": [
+   "Array",
+   "lastIndexOf",
+   1,
+   [],
+   "integer"
+  ],
+  "ARRAY_MAP": [
+   "Array",
+   "map",
+   1,
+   [
+    "function"
+   ],
+   "object(Array {length})"
+  ],
+  "ARRAY_POP": [
+   "Array",
+   "pop",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_PUSH": [
+   "Array",
+   "push",
+   1,
+   [
+    "any"
+   ],
+   "integer"
+  ],
+  "ARRAY_REDUCE": [
+   "Array",
+   "reduce",
+   1,
+   [
+    "function",
+    "any"
+   ],
+   "any"
+  ],
+  "ARRAY_REDUCE_RIGHT": [
+   "Array",
+   "reduceRight",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_REVERSE": [
+   "Array",
+   "reverse",
+   0,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_SHIFT": [
+   "Array",
+   "shift",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_SLICE": [
+   "Array",
+   "slice",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "object(Array {length})"
+  ],
+  "ARRAY_SOME": [
+   "Array",
+   "some",
+   1,
+   [
+    "function"
+   ],
+   "boolean"
+  ],
+  "ARRAY_SORT": [
+   "Array",
+   "sort",
+   1,
+   [
+    "function"
+   ],
+   "object(Array {length})"
+  ],
+  "ARRAY_SPLICE": [
+   "Array",
+   "splice",
+   2,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_TO_LOCALE_STRING": [
+   "Array",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_TO_REVERSED": [
+   "Array",
+   "toReversed",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_TO_SORTED": [
+   "Array",
+   "toSorted",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_TO_SOURCE": [
+   "Array",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_TO_SPLICED": [
+   "Array",
+   "toSpliced",
+   2,
+   [],
+   "any"
+  ],
+  "ARRAY_TO_STRING": [
+   "Array",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "ARRAY_UNSHIFT": [
+   "Array",
+   "unshift",
+   1,
+   [],
+   "integer"
+  ],
+  "ARRAY_VALUES": [
+   "Array",
+   "values",
+   0,
+   [],
+   "object"
+  ],
+  "ARRAY_WITH": [
+   "Array",
+   "with",
+   2,
+   [],
+   "any"
+  ],
+  "ARRAY_BUFFER_SLICE": [
+   "ArrayBuffer",
+   "slice",
+   2,
+   [],
+   "object(ArrayBuffer)"
+  ],
+  "ARRAY_BUFFER_TRANSFER": [
+   "ArrayBuffer",
+   "transfer",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_BUFFER_TRANSFER_TO_FIXED_LENGTH": [
+   "ArrayBuffer",
+   "transferToFixedLength",
+   0,
+   [],
+   "any"
+  ],
+  "BIG_INT_TO_LOCALE_STRING": [
+   "BigInt",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "BIG_INT_TO_SOURCE": [
+   "BigInt",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "BIG_INT_TO_STRING": [
+   "BigInt",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "BIG_INT_VALUE_OF": [
+   "BigInt",
+   "valueOf",
+   0,
+   [],
+   "bigint"
+  ],
+  "BOOLEAN_TO_SOURCE": [
+   "Boolean",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "BOOLEAN_TO_STRING": [
+   "Boolean",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "BOOLEAN_VALUE_OF": [
+   "Boolean",
+   "valueOf",
+   0,
+   [],
+   "boolean"
+  ],
+  "DATA_VIEW_GET_FLOAT32": [
+   "DataView",
+   "getFloat32",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_FLOAT64": [
+   "DataView",
+   "getFloat64",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_INT16": [
+   "DataView",
+   "getInt16",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_INT32": [
+   "DataView",
+   "getInt32",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_INT8": [
+   "DataView",
+   "getInt8",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_UINT16": [
+   "DataView",
+   "getUint16",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_UINT32": [
+   "DataView",
+   "getUint32",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_GET_UINT8": [
+   "DataView",
+   "getUint8",
+   1,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_FLOAT32": [
+   "DataView",
+   "setFloat32",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_FLOAT64": [
+   "DataView",
+   "setFloat64",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_INT16": [
+   "DataView",
+   "setInt16",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_INT32": [
+   "DataView",
+   "setInt32",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_INT8": [
+   "DataView",
+   "setInt8",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_UINT16": [
+   "DataView",
+   "setUint16",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_UINT32": [
+   "DataView",
+   "setUint32",
+   2,
+   [],
+   "any"
+  ],
+  "DATA_VIEW_SET_UINT8": [
+   "DataView",
+   "setUint8",
+   2,
+   [],
+   "any"
+  ],
+  "DATE_GET_DATE": [
+   "Date",
+   "getDate",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_DAY": [
+   "Date",
+   "getDay",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_FULL_YEAR": [
+   "Date",
+   "getFullYear",
+   0,
+   [],
+   "integer"
+  ],
+  "DATE_GET_HOURS": [
+   "Date",
+   "getHours",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_MILLISECONDS": [
+   "Date",
+   "getMilliseconds",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_MINUTES": [
+   "Date",
+   "getMinutes",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_MONTH": [
+   "Date",
+   "getMonth",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_SECONDS": [
+   "Date",
+   "getSeconds",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_TIME": [
+   "Date",
+   "getTime",
+   0,
+   [],
+   "integer|float"
+  ],
+  "DATE_GET_TIMEZONE_OFFSET": [
+   "Date",
+   "getTimezoneOffset",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_DATE": [
+   "Date",
+   "getUTCDate",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_DAY": [
+   "Date",
+   "getUTCDay",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_FULL_YEAR": [
+   "Date",
+   "getUTCFullYear",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_HOURS": [
+   "Date",
+   "getUTCHours",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_MILLISECONDS": [
+   "Date",
+   "getUTCMilliseconds",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_MINUTES": [
+   "Date",
+   "getUTCMinutes",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_MONTH": [
+   "Date",
+   "getUTCMonth",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_UTC_SECONDS": [
+   "Date",
+   "getUTCSeconds",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_GET_YEAR": [
+   "Date",
+   "getYear",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_SET_DATE": [
+   "Date",
+   "setDate",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_SET_FULL_YEAR": [
+   "Date",
+   "setFullYear",
+   3,
+   [],
+   "any"
+  ],
+  "DATE_SET_HOURS": [
+   "Date",
+   "setHours",
+   4,
+   [],
+   "any"
+  ],
+  "DATE_SET_MILLISECONDS": [
+   "Date",
+   "setMilliseconds",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_SET_MINUTES": [
+   "Date",
+   "setMinutes",
+   3,
+   [],
+   "any"
+  ],
+  "DATE_SET_MONTH": [
+   "Date",
+   "setMonth",
+   2,
+   [],
+   "any"
+  ],
+  "DATE_SET_SECONDS": [
+   "Date",
+   "setSeconds",
+   2,
+   [],
+   "any"
+  ],
+  "DATE_SET_TIME": [
+   "Date",
+   "setTime",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_DATE": [
+   "Date",
+   "setUTCDate",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_FULL_YEAR": [
+   "Date",
+   "setUTCFullYear",
+   3,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_HOURS": [
+   "Date",
+   "setUTCHours",
+   4,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_MILLISECONDS": [
+   "Date",
+   "setUTCMilliseconds",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_MINUTES": [
+   "Date",
+   "setUTCMinutes",
+   3,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_MONTH": [
+   "Date",
+   "setUTCMonth",
+   2,
+   [],
+   "any"
+  ],
+  "DATE_SET_UTC_SECONDS": [
+   "Date",
+   "setUTCSeconds",
+   2,
+   [],
+   "any"
+  ],
+  "DATE_SET_YEAR": [
+   "Date",
+   "setYear",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_TO_DATE_STRING": [
+   "Date",
+   "toDateString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_ISO_STRING": [
+   "Date",
+   "toISOString",
+   0,
+   [],
+   "string"
+  ],
+  "DATE_TO_JSON": [
+   "Date",
+   "toJSON",
+   1,
+   [],
+   "any"
+  ],
+  "DATE_TO_LOCALE_DATE_STRING": [
+   "Date",
+   "toLocaleDateString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_LOCALE_STRING": [
+   "Date",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_LOCALE_TIME_STRING": [
+   "Date",
+   "toLocaleTimeString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_SOURCE": [
+   "Date",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_STRING": [
+   "Date",
+   "toString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_TIME_STRING": [
+   "Date",
+   "toTimeString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_TO_UTC_STRING": [
+   "Date",
+   "toUTCString",
+   0,
+   [],
+   "any"
+  ],
+  "DATE_VALUE_OF": [
+   "Date",
+   "valueOf",
+   0,
+   [],
+   "integer|float"
+  ],
+  "ERROR_TO_SOURCE": [
+   "Error",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "ERROR_TO_STRING": [
+   "Error",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "MAP_CLEAR": [
+   "Map",
+   "clear",
+   0,
+   [],
+   "undefined"
+  ],
+  "MAP_DELETE": [
+   "Map",
+   "delete",
+   1,
+   [],
+   "boolean"
+  ],
+  "MAP_ENTRIES": [
+   "Map",
+   "entries",
+   0,
+   [],
+   "object"
+  ],
+  "MAP_FOR_EACH": [
+   "Map",
+   "forEach",
+   1,
+   [],
+   "undefined"
+  ],
+  "MAP_GET": [
+   "Map",
+   "get",
+   1,
+   [
+    "any"
+   ],
+   "any"
+  ],
+  "MAP_HAS": [
+   "Map",
+   "has",
+   1,
+   [
+    "any"
+   ],
+   "boolean"
+  ],
+  "MAP_KEYS": [
+   "Map",
+   "keys",
+   0,
+   [],
+   "object"
+  ],
+  "MAP_SET": [
+   "Map",
+   "set",
+   2,
+   [
+    "any",
+    "any"
+   ],
+   "object(Map)"
+  ],
+  "MAP_VALUES": [
+   "Map",
+   "values",
+   0,
+   [],
+   "object"
+  ],
+  "NUMBER_TO_EXPONENTIAL": [
+   "Number",
+   "toExponential",
+   1,
+   [],
+   "string"
+  ],
+  "NUMBER_TO_FIXED": [
+   "Number",
+   "toFixed",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "NUMBER_TO_LOCALE_STRING": [
+   "Number",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "NUMBER_TO_PRECISION": [
+   "Number",
+   "toPrecision",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "NUMBER_TO_SOURCE": [
+   "Number",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "NUMBER_TO_STRING": [
+   "Number",
+   "toString",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "NUMBER_VALUE_OF": [
+   "Number",
+   "valueOf",
+   0,
+   [],
+   "integer|float"
+  ],
+  "OBJECT_DEFINE_GETTER": [
+   "Object",
+   "__defineGetter__",
+   2,
+   [],
+   "any"
+  ],
+  "OBJECT_DEFINE_SETTER": [
+   "Object",
+   "__defineSetter__",
+   2,
+   [],
+   "any"
+  ],
+  "OBJECT_LOOKUP_GETTER": [
+   "Object",
+   "__lookupGetter__",
+   1,
+   [],
+   "any"
+  ],
+  "OBJECT_LOOKUP_SETTER": [
+   "Object",
+   "__lookupSetter__",
+   1,
+   [],
+   "any"
+  ],
+  "OBJECT_HAS_OWN_PROPERTY": [
+   "Object",
+   "hasOwnProperty",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_IS_PROTOTYPE_OF": [
+   "Object",
+   "isPrototypeOf",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_PROPERTY_IS_ENUMERABLE": [
+   "Object",
+   "propertyIsEnumerable",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_TO_LOCALE_STRING": [
+   "Object",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "OBJECT_TO_SOURCE": [
+   "Object",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "OBJECT_TO_STRING": [
+   "Object",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "OBJECT_VALUE_OF": [
+   "Object",
+   "valueOf",
+   0,
+   [],
+   "any"
+  ],
+  "PROMISE_CATCH": [
+   "Promise",
+   "catch",
+   1,
+   [],
+   "object(Promise)"
+  ],
+  "PROMISE_FINALLY": [
+   "Promise",
+   "finally",
+   1,
+   [],
+   "object(Promise)"
+  ],
+  "PROMISE_THEN": [
+   "Promise",
+   "then",
+   2,
+   [],
+   "object(Promise)"
+  ],
+  "REG_EXP_COMPILE": [
+   "RegExp",
+   "compile",
+   2,
+   [],
+   "any"
+  ],
+  "REG_EXP_EXEC": [
+   "RegExp",
+   "exec",
+   1,
+   [],
+   "any"
+  ],
+  "REG_EXP_PREFIX": [
+   "RegExp",
+   "prefix",
+   1,
+   [],
+   "any"
+  ],
+  "REG_EXP_TEST": [
+   "RegExp",
+   "test",
+   1,
+   [],
+   "boolean"
+  ],
+  "REG_EXP_TO_SOURCE": [
+   "RegExp",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "REG_EXP_TO_STRING": [
+   "RegExp",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "SET_ADD": [
+   "Set",
+   "add",
+   1,
+   [
+    "any"
+   ],
+   "object(Set)"
+  ],
+  "SET_CLEAR": [
+   "Set",
+   "clear",
+   0,
+   [],
+   "undefined"
+  ],
+  "SET_DELETE": [
+   "Set",
+   "delete",
+   1,
+   [],
+   "boolean"
+  ],
+  "SET_DIFFERENCE": [
+   "Set",
+   "difference",
+   1,
+   [],
+   "any"
+  ],
+  "SET_ENTRIES": [
+   "Set",
+   "entries",
+   0,
+   [],
+   "any"
+  ],
+  "SET_FOR_EACH": [
+   "Set",
+   "forEach",
+   1,
+   [],
+   "any"
+  ],
+  "SET_HAS": [
+   "Set",
+   "has",
+   1,
+   [
+    "any"
+   ],
+   "boolean"
+  ],
+  "SET_INTERSECTION": [
+   "Set",
+   "intersection",
+   1,
+   [],
+   "any"
+  ],
+  "SET_IS_DISJOINT_FROM": [
+   "Set",
+   "isDisjointFrom",
+   1,
+   [],
+   "any"
+  ],
+  "SET_IS_SUBSET_OF": [
+   "Set",
+   "isSubsetOf",
+   1,
+   [],
+   "any"
+  ],
+  "SET_IS_SUPERSET_OF": [
+   "Set",
+   "isSupersetOf",
+   1,
+   [],
+   "any"
+  ],
+  "SET_KEYS": [
+   "Set",
+   "keys",
+   0,
+   [],
+   "any"
+  ],
+  "SET_SYMMETRIC_DIFFERENCE": [
+   "Set",
+   "symmetricDifference",
+   1,
+   [],
+   "any"
+  ],
+  "SET_UNION": [
+   "Set",
+   "union",
+   1,
+   [],
+   "any"
+  ],
+  "SET_VALUES": [
+   "Set",
+   "values",
+   0,
+   [],
+   "object"
+  ],
+  "STRING_ANCHOR": [
+   "String",
+   "anchor",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_AT": [
+   "String",
+   "at",
+   1,
+   [],
+   "string"
+  ],
+  "STRING_BIG": [
+   "String",
+   "big",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_BLINK": [
+   "String",
+   "blink",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_BOLD": [
+   "String",
+   "bold",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_CHAR_AT": [
+   "String",
+   "charAt",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "STRING_CHAR_CODE_AT": [
+   "String",
+   "charCodeAt",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "STRING_CODE_POINT_AT": [
+   "String",
+   "codePointAt",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "STRING_CONCAT": [
+   "String",
+   "concat",
+   1,
+   [],
+   "string"
+  ],
+  "STRING_ENDS_WITH": [
+   "String",
+   "endsWith",
+   1,
+   [],
+   "boolean"
+  ],
+  "STRING_EQUALS": [
+   "String",
+   "equals",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_EQUALS_IGNORE_CASE": [
+   "String",
+   "equalsIgnoreCase",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_FIXED": [
+   "String",
+   "fixed",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_FONTCOLOR": [
+   "String",
+   "fontcolor",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_FONTSIZE": [
+   "String",
+   "fontsize",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_INCLUDES": [
+   "String",
+   "includes",
+   1,
+   [],
+   "boolean"
+  ],
+  "STRING_INDEX_OF": [
+   "String",
+   "indexOf",
+   1,
+   [
+    "string"
+   ],
+   "integer"
+  ],
+  "STRING_IS_WELL_FORMED": [
+   "String",
+   "isWellFormed",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_ITALICS": [
+   "String",
+   "italics",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_LAST_INDEX_OF": [
+   "String",
+   "lastIndexOf",
+   1,
+   [],
+   "integer"
+  ],
+  "STRING_LINK": [
+   "String",
+   "link",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_LOCALE_COMPARE": [
+   "String",
+   "localeCompare",
+   1,
+   [],
+   "integer"
+  ],
+  "STRING_MATCH": [
+   "String",
+   "match",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_MATCH_ALL": [
+   "String",
+   "matchAll",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_NORMALIZE": [
+   "String",
+   "normalize",
+   0,
+   [],
+   "string"
+  ],
+  "STRING_PAD_END": [
+   "String",
+   "padEnd",
+   1,
+   [],
+   "string"
+  ],
+  "STRING_PAD_START": [
+   "String",
+   "padStart",
+   1,
+   [
+    "integer|float",
+    "string"
+   ],
+   "string"
+  ],
+  "STRING_REPEAT": [
+   "String",
+   "repeat",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "STRING_REPLACE": [
+   "String",
+   "replace",
+   2,
+   [],
+   "string"
+  ],
+  "STRING_REPLACE_ALL": [
+   "String",
+   "replaceAll",
+   2,
+   [],
+   "string"
+  ],
+  "STRING_SEARCH": [
+   "String",
+   "search",
+   1,
+   [],
+   "integer"
+  ],
+  "STRING_SLICE": [
+   "String",
+   "slice",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "string"
+  ],
+  "STRING_SMALL": [
+   "String",
+   "small",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_SPLIT": [
+   "String",
+   "split",
+   2,
+   [
+    "string"
+   ],
+   "object(Array {length})"
+  ],
+  "STRING_STARTS_WITH": [
+   "String",
+   "startsWith",
+   1,
+   [],
+   "boolean"
+  ],
+  "STRING_STRIKE": [
+   "String",
+   "strike",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_SUB": [
+   "String",
+   "sub",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_SUBSTR": [
+   "String",
+   "substr",
+   2,
+   [],
+   "string"
+  ],
+  "STRING_SUBSTRING": [
+   "String",
+   "substring",
+   2,
+   [],
+   "string"
+  ],
+  "STRING_SUP": [
+   "String",
+   "sup",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TO_LOCALE_LOWER_CASE": [
+   "String",
+   "toLocaleLowerCase",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TO_LOCALE_UPPER_CASE": [
+   "String",
+   "toLocaleUpperCase",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TO_LOWER_CASE": [
+   "String",
+   "toLowerCase",
+   0,
+   [],
+   "string"
+  ],
+  "STRING_TO_SOURCE": [
+   "String",
+   "toSource",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TO_STRING": [
+   "String",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "STRING_TO_UPPER_CASE": [
+   "String",
+   "toUpperCase",
+   0,
+   [],
+   "string"
+  ],
+  "STRING_TO_WELL_FORMED": [
+   "String",
+   "toWellFormed",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TRIM": [
+   "String",
+   "trim",
+   0,
+   [],
+   "string"
+  ],
+  "STRING_TRIM_END": [
+   "String",
+   "trimEnd",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TRIM_LEFT": [
+   "String",
+   "trimLeft",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TRIM_RIGHT": [
+   "String",
+   "trimRight",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_TRIM_START": [
+   "String",
+   "trimStart",
+   0,
+   [],
+   "any"
+  ],
+  "STRING_VALUE_OF": [
+   "String",
+   "valueOf",
+   0,
+   [],
+   "string"
+  ],
+  "SYMBOL_TO_STRING": [
+   "Symbol",
+   "toString",
+   0,
+   [],
+   "string"
+  ],
+  "SYMBOL_VALUE_OF": [
+   "Symbol",
+   "valueOf",
+   0,
+   [],
+   "symbol"
+  ],
+  "TYPED_ARRAY_AT": [
+   "TypedArray",
+   "at",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_COPY_WITHIN": [
+   "TypedArray",
+   "copyWithin",
+   2,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_ENTRIES": [
+   "TypedArray",
+   "entries",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_EVERY": [
+   "TypedArray",
+   "every",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FILL": [
+   "TypedArray",
+   "fill",
+   1,
+   [],
+   "object(TypedArray)"
+  ],
+  "TYPED_ARRAY_FILTER": [
+   "TypedArray",
+   "filter",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FIND": [
+   "TypedArray",
+   "find",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FIND_INDEX": [
+   "TypedArray",
+   "findIndex",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FIND_LAST": [
+   "TypedArray",
+   "findLast",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FIND_LAST_INDEX": [
+   "TypedArray",
+   "findLastIndex",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_FOR_EACH": [
+   "TypedArray",
+   "forEach",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_INCLUDES": [
+   "TypedArray",
+   "includes",
+   1,
+   [],
+   "boolean"
+  ],
+  "TYPED_ARRAY_INDEX_OF": [
+   "TypedArray",
+   "indexOf",
+   1,
+   [],
+   "integer"
+  ],
+  "TYPED_ARRAY_JOIN": [
+   "TypedArray",
+   "join",
+   1,
+   [],
+   "string"
+  ],
+  "TYPED_ARRAY_KEYS": [
+   "TypedArray",
+   "keys",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_LAST_INDEX_OF": [
+   "TypedArray",
+   "lastIndexOf",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_MAP": [
+   "TypedArray",
+   "map",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_REDUCE": [
+   "TypedArray",
+   "reduce",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_REDUCE_RIGHT": [
+   "TypedArray",
+   "reduceRight",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_REVERSE": [
+   "TypedArray",
+   "reverse",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_SET": [
+   "TypedArray",
+   "set",
+   1,
+   [],
+   "undefined"
+  ],
+  "TYPED_ARRAY_SLICE": [
+   "TypedArray",
+   "slice",
+   2,
+   [],
+   "object(TypedArray)"
+  ],
+  "TYPED_ARRAY_SOME": [
+   "TypedArray",
+   "some",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_SORT": [
+   "TypedArray",
+   "sort",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_SUBARRAY": [
+   "TypedArray",
+   "subarray",
+   2,
+   [],
+   "object(TypedArray)"
+  ],
+  "TYPED_ARRAY_TO_LOCALE_STRING": [
+   "TypedArray",
+   "toLocaleString",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_TO_REVERSED": [
+   "TypedArray",
+   "toReversed",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_TO_SORTED": [
+   "TypedArray",
+   "toSorted",
+   1,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_TO_STRING": [
+   "TypedArray",
+   "toString",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_VALUES": [
+   "TypedArray",
+   "values",
+   0,
+   [],
+   "any"
+  ],
+  "TYPED_ARRAY_WITH": [
+   "TypedArray",
+   "with",
+   2,
+   [],
+   "any"
+  ],
+  "WEAK_MAP_DELETE": [
+   "WeakMap",
+   "delete",
+   1,
+   [],
+   "any"
+  ],
+  "WEAK_MAP_GET": [
+   "WeakMap",
+   "get",
+   1,
+   [],
+   "any"
+  ],
+  "WEAK_MAP_HAS": [
+   "WeakMap",
+   "has",
+   1,
+   [],
+   "boolean"
+  ],
+  "WEAK_MAP_SET": [
+   "WeakMap",
+   "set",
+   2,
+   [],
+   "object(WeakMap)"
+  ],
+  "WEAK_SET_ADD": [
+   "WeakSet",
+   "add",
+   1,
+   [],
+   "object(WeakSet)"
+  ],
+  "WEAK_SET_DELETE": [
+   "WeakSet",
+   "delete",
+   1,
+   [],
+   "any"
+  ],
+  "WEAK_SET_HAS": [
+   "WeakSet",
+   "has",
+   1,
+   [],
+   "boolean"
+  ],
+  "ARRAY_CTOR_CONCAT": [
+   "ArrayCtor",
+   "concat",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_EVERY": [
+   "ArrayCtor",
+   "every",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FILTER": [
+   "ArrayCtor",
+   "filter",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FIND": [
+   "ArrayCtor",
+   "find",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FIND_INDEX": [
+   "ArrayCtor",
+   "findIndex",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FIND_LAST": [
+   "ArrayCtor",
+   "findLast",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FIND_LAST_INDEX": [
+   "ArrayCtor",
+   "findLastIndex",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FOR_EACH": [
+   "ArrayCtor",
+   "forEach",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_FROM": [
+   "ArrayCtor",
+   "from",
+   1,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_CTOR_INDEX_OF": [
+   "ArrayCtor",
+   "indexOf",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_IS_ARRAY": [
+   "ArrayCtor",
+   "isArray",
+   1,
+   [],
+   "boolean"
+  ],
+  "ARRAY_CTOR_JOIN": [
+   "ArrayCtor",
+   "join",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_LAST_INDEX_OF": [
+   "ArrayCtor",
+   "lastIndexOf",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_MAP": [
+   "ArrayCtor",
+   "map",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_OF": [
+   "ArrayCtor",
+   "of",
+   0,
+   [],
+   "object(Array {length})"
+  ],
+  "ARRAY_CTOR_POP": [
+   "ArrayCtor",
+   "pop",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_PUSH": [
+   "ArrayCtor",
+   "push",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_REDUCE": [
+   "ArrayCtor",
+   "reduce",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_REDUCE_RIGHT": [
+   "ArrayCtor",
+   "reduceRight",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_REVERSE": [
+   "ArrayCtor",
+   "reverse",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_SHIFT": [
+   "ArrayCtor",
+   "shift",
+   0,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_SLICE": [
+   "ArrayCtor",
+   "slice",
+   2,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_SOME": [
+   "ArrayCtor",
+   "some",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_SORT": [
+   "ArrayCtor",
+   "sort",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_SPLICE": [
+   "ArrayCtor",
+   "splice",
+   2,
+   [],
+   "any"
+  ],
+  "ARRAY_CTOR_UNSHIFT": [
+   "ArrayCtor",
+   "unshift",
+   1,
+   [],
+   "any"
+  ],
+  "ARRAY_BUFFER_CTOR_IS_VIEW": [
+   "ArrayBufferCtor",
+   "isView",
+   1,
+   [],
+   "any"
+  ],
+  "BIG_INT_CTOR_AS_INT_N": [
+   "BigIntCtor",
+   "asIntN",
+   2,
+   [
+    "integer|float",
+    "bigint"
+   ],
+   "bigint"
+  ],
+  "BIG_INT_CTOR_AS_UINT_N": [
+   "BigIntCtor",
+   "asUintN",
+   2,
+   [
+    "integer|float",
+    "bigint"
+   ],
+   "bigint"
+  ],
+  "DATE_CTOR_UTC": [
+   "DateCtor",
+   "UTC",
+   7,
+   [],
+   "any"
+  ],
+  "DATE_CTOR_NOW": [
+   "DateCtor",
+   "now",
+   0,
+   [],
+   "integer|float"
+  ],
+  "DATE_CTOR_PARSE": [
+   "DateCtor",
+   "parse",
+   1,
+   [],
+   "any"
+  ],
+  "ERROR_CTOR_CAPTURE_STACK_TRACE": [
+   "ErrorCtor",
+   "captureStackTrace",
+   2,
+   [],
+   "any"
+  ],
+  "ERROR_CTOR_IS_ERROR": [
+   "ErrorCtor",
+   "isError",
+   1,
+   [],
+   "any"
+  ],
+  "JSON_PARSE": [
+   "JSON",
+   "parse",
+   2,
+   [
+    "string"
+   ],
+   "any"
+  ],
+  "JSON_STRINGIFY": [
+   "JSON",
+   "stringify",
+   3,
+   [
+    "any"
+   ],
+   "any"
+  ],
+  "MAP_CTOR_GROUP_BY": [
+   "MapCtor",
+   "groupBy",
+   2,
+   [],
+   "any"
+  ],
+  "MATH_ABS": [
+   "Math",
+   "abs",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_ACOS": [
+   "Math",
+   "acos",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_ACOSH": [
+   "Math",
+   "acosh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_ASIN": [
+   "Math",
+   "asin",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_ASINH": [
+   "Math",
+   "asinh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_ATAN": [
+   "Math",
+   "atan",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_ATAN2": [
+   "Math",
+   "atan2",
+   2,
+   [],
+   "integer|float"
+  ],
+  "MATH_ATANH": [
+   "Math",
+   "atanh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_CBRT": [
+   "Math",
+   "cbrt",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_CEIL": [
+   "Math",
+   "ceil",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_CLZ32": [
+   "Math",
+   "clz32",
+   1,
+   [],
+   "integer"
+  ],
+  "MATH_COS": [
+   "Math",
+   "cos",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_COSH": [
+   "Math",
+   "cosh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_EXP": [
+   "Math",
+   "exp",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_EXPM1": [
+   "Math",
+   "expm1",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_F16ROUND": [
+   "Math",
+   "f16round",
+   1,
+   [],
+   "any"
+  ],
+  "MATH_FLOOR": [
+   "Math",
+   "floor",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_FROUND": [
+   "Math",
+   "fround",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_HYPOT": [
+   "Math",
+   "hypot",
+   2,
+   [],
+   "integer|float"
+  ],
+  "MATH_IMUL": [
+   "Math",
+   "imul",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "integer"
+  ],
+  "MATH_LOG": [
+   "Math",
+   "log",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_LOG10": [
+   "Math",
+   "log10",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_LOG1P": [
+   "Math",
+   "log1p",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_LOG2": [
+   "Math",
+   "log2",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_MAX": [
+   "Math",
+   "max",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_MIN": [
+   "Math",
+   "min",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_POW": [
+   "Math",
+   "pow",
+   2,
+   [
+    "integer|float",
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_RANDOM": [
+   "Math",
+   "random",
+   0,
+   [],
+   "integer|float"
+  ],
+  "MATH_ROUND": [
+   "Math",
+   "round",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_SIGN": [
+   "Math",
+   "sign",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_SIN": [
+   "Math",
+   "sin",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_SINH": [
+   "Math",
+   "sinh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_SQRT": [
+   "Math",
+   "sqrt",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "MATH_TAN": [
+   "Math",
+   "tan",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_TANH": [
+   "Math",
+   "tanh",
+   1,
+   [],
+   "integer|float"
+  ],
+  "MATH_TRUNC": [
+   "Math",
+   "trunc",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "NUMBER_CTOR_IS_FINITE": [
+   "NumberCtor",
+   "isFinite",
+   1,
+   [],
+   "boolean"
+  ],
+  "NUMBER_CTOR_IS_INTEGER": [
+   "NumberCtor",
+   "isInteger",
+   1,
+   [
+    "any"
+   ],
+   "boolean"
+  ],
+  "NUMBER_CTOR_IS_NAN": [
+   "NumberCtor",
+   "isNaN",
+   1,
+   [],
+   "boolean"
+  ],
+  "NUMBER_CTOR_IS_SAFE_INTEGER": [
+   "NumberCtor",
+   "isSafeInteger",
+   1,
+   [],
+   "boolean"
+  ],
+  "NUMBER_CTOR_PARSE_FLOAT": [
+   "NumberCtor",
+   "parseFloat",
+   1,
+   [],
+   "integer|float"
+  ],
+  "NUMBER_CTOR_PARSE_INT": [
+   "NumberCtor",
+   "parseInt",
+   2,
+   [],
+   "integer|float"
+  ],
+  "OBJECT_CTOR_ASSIGN": [
+   "ObjectCtor",
+   "assign",
+   2,
+   [
+    "object",
+    "any"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_CREATE": [
+   "ObjectCtor",
+   "create",
+   2,
+   [],
+   "object"
+  ],
+  "OBJECT_CTOR_DEFINE_PROPERTIES": [
+   "ObjectCtor",
+   "defineProperties",
+   2,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_DEFINE_PROPERTY": [
+   "ObjectCtor",
+   "defineProperty",
+   3,
+   [
+    "object",
+    "any",
+    "object"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_ENTRIES": [
+   "ObjectCtor",
+   "entries",
+   1,
+   [
+    "object"
+   ],
+   "object(Array {length})"
+  ],
+  "OBJECT_CTOR_FREEZE": [
+   "ObjectCtor",
+   "freeze",
+   1,
+   [
+    "object"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_FROM_ENTRIES": [
+   "ObjectCtor",
+   "fromEntries",
+   1,
+   [],
+   "object"
+  ],
+  "OBJECT_CTOR_GET_OWN_PROPERTY_DESCRIPTOR": [
+   "ObjectCtor",
+   "getOwnPropertyDescriptor",
+   2,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_GET_OWN_PROPERTY_DESCRIPTORS": [
+   "ObjectCtor",
+   "getOwnPropertyDescriptors",
+   1,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_GET_OWN_PROPERTY_NAMES": [
+   "ObjectCtor",
+   "getOwnPropertyNames",
+   1,
+   [
+    "object"
+   ],
+   "object(Array {length})"
+  ],
+  "OBJECT_CTOR_GET_OWN_PROPERTY_SYMBOLS": [
+   "ObjectCtor",
+   "getOwnPropertySymbols",
+   1,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_GET_PROTOTYPE_OF": [
+   "ObjectCtor",
+   "getPrototypeOf",
+   1,
+   [
+    "object"
+   ],
+   "any"
+  ],
+  "OBJECT_CTOR_GROUP_BY": [
+   "ObjectCtor",
+   "groupBy",
+   2,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_HAS_OWN": [
+   "ObjectCtor",
+   "hasOwn",
+   1,
+   [],
+   "any"
+  ],
+  "OBJECT_CTOR_IS": [
+   "ObjectCtor",
+   "is",
+   2,
+   [
+    "any",
+    "any"
+   ],
+   "boolean"
+  ],
+  "OBJECT_CTOR_IS_EXTENSIBLE": [
+   "ObjectCtor",
+   "isExtensible",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_CTOR_IS_FROZEN": [
+   "ObjectCtor",
+   "isFrozen",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_CTOR_IS_SEALED": [
+   "ObjectCtor",
+   "isSealed",
+   1,
+   [],
+   "boolean"
+  ],
+  "OBJECT_CTOR_KEYS": [
+   "ObjectCtor",
+   "keys",
+   1,
+   [
+    "object"
+   ],
+   "object(Array {length})"
+  ],
+  "OBJECT_CTOR_PREVENT_EXTENSIONS": [
+   "ObjectCtor",
+   "preventExtensions",
+   1,
+   [
+    "object"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_SEAL": [
+   "ObjectCtor",
+   "seal",
+   1,
+   [
+    "object"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_SET_PROTOTYPE_OF": [
+   "ObjectCtor",
+   "setPrototypeOf",
+   2,
+   [
+    "object",
+    "any"
+   ],
+   "object"
+  ],
+  "OBJECT_CTOR_VALUES": [
+   "ObjectCtor",
+   "values",
+   1,
+   [
+    "object"
+   ],
+   "object(Array {length})"
+  ],
+  "PROMISE_CTOR_ALL": [
+   "PromiseCtor",
+   "all",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_ALL_SETTLED": [
+   "PromiseCtor",
+   "allSettled",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_ANY": [
+   "PromiseCtor",
+   "any",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_RACE": [
+   "PromiseCtor",
+   "race",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_REJECT": [
+   "PromiseCtor",
+   "reject",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_RESOLVE": [
+   "PromiseCtor",
+   "resolve",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_TRY": [
+   "PromiseCtor",
+   "try",
+   1,
+   [],
+   "any"
+  ],
+  "PROMISE_CTOR_WITH_RESOLVERS": [
+   "PromiseCtor",
+   "withResolvers",
+   0,
+   [],
+   "any"
+  ],
+  "PROXY_CTOR_REVOCABLE": [
+   "ProxyCtor",
+   "revocable",
+   2,
+   [],
+   "any"
+  ],
+  "REFLECT_APPLY": [
+   "Reflect",
+   "apply",
+   3,
+   [
+    "function",
+    "any",
+    "object(Array {length})"
+   ],
+   "any"
+  ],
+  "REFLECT_CONSTRUCT": [
+   "Reflect",
+   "construct",
+   2,
+   [
+    "function",
+    "object(Array {length})"
+   ],
+   "object"
+  ],
+  "REFLECT_DEFINE_PROPERTY": [
+   "Reflect",
+   "defineProperty",
+   3,
+   [],
+   "boolean"
+  ],
+  "REFLECT_DELETE_PROPERTY": [
+   "Reflect",
+   "deleteProperty",
+   2,
+   [],
+   "boolean"
+  ],
+  "REFLECT_GET": [
+   "Reflect",
+   "get",
+   2,
+   [
+    "object",
+    "any"
+   ],
+   "any"
+  ],
+  "REFLECT_GET_OWN_PROPERTY_DESCRIPTOR": [
+   "Reflect",
+   "getOwnPropertyDescriptor",
+   2,
+   [],
+   "any"
+  ],
+  "REFLECT_GET_PROTOTYPE_OF": [
+   "Reflect",
+   "getPrototypeOf",
+   1,
+   [],
+   "any"
+  ],
+  "REFLECT_HAS": [
+   "Reflect",
+   "has",
+   2,
+   [
+    "object",
+    "any"
+   ],
+   "boolean"
+  ],
+  "REFLECT_IS_EXTENSIBLE": [
+   "Reflect",
+   "isExtensible",
+   1,
+   [],
+   "any"
+  ],
+  "REFLECT_OWN_KEYS": [
+   "Reflect",
+   "ownKeys",
+   1,
+   [
+    "object"
+   ],
+   "object(Array {length})"
+  ],
+  "REFLECT_PREVENT_EXTENSIONS": [
+   "Reflect",
+   "preventExtensions",
+   1,
+   [],
+   "any"
+  ],
+  "REFLECT_SET": [
+   "Reflect",
+   "set",
+   3,
+   [
+    "object",
+    "any",
+    "any"
+   ],
+   "boolean"
+  ],
+  "REFLECT_SET_PROTOTYPE_OF": [
+   "Reflect",
+   "setPrototypeOf",
+   2,
+   [],
+   "boolean"
+  ],
+  "STRING_CTOR_CHAR_AT": [
+   "StringCtor",
+   "charAt",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_CHAR_CODE_AT": [
+   "StringCtor",
+   "charCodeAt",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_CONCAT": [
+   "StringCtor",
+   "concat",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_EQUALS_IGNORE_CASE": [
+   "StringCtor",
+   "equalsIgnoreCase",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_FROM_CHAR_CODE": [
+   "StringCtor",
+   "fromCharCode",
+   1,
+   [
+    "integer|float"
+   ],
+   "string"
+  ],
+  "STRING_CTOR_FROM_CODE_POINT": [
+   "StringCtor",
+   "fromCodePoint",
+   1,
+   [],
+   "string"
+  ],
+  "STRING_CTOR_INDEX_OF": [
+   "StringCtor",
+   "indexOf",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_LAST_INDEX_OF": [
+   "StringCtor",
+   "lastIndexOf",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_LOCALE_COMPARE": [
+   "StringCtor",
+   "localeCompare",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_MATCH": [
+   "StringCtor",
+   "match",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_RAW": [
+   "StringCtor",
+   "raw",
+   1,
+   [],
+   "string"
+  ],
+  "STRING_CTOR_REPLACE": [
+   "StringCtor",
+   "replace",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_REPLACE_ALL": [
+   "StringCtor",
+   "replaceAll",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_SEARCH": [
+   "StringCtor",
+   "search",
+   2,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_SLICE": [
+   "StringCtor",
+   "slice",
+   3,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_SPLIT": [
+   "StringCtor",
+   "split",
+   3,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_SUBSTR": [
+   "StringCtor",
+   "substr",
+   3,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_SUBSTRING": [
+   "StringCtor",
+   "substring",
+   3,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_TO_LOCALE_LOWER_CASE": [
+   "StringCtor",
+   "toLocaleLowerCase",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_TO_LOWER_CASE": [
+   "StringCtor",
+   "toLowerCase",
+   1,
+   [],
+   "any"
+  ],
+  "STRING_CTOR_TO_UPPER_CASE": [
+   "StringCtor",
+   "toUpperCase",
+   1,
+   [],
+   "any"
+  ],
+  "SYMBOL_CTOR_FOR": [
+   "SymbolCtor",
+   "for",
+   1,
+   [
+    "string"
+   ],
+   "symbol"
+  ],
+  "SYMBOL_CTOR_KEY_FOR": [
+   "SymbolCtor",
+   "keyFor",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_AGGREGATE_ERROR": [
+   "globalCtor",
+   "AggregateError",
+   2,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ARRAY": [
+   "globalCtor",
+   "Array",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ARRAY_BUFFER": [
+   "globalCtor",
+   "ArrayBuffer",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_BIG_INT": [
+   "globalCtor",
+   "BigInt",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_BIG_INT64_ARRAY": [
+   "globalCtor",
+   "BigInt64Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_BIG_UINT64_ARRAY": [
+   "globalCtor",
+   "BigUint64Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_BOOLEAN": [
+   "globalCtor",
+   "Boolean",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_CALL": [
+   "globalCtor",
+   "Call",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_CALL_SITE": [
+   "globalCtor",
+   "CallSite",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_CONTINUATION": [
+   "globalCtor",
+   "Continuation",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_DATA_VIEW": [
+   "globalCtor",
+   "DataView",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_DATE": [
+   "globalCtor",
+   "Date",
+   7,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ERROR": [
+   "globalCtor",
+   "Error",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_EVAL_ERROR": [
+   "globalCtor",
+   "EvalError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_FLOAT32_ARRAY": [
+   "globalCtor",
+   "Float32Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_FLOAT64_ARRAY": [
+   "globalCtor",
+   "Float64Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_FUNCTION": [
+   "globalCtor",
+   "Function",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_INT16_ARRAY": [
+   "globalCtor",
+   "Int16Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_INT32_ARRAY": [
+   "globalCtor",
+   "Int32Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_INT8_ARRAY": [
+   "globalCtor",
+   "Int8Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_INTERNAL_ERROR": [
+   "globalCtor",
+   "InternalError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ITERATOR": [
+   "globalCtor",
+   "Iterator",
+   2,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_JAVA_EXCEPTION": [
+   "globalCtor",
+   "JavaException",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_MAP": [
+   "globalCtor",
+   "Map",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_NUMBER": [
+   "globalCtor",
+   "Number",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_OBJECT": [
+   "globalCtor",
+   "Object",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PROMISE": [
+   "globalCtor",
+   "Promise",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PROXY": [
+   "globalCtor",
+   "Proxy",
+   2,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_RANGE_ERROR": [
+   "globalCtor",
+   "RangeError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_REFERENCE_ERROR": [
+   "globalCtor",
+   "ReferenceError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_REG_EXP": [
+   "globalCtor",
+   "RegExp",
+   2,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_SCRIPT": [
+   "globalCtor",
+   "Script",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_SET": [
+   "globalCtor",
+   "Set",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_STRING": [
+   "globalCtor",
+   "String",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_SYMBOL": [
+   "globalCtor",
+   "Symbol",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_SYNTAX_ERROR": [
+   "globalCtor",
+   "SyntaxError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_TYPE_ERROR": [
+   "globalCtor",
+   "TypeError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_URI_ERROR": [
+   "globalCtor",
+   "URIError",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UINT16_ARRAY": [
+   "globalCtor",
+   "Uint16Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UINT32_ARRAY": [
+   "globalCtor",
+   "Uint32Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UINT8_ARRAY": [
+   "globalCtor",
+   "Uint8Array",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UINT8_CLAMPED_ARRAY": [
+   "globalCtor",
+   "Uint8ClampedArray",
+   3,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_WEAK_MAP": [
+   "globalCtor",
+   "WeakMap",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_WEAK_SET": [
+   "globalCtor",
+   "WeakSet",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_WITH": [
+   "globalCtor",
+   "With",
+   0,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_GENERATOR_FUNCTION": [
+   "globalCtor",
+   "__GeneratorFunction",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_IS_PROXY": [
+   "globalCtor",
+   "__isProxy",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_JTYPE": [
+   "globalCtor",
+   "__jtype",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PAUSE": [
+   "globalCtor",
+   "__pause",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PROBE": [
+   "globalCtor",
+   "__probe",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_DECODE_URI": [
+   "globalCtor",
+   "decodeURI",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_DECODE_URI_COMPONENT": [
+   "globalCtor",
+   "decodeURIComponent",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ENCODE_URI": [
+   "globalCtor",
+   "encodeURI",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ENCODE_URI_COMPONENT": [
+   "globalCtor",
+   "encodeURIComponent",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_ESCAPE": [
+   "globalCtor",
+   "escape",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_EVAL": [
+   "globalCtor",
+   "eval",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_IS_FINITE": [
+   "globalCtor",
+   "isFinite",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_IS_NAN": [
+   "globalCtor",
+   "isNaN",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_IS_XML_NAME": [
+   "globalCtor",
+   "isXMLName",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PARSE_FLOAT": [
+   "globalCtor",
+   "parseFloat",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PARSE_INT": [
+   "globalCtor",
+   "parseInt",
+   2,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_PRINT": [
+   "globalCtor",
+   "print",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UNESCAPE": [
+   "globalCtor",
+   "unescape",
+   1,
+   [],
+   "any"
+  ],
+  "GLOBAL_CTOR_UNEVAL": [
+   "globalCtor",
+   "uneval",
+   1,
+   [],
+   "any"
+  ],
+  "J_TAKES_INT": [
+   "J",
+   "takesInt",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer"
+  ],
+  "J_TAKES_LONG": [
+   "J",
+   "takesLong",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "J_TAKES_SHORT": [
+   "J",
+   "takesShort",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer"
+  ],
+  "J_TAKES_BYTE": [
+   "J",
+   "takesByte",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer"
+  ],
+  "J_TAKES_CHAR": [
+   "J",
+   "takesChar",
+   1,
+   [
+    "string"
+   ],
+   "string"
+  ],
+  "J_TAKES_FLOAT": [
+   "J",
+   "takesFloat",
+   1,
+   [
+    "integer|float"
+   ],
+   "float"
+  ],
+  "J_TAKES_DOUBLE": [
+   "J",
+   "takesDouble",
+   1,
+   [
+    "integer|float"
+   ],
+   "float"
+  ],
+  "J_TAKES_BOOLEAN": [
+   "J",
+   "takesBoolean",
+   1,
+   [
+    "boolean"
+   ],
+   "boolean"
+  ],
+  "J_TAKES_STRING": [
+   "J",
+   "takesString",
+   1,
+   [
+    "string"
+   ],
+   "string"
+  ],
+  "J_TAKES_INTEGER": [
+   "J",
+   "takesInteger",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer"
+  ],
+  "J_TAKES_NUMBER": [
+   "J",
+   "takesNumber",
+   1,
+   [
+    "integer|float"
+   ],
+   "integer|float"
+  ],
+  "J_TAKES_BIG_INTEGER": [
+   "J",
+   "takesBigInteger",
+   1,
+   [
+    "bigint"
+   ],
+   "bigint"
+  ],
+  "J_TAKES_CHAR_SEQUENCE": [
+   "J",
+   "takesCharSequence",
+   1,
+   [
+    "string"
+   ],
+   "string"
+  ],
+  "J_ECHO": [
+   "J",
+   "echo",
+   1,
+   [
+    "any"
+   ],
+   "any"
+  ],
+  "J_TYPE_OF": [
+   "J",
+   "typeOf",
+   1,
+   [
+    "any"
+   ],
+   "string"
+  ],
+  "J_OVER": [
+   "J",
+   "over",
+   1,
+   [
+    "any"
+   ],
+   "string"
+  ],
+  "J_AN_INT": [
+   "J",
+   "anInt",
+   0,
+   [],
+   "integer"
+  ],
+  "J_A_LONG": [
+   "J",
+   "aLong",
+   0,
+   [],
+   "integer|float"
+  ],
+  "J_MAX_LONG": [
+   "J",
+   "maxLong",
+   0,
+   [],
+   "integer|float"
+  ],
+  "J_A_FLOAT": [
+   "J",
+   "aFloat",
+   0,
+   [],
+   "float"
+  ],
+  "J_A_DOUBLE": [
+   "J",
+   "aDouble",
+   0,
+   [],
+   "float"
+  ],
+  "J_NEG_ZERO": [
+   "J",
+   "negZero",
+   0,
+   [],
+   "float"
+  ],
+  "J_NAN": [
+   "J",
+   "nan",
+   0,
+   [],
+   "float"
+  ],
+  "J_A_SHORT": [
+   "J",
+   "aShort",
+   0,
+   [],
+   "integer"
+  ],
+  "J_A_BYTE": [
+   "J",
+   "aByte",
+   0,
+   [],
+   "integer"
+  ],
+  "J_A_CHAR": [
+   "J",
+   "aChar",
+   0,
+   [],
+   "string"
+  ],
+  "J_BOXED_INT": [
+   "J",
+   "boxedInt",
+   0,
+   [],
+   "integer"
+  ],
+  "J_BOXED_LONG": [
+   "J",
+   "boxedLong",
+   0,
+   [],
+   "integer|float"
+  ],
+  "J_BIG_INTEGER": [
+   "J",
+   "bigInteger",
+   0,
+   [],
+   "bigint"
+  ],
+  "J_A_STRING": [
+   "J",
+   "aString",
+   0,
+   [],
+   "string"
+  ],
+  "J_NOTHING": [
+   "J",
+   "nothing",
+   0,
+   [],
+   "null"
+  ],
+  "J_INT_ARRAY": [
+   "J",
+   "intArray",
+   1,
+   [
+    "integer|float"
+   ],
+   "object(JavaArray)"
+  ],
+  "J_DOUBLE_ARRAY": [
+   "J",
+   "doubleArray",
+   1,
+   [
+    "integer|float"
+   ],
+   "object(JavaArray)"
+  ],
+  "J_OBJECT_ARRAY": [
+   "J",
+   "objectArray",
+   1,
+   [
+    "integer|float"
+   ],
+   "object(JavaArray)"
+  ],
+  "J_STRING_ARRAY": [
+   "J",
+   "stringArray",
+   0,
+   [],
+   "object(JavaArray)"
+  ],
+  "J_LIST": [
+   "J",
+   "list",
+   0,
+   [],
+   "object(JavaList)"
+  ],
+  "J_MAP": [
+   "J",
+   "map",
+   0,
+   [],
+   "object(JavaMap)"
+  ],
+  "J_SUM": [
+   "J",
+   "sum",
+   1,
+   [
+    "any"
+   ],
+   "integer|float"
+  ],
+  "J_SIZE": [
+   "J",
+   "size",
+   1,
+   [
+    "object"
+   ],
+   "integer"
+  ],
+  "J_GET": [
+   "J",
+   "get",
+   2,
+   [
+    "object",
+    "any"
+   ],
+   "any"
+  ],
+  "J_BUMP": [
+   "J",
+   "bump",
+   0,
+   [],
+   "integer"
+  ],
+  "FUNCTION_CALL": [
+   "Function",
+   "call",
+   1,
+   [
+    "any"
+   ],
+   "any"
+  ],
+  "FUNCTION_APPLY": [
+   "Function",
+   "apply",
+   2,
+   [
+    "any",
+    "object(Array {length})"
+   ],
+   "any"
+  ],
+  "FUNCTION_BIND": [
+   "Function",
+   "bind",
+   1,
+   [
+    "any"
+   ],
+   "function"
+  ],
+  "FUNCTION_TO_STRING": [
+   "Function",
+   "toString",
+   0,
+   [],
+   "string"
+  ]
+ },
+ "methodsByGroup": {
+  "Array": [
+   "at",
+   "concat",
+   "copyWithin",
+   "entries",
+   "every",
+   "fill",
+   "filter",
+   "find",
+   "findIndex",
+   "findLast",
+   "findLastIndex",
+   "flat",
+   "flatMap",
+   "forEach",
+   "includes",
+   "indexOf",
+   "join",
+   "keys",
+   "lastIndexOf",
+   "map",
+   "pop",
+   "push",
+   "reduce",
+   "reduceRight",
+   "reverse",
+   "shift",
+   "slice",
+   "some",
+   "sort",
+   "splice",
+   "toLocaleString",
+   "toReversed",
+   "toSorted",
+   "toSource",
+   "toSpliced",
+   "toString",
+   "unshift",
+   "values",
+   "with"
+  ],
+  "ArrayBuffer": [
+   "slice",
+   "transfer",
+   "transferToFixedLength"
+  ],
+  "BigInt": [
+   "toLocaleString",
+   "toSource",
+   "toString",
+   "valueOf"
+  ],
+  "Boolean": [
+   "toSource",
+   "toString",
+   "valueOf"
+  ],
+  "DataView": [
+   "getFloat32",
+   "getFloat64",
+   "getInt16",
+   "getInt32",
+   "getInt8",
+   "getUint16",
+   "getUint32",
+   "getUint8",
+   "setFloat32",
+   "setFloat64",
+   "setInt16",
+   "setInt32",
+   "setInt8",
+   "setUint16",
+   "setUint32",
+   "setUint8"
+  ],
+  "Date": [
+   "getDate",
+   "getDay",
+   "getFullYear",
+   "getHours",
+   "getMilliseconds",
+   "getMinutes",
+   "getMonth",
+   "getSeconds",
+   "getTime",
+   "getTimezoneOffset",
+   "getUTCDate",
+   "getUTCDay",
+   "getUTCFullYear",
+   "getUTCHours",
+   "getUTCMilliseconds",
+   "getUTCMinutes",
+   "getUTCMonth",
+   "getUTCSeconds",
+   "getYear",
+   "setDate",
+   "setFullYear",
+   "setHours",
+   "setMilliseconds",
+   "setMinutes",
+   "setMonth",
+   "setSeconds",
+   "setTime",
+   "setUTCDate",
+   "setUTCFullYear",
+   "setUTCHours",
+   "setUTCMilliseconds",
+   "setUTCMinutes",
+   "setUTCMonth",
+   "setUTCSeconds",
+   "setYear",
+   "toDateString",
+   "toISOString",
+   "toJSON",
+   "toLocaleDateString",
+   "toLocaleString",
+   "toLocaleTimeString",
+   "toSource",
+   "toString",
+   "toTimeString",
+   "toUTCString",
+   "valueOf"
+  ],
+  "Error": [
+   "toSource",
+   "toString"
+  ],
+  "Map": [
+   "clear",
+   "delete",
+   "entries",
+   "forEach",
+   "get",
+   "has",
+   "keys",
+   "set",
+   "values"
+  ],
+  "Number": [
+   "toExponential",
+   "toFixed",
+   "toLocaleString",
+   "toPrecision",
+   "toSource",
+   "toString",
+   "valueOf"
+  ],
+  "Object": [
+   "__defineGetter__",
+   "__defineSetter__",
+   "__lookupGetter__",
+   "__lookupSetter__",
+   "hasOwnProperty",
+   "isPrototypeOf",
+   "propertyIsEnumerable",
+   "toLocaleString",
+   "toSource",
+   "toString",
+   "valueOf"
+  ],
+  "Promise": [
+   "catch",
+   "finally",
+   "then"
+  ],
+  "RegExp": [
+   "compile",
+   "exec",
+   "prefix",
+   "test",
+   "toSource",
+   "toString"
+  ],
+  "Set": [
+   "add",
+   "clear",
+   "delete",
+   "difference",
+   "entries",
+   "forEach",
+   "has",
+   "intersection",
+   "isDisjointFrom",
+   "isSubsetOf",
+   "isSupersetOf",
+   "keys",
+   "symmetricDifference",
+   "union",
+   "values"
+  ],
+  "String": [
+   "anchor",
+   "at",
+   "big",
+   "blink",
+   "bold",
+   "charAt",
+   "charCodeAt",
+   "codePointAt",
+   "concat",
+   "endsWith",
+   "equals",
+   "equalsIgnoreCase",
+   "fixed",
+   "fontcolor",
+   "fontsize",
+   "includes",
+   "indexOf",
+   "isWellFormed",
+   "italics",
+   "lastIndexOf",
+   "link",
+   "localeCompare",
+   "match",
+   "matchAll",
+   "normalize",
+   "padEnd",
+   "padStart",
+   "repeat",
+   "replace",
+   "replaceAll",
+   "search",
+   "slice",
+   "small",
+   "split",
+   "startsWith",
+   "strike",
+   "sub",
+   "substr",
+   "substring",
+   "sup",
+   "toLocaleLowerCase",
+   "toLocaleUpperCase",
+   "toLowerCase",
+   "toSource",
+   "toString",
+   "toUpperCase",
+   "toWellFormed",
+   "trim",
+   "trimEnd",
+   "trimLeft",
+   "trimRight",
+   "trimStart",
+   "valueOf"
+  ],
+  "Symbol": [
+   "toString",
+   "valueOf"
+  ],
+  "TypedArray": [
+   "at",
+   "copyWithin",
+   "entries",
+   "every",
+   "fill",
+   "filter",
+   "find",
+   "findIndex",
+   "findLast",
+   "findLastIndex",
+   "forEach",
+   "includes",
+   "indexOf",
+   "join",
+   "keys",
+   "lastIndexOf",
+   "map",
+   "reduce",
+   "reduceRight",
+   "reverse",
+   "set",
+   "slice",
+   "some",
+   "sort",
+   "subarray",
+   "toLocaleString",
+   "toReversed",
+   "toSorted",
+   "toString",
+   "values",
+   "with"
+  ],
+  "WeakMap": [
+   "delete",
+   "get",
+   "has",
+   "set"
+  ],
+  "WeakSet": [
+   "add",
+   "delete",
+   "has"
+  ],
+  "ArrayCtor": [
+   "concat",
+   "every",
+   "filter",
+   "find",
+   "findIndex",
+   "findLast",
+   "findLastIndex",
+   "forEach",
+   "from",
+   "indexOf",
+   "isArray",
+   "join",
+   "lastIndexOf",
+   "map",
+   "of",
+   "pop",
+   "push",
+   "reduce",
+   "reduceRight",
+   "reverse",
+   "shift",
+   "slice",
+   "some",
+   "sort",
+   "splice",
+   "unshift"
+  ],
+  "ArrayBufferCtor": [
+   "isView"
+  ],
+  "BigIntCtor": [
+   "asIntN",
+   "asUintN"
+  ],
+  "DateCtor": [
+   "UTC",
+   "now",
+   "parse"
+  ],
+  "ErrorCtor": [
+   "captureStackTrace",
+   "isError"
+  ],
+  "JSON": [
+   "parse",
+   "stringify"
+  ],
+  "MapCtor": [
+   "groupBy"
+  ],
+  "Math": [
+   "abs",
+   "acos",
+   "acosh",
+   "asin",
+   "asinh",
+   "atan",
+   "atan2",
+   "atanh",
+   "cbrt",
+   "ceil",
+   "clz32",
+   "cos",
+   "cosh",
+   "exp",
+   "expm1",
+   "f16round",
+   "floor",
+   "fround",
+   "hypot",
+   "imul",
+   "log",
+   "log10",
+   "log1p",
+   "log2",
+   "max",
+   "min",
+   "pow",
+   "random",
+   "round",
+   "sign",
+   "sin",
+   "sinh",
+   "sqrt",
+   "tan",
+   "tanh",
+   "trunc"
+  ],
+  "NumberCtor": [
+   "isFinite",
+   "isInteger",
+   "isNaN",
+   "isSafeInteger",
+   "parseFloat",
+   "parseInt"
+  ],
+  "ObjectCtor": [
+   "assign",
+   "create",
+   "defineProperties",
+   "defineProperty",
+   "entries",
+   "freeze",
+   "fromEntries",
+   "getOwnPropertyDescriptor",
+   "getOwnPropertyDescriptors",
+   "getOwnPropertyNames",
+   "getOwnPropertySymbols",
+   "getPrototypeOf",
+   "groupBy",
+   "hasOwn",
+   "is",
+   "isExtensible",
+   "isFrozen",
+   "isSealed",
+   "keys",
+   "preventExtensions",
+   "seal",
+   "setPrototypeOf",
+   "values"
+  ],
+  "PromiseCtor": [
+   "all",
+   "allSettled",
+   "any",
+   "race",
+   "reject",
+   "resolve",
+   "try",
+   "withResolvers"
+  ],
+  "ProxyCtor": [
+   "revocable"
+  ],
+  "Reflect": [
+   "apply",
+   "construct",
+   "defineProperty",
+   "deleteProperty",
+   "get",
+   "getOwnPropertyDescriptor",
+   "getPrototypeOf",
+   "has",
+   "isExtensible",
+   "ownKeys",
+   "preventExtensions",
+   "set",
+   "setPrototypeOf"
+  ],
+  "StringCtor": [
+   "charAt",
+   "charCodeAt",
+   "concat",
+   "equalsIgnoreCase",
+   "fromCharCode",
+   "fromCodePoint",
+   "indexOf",
+   "lastIndexOf",
+   "localeCompare",
+   "match",
+   "raw",
+   "replace",
+   "replaceAll",
+   "search",
+   "slice",
+   "split",
+   "substr",
+   "substring",
+   "toLocaleLowerCase",
+   "toLowerCase",
+   "toUpperCase"
+  ],
+  "SymbolCtor": [
+   "for",
+   "keyFor"
+  ],
+  "globalCtor": [
+   "AggregateError",
+   "Array",
+   "ArrayBuffer",
+   "BigInt",
+   "BigInt64Array",
+   "BigUint64Array",
+   "Boolean",
+   "Call",
+   "CallSite",
+   "Continuation",
+   "DataView",
+   "Date",
+   "Error",
+   "EvalError",
+   "Float32Array",
+   "Float64Array",
+   "Function",
+   "Int16Array",
+   "Int32Array",
+   "Int8Array",
+   "InternalError",
+   "Iterator",
+   "JavaException",
+   "Map",
+   "Number",
+   "Object",
+   "Promise",
+   "Proxy",
+   "RangeError",
+   "ReferenceError",
+   "RegExp",
+   "Script",
+   "Set",
+   "String",
+   "Symbol",
+   "SyntaxError",
+   "TypeError",
+   "URIError",
+   "Uint16Array",
+   "Uint32Array",
+   "Uint8Array",
+   "Uint8ClampedArray",
+   "WeakMap",
+   "WeakSet",
+   "With",
+   "__GeneratorFunction",
+   "__isProxy",
+   "__jtype",
+   "__pause",
+   "__probe",
+   "decodeURI",
+   "decodeURIComponent",
+   "encodeURI",
+   "encodeURIComponent",
+   "escape",
+   "eval",
+   "isFinite",
+   "isNaN",
+   "isXMLName",
+   "parseFloat",
+   "parseInt",
+   "print",
+   "unescape",
+   "uneval"
+  ],
+  "J": [
+   "takesInt",
+   "takesLong",
+   "takesShort",
+   "takesByte",
+   "takesChar",
+   "takesFloat",
+   "takesDouble",
+   "takesBoolean",
+   "takesString",
+   "takesInteger",
+   "takesNumber",
+   "takesBigInteger",
+   "takesCharSequence",
+   "echo",
+   "typeOf",
+   "over",
+   "anInt",
+   "aLong",
+   "maxLong",
+   "aFloat",
+   "aDouble",
+   "negZero",
+   "nan",
+   "aShort",
+   "aByte",
+   "aChar",
+   "boxedInt",
+   "boxedLong",
+   "bigInteger",
+   "aString",
+   "nothing",
+   "intArray",
+   "doubleArray",
+   "objectArray",
+   "stringArray",
+   "list",
+   "map",
+   "sum",
+   "size",
+   "get",
+   "bump"
+  ],
+  "Function": [
+   "call",
+   "apply",
+   "bind",
+   "toString"
+  ]
+ },
+ "propsByGroup": {
+  "Array": [
+   "length"
+  ],
+  "BigInt64Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "BigUint64Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Error": [
+   "fileName",
+   "lineNumber",
+   "message",
+   "name"
+  ],
+  "EvalError": [
+   "message",
+   "name"
+  ],
+  "Float32Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Float64Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Int16Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Int32Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Int8Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Object": [
+   "__proto__"
+  ],
+  "RangeError": [
+   "message",
+   "name"
+  ],
+  "ReferenceError": [
+   "message",
+   "name"
+  ],
+  "RegExp": [
+   "dotAll",
+   "flags",
+   "global",
+   "ignoreCase",
+   "lastIndex",
+   "multiline",
+   "source",
+   "sticky",
+   "unicode"
+  ],
+  "String": [
+   "length"
+  ],
+  "SyntaxError": [
+   "message",
+   "name"
+  ],
+  "TypeError": [
+   "message",
+   "name"
+  ],
+  "URIError": [
+   "message",
+   "name"
+  ],
+  "Uint16Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Uint32Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Uint8Array": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "Uint8ClampedArray": [
+   "BYTES_PER_ELEMENT"
+  ],
+  "__GeneratorFunction": [
+   "prototype"
+  ],
+  "ArrayCtor": [
+   "arity"
+  ],
+  "ArrayBufferCtor": [
+   "arity"
+  ],
+  "BigIntCtor": [
+   "arity"
+  ],
+  "BigInt64ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "BigUint64ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "BooleanCtor": [
+   "arity"
+  ],
+  "CallCtor": [
+   "arity"
+  ],
+  "DataViewCtor": [
+   "arity"
+  ],
+  "DateCtor": [
+   "arity"
+  ],
+  "ErrorCtor": [
+   "arity",
+   "prepareStackTrace",
+   "stackTraceLimit"
+  ],
+  "EvalErrorCtor": [
+   "arity"
+  ],
+  "Float32ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Float64ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Int16ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Int32ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Int8ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "JSON": [
+   "toSource"
+  ],
+  "MapCtor": [
+   "arity"
+  ],
+  "Math": [
+   "E",
+   "LN10",
+   "LN2",
+   "LOG10E",
+   "LOG2E",
+   "PI",
+   "SQRT1_2",
+   "SQRT2",
+   "toSource"
+  ],
+  "NumberCtor": [
+   "EPSILON",
+   "MAX_SAFE_INTEGER",
+   "MAX_VALUE",
+   "MIN_SAFE_INTEGER",
+   "MIN_VALUE",
+   "NEGATIVE_INFINITY",
+   "NaN",
+   "POSITIVE_INFINITY",
+   "arity"
+  ],
+  "ObjectCtor": [
+   "arity"
+  ],
+  "PromiseCtor": [
+   "arity"
+  ],
+  "ProxyCtor": [
+   "arity"
+  ],
+  "RangeErrorCtor": [
+   "arity"
+  ],
+  "ReferenceErrorCtor": [
+   "arity"
+  ],
+  "RegExpCtor": [
+   "$1",
+   "$2",
+   "$3",
+   "$4",
+   "$5",
+   "$6",
+   "$7",
+   "$8",
+   "$9",
+   "$_",
+   "arity",
+   "input",
+   "lastMatch",
+   "lastParen",
+   "leftContext",
+   "multiline",
+   "rightContext"
+  ],
+  "SetCtor": [
+   "arity"
+  ],
+  "StringCtor": [
+   "arity"
+  ],
+  "SymbolCtor": [
+   "arity",
+   "hasInstance",
+   "isConcatSpreadable",
+   "isRegExp",
+   "iterator",
+   "match",
+   "matchAll",
+   "replace",
+   "search",
+   "species",
+   "split",
+   "toPrimitive",
+   "toStringTag",
+   "unscopables"
+  ],
+  "SyntaxErrorCtor": [
+   "arity"
+  ],
+  "TypeErrorCtor": [
+   "arity"
+  ],
+  "URIErrorCtor": [
+   "arity"
+  ],
+  "Uint16ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Uint32ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Uint8ArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "Uint8ClampedArrayCtor": [
+   "BYTES_PER_ELEMENT",
+   "arity"
+  ],
+  "WeakMapCtor": [
+   "arity"
+  ],
+  "WeakSetCtor": [
+   "arity"
+  ],
+  "WithCtor": [
+   "arity"
+  ],
+  "__GeneratorFunctionCtor": [
+   "arity"
+  ],
+  "decodeURICtor": [
+   "arity"
+  ],
+  "decodeURIComponentCtor": [
+   "arity"
+  ],
+  "encodeURICtor": [
+   "arity"
+  ],
+  "encodeURIComponentCtor": [
+   "arity"
+  ],
+  "escapeCtor": [
+   "arity"
+  ],
+  "globalCtor": [
+   "Infinity",
+   "J",
+   "JSON",
+   "Math",
+   "NaN",
+   "Reflect",
+   "StopIteration",
+   "global",
+   "globalThis",
+   "undefined"
+  ],
+  "isFiniteCtor": [
+   "arity"
+  ],
+  "isNaNCtor": [
+   "arity"
+  ],
+  "isXMLNameCtor": [
+   "arity"
+  ],
+  "parseFloatCtor": [
+   "arity"
+  ],
+  "parseIntCtor": [
+   "arity"
+  ],
+  "unescapeCtor": [
+   "arity"
+  ],
+  "J": [
+   "PI_ISH",
+   "field",
+   "staticCounter"
+  ]
+ },
+ "syntaxSupported": [
+  "arrow",
+  "arrow-destructure",
+  "bigint",
+  "binary-literal",
+  "comma-in-for",
+  "computed-key",
+  "const",
+  "debugger",
+  "default-params",
+  "destructuring",
+  "exponent",
+  "for-of",
+  "generator",
+  "generator-method",
+  "getter",
+  "getter-computed",
+  "getter-numeric",
+  "hashbang",
+  "label-block",
+  "label-continue",
+  "legacy-octal",
+  "let",
+  "logical-assign",
+  "nullish",
+  "numeric-separator",
+  "object-spread",
+  "octal-literal",
+  "optional-chaining",
+  "regexp-dotall",
+  "regexp-lookbehind",
+  "regexp-named-groups",
+  "regexp-unicode",
+  "rest-params",
+  "shorthand-method",
+  "spread-array",
+  "super-in-object",
+  "tagged-template",
+  "template",
+  "trailing-comma-call",
+  "unicode-escape-id",
+  "with"
+ ],
+ "builtinPool": [
+  "Array",
+  "ArrayBuffer",
+  "BigInt",
+  "BigInt64Array",
+  "BigUint64Array",
+  "Boolean",
+  "Call",
+  "DataView",
+  "Date",
+  "Error",
+  "EvalError",
+  "Float32Array",
+  "Float64Array",
+  "Function",
+  "Infinity",
+  "Int16Array",
+  "Int32Array",
+  "Int8Array",
+  "JSON",
+  "Map",
+  "Math",
+  "NaN",
+  "Number",
+  "Object",
+  "Promise",
+  "Proxy",
+  "RangeError",
+  "ReferenceError",
+  "Reflect",
+  "RegExp",
+  "Set",
+  "String",
+  "Symbol",
+  "SyntaxError",
+  "TypeError",
+  "URIError",
+  "Uint16Array",
+  "Uint32Array",
+  "Uint8Array",
+  "Uint8ClampedArray",
+  "WeakMap",
+  "WeakSet",
+  "With",
+  "__GeneratorFunction",
+  "decodeURI",
+  "decodeURIComponent",
+  "encodeURI",
+  "encodeURIComponent",
+  "escape",
+  "eval",
+  "global",
+  "globalThis",
+  "isFinite",
+  "isNaN",
+  "isXMLName",
+  "parseFloat",
+  "parseInt",
+  "undefined",
+  "unescape"
+ ],
+ "typedArrays": [
+  "Int8Array",
+  "Uint8Array",
+  "Uint8ClampedArray",
+  "Int16Array",
+  "Uint16Array",
+  "Int32Array",
+  "Uint32Array",
+  "Float32Array",
+  "Float64Array",
+  "BigInt64Array",
+  "BigUint64Array"
+ ],
+ "errors": [
+  "Error",
+  "EvalError",
+  "RangeError",
+  "ReferenceError",
+  "SyntaxError",
+  "TypeError",
+  "URIError"
+ ],
+ "interestingKeys": [
+  [
+   "a",
+   "ordinary"
+  ],
+  [
+   "b",
+   "ordinary"
+  ],
+  [
+   "c",
+   "ordinary"
+  ],
+  [
+   "d",
+   "ordinary"
+  ],
+  [
+   "e",
+   "ordinary"
+  ],
+  [
+   "f",
+   "ordinary"
+  ],
+  [
+   "x",
+   "ordinary"
+  ],
+  [
+   "y",
+   "ordinary"
+  ],
+  [
+   "m",
+   "ordinary"
+  ],
+  [
+   "n",
+   "ordinary"
+  ],
+  [
+   "g",
+   "ordinary"
+  ],
+  [
+   "foo",
+   "ordinary"
+  ],
+  [
+   "!",
+   "ordinary"
+  ],
+  [
+   "0",
+   "index"
+  ],
+  [
+   "1",
+   "index"
+  ],
+  [
+   "2",
+   "index"
+  ],
+  [
+   "10",
+   "index"
+  ],
+  [
+   "42",
+   "index"
+  ],
+  [
+   "length",
+   "length"
+  ],
+  [
+   "__proto__",
+   "proto"
+  ],
+  [
+   "constructor",
+   "well-known"
+  ],
+  [
+   "done",
+   "well-known"
+  ],
+  [
+   "get",
+   "well-known"
+  ],
+  [
+   "has",
+   "well-known"
+  ],
+  [
+   "hasOwnProperty",
+   "well-known"
+  ],
+  [
+   "message",
+   "well-known"
+  ],
+  [
+   "name",
+   "well-known"
+  ],
+  [
+   "next",
+   "well-known"
+  ],
+  [
+   "prototype",
+   "well-known"
+  ],
+  [
+   "set",
+   "well-known"
+  ],
+  [
+   "then",
+   "well-known"
+  ],
+  [
+   "toJSON",
+   "well-known"
+  ],
+  [
+   "toString",
+   "well-known"
+  ],
+  [
+   "value",
+   "well-known"
+  ],
+  [
+   "valueOf",
+   "well-known"
+  ]
+ ],
+ "floatReprs": [
+  "0.0",
+  "0.5",
+  "1.0",
+  "1.5",
+  "0.1",
+  "2.0",
+  "3.0",
+  "1000.0",
+  "1000000.0",
+  "1000000000.0",
+  "1000000000000.0",
+  "1e+21",
+  "1e-15",
+  "5e-324",
+  "2.2250738585072014e-308",
+  "1.7976931348623157e+308",
+  "4503599627370496.0",
+  "9007199254740992.0",
+  "1e+16",
+  "1000000000000000.0",
+  "0.0001",
+  "1e-05",
+  "123456789.125",
+  "1e-07",
+  "2.5e-05"
+ ],
+ "floatValues": [
+  0.0,
+  0.5,
+  1.0,
+  1.5,
+  0.1,
+  2.0,
+  3.0,
+  1000.0,
+  1000000.0,
+  1000000000.0,
+  1000000000000.0,
+  1e+21,
+  1e-15,
+  5e-324,
+  2.2250738585072014e-308,
+  1.7976931348623157e+308,
+  4503599627370496.0,
+  9007199254740992.0,
+  1e+16,
+  1000000000000000.0,
+  0.0001,
+  1e-05,
+  123456789.125,
+  1e-07,
+  2.5e-05
+ ],
+ "strReprs": [
+  [
+   "",
+   "''"
+  ],
+  [
+   "a",
+   "'a'"
+  ],
+  [
+   "0",
+   "'0'"
+  ],
+  [
+   "1",
+   "'1'"
+  ],
+  [
+   "-0",
+   "'-0'"
+  ],
+  [
+   "10",
+   "'10'"
+  ],
+  [
+   "abc",
+   "'abc'"
+  ],
+  [
+   "1e3",
+   "'1e3'"
+  ],
+  [
+   " 1",
+   "' 1'"
+  ],
+  [
+   "x",
+   "'x'"
+  ],
+  [
+   "length",
+   "'length'"
+  ],
+  [
+   "undefined",
+   "'undefined'"
+  ],
+  [
+   "NaN",
+   "'NaN'"
+  ],
+  [
+   "true",
+   "'true'"
+  ],
+  [
+   "\u00e9",
+   "'\u00e9'"
+  ],
+  [
+   "\ud83d\ude00",
+   "'\ud83d\ude00'"
+  ],
+  [
+   "\ud800",
+   "'\\ud800'"
+  ],
+  [
+   "\n",
+   "'\\n'"
+  ],
+  [
+   "\\",
+   "'\\\\'"
+  ],
+  [
+   "\"",
+   "'\"'"
+  ],
+  [
+   "'",
+   "\"'\""
+  ],
+  [
+   "\u0000",
+   "'\\x00'"
+  ],
+  [
+   "\u007f",
+   "'\\x7f'"
+  ],
+  [
+   "\u2028",
+   "'\\u2028'"
+  ],
+  [
+   "a'b",
+   "\"a'b\""
+  ],
+  [
+   "a'\"b",
+   "'a\\'\"b'"
+  ],
+  [
+   "\u00a0",
+   "'\\xa0'"
+  ],
+  [
+   "\ud83d\ude00",
+   "'\ud83d\ude00'"
+  ]
+ ]
+}

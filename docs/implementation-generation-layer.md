@@ -7,6 +7,27 @@ is there, how the pieces fit, how to drive each one from a Python shell, how to 
 and what the tests guard. What the campaigns measured and what is still open is in the
 design, Part III.
 
+
+> **Ported to Java (2026-11-06).** This guide was written for the Python implementation, which
+> has since been replaced; the design is unchanged and the names map one to one (snake_case
+> became camelCase, `@st.composite` strategies became `Gen`s over a `Draw`, context managers
+> became try-with-resources handles; see the class Javadoc of `Builder` and `Strategies`).
+>
+> | Python | Java |
+> |---|---|
+> | `oxpecker/il/types.py`, `ops.py`, `program.py`, `options.py` | `dev.oxpecker.il.Type`, `Ops`, `Instruction`/`Program`, `GenOptions` (oxpecker-core) |
+> | `il/environment.py` | `Env` |
+> | `il/analysis.py`, `builder.py`, `lift.py` | `Analysis` (+ `Typer`, `RhinoModel`), `Builder`, `Lifter` |
+> | `il/strategies.py`, `templates.py`, `generators/*.py` | `Strategies`, `Templates`, `il.generators.*` |
+> | `il/mutate.py` | `Mutate` |
+> | Hypothesis (draws, replay, shrinking) | `dev.oxpecker.gen.Draw`, `Engine`, `Choices` on jetCheck |
+> | `harness/`, `related.py`, `shrink.py`, `corpora/` | `dev.oxpecker.harness`, `related`, `shrink.SourceShrink`, `corpora` (oxpecker-fuzz) |
+> | `fuzz.py`, `cmin.py`, `findings.py` | `dev.oxpecker.fuzz.Fuzz`/`Lineages`/`Corpus`/`Shrinker`, `Cmin`, `Findings` |
+> | `cli.py`, `inspector.py` | `dev.oxpecker.cli.Main` (`bin/oxpecker`), `dev.oxpecker.inspector.Inspector` |
+> | `tests/il/test_<x>.py`, `tests/test_<x>.py` | `<X>Test` in oxpecker-core / oxpecker-fuzz (`./gradlew test`, `-Pslow` for the Rhino ones) |
+>
+> The shell examples below are in Python; `docs/repl-tutorial.md` has the jshell equivalents.
+
 ## 1. The pipeline in one picture
 
 ```
@@ -401,9 +422,9 @@ Rules, in the order they bite:
 7. Add it to `MUST_EMIT` in `tests/il/test_generators.py`: the operation classes every draw must
    contain and, sparingly, the ones some draws must contain (forty draws do not cover a
    five-way choice evenly).
-8. Run `pytest tests/il/test_lint.py tests/il/test_generators.py -k <name>`, then
-   `tests/il/test_lift_rhino.py` and, for the family, `OXPECKER_FAMILIES=<family> pytest
-   tests/il/test_completion_rhino.py -s`.
+8. Run `./gradlew :oxpecker-core:test --tests 'dev.oxpecker.il.SourceLintTest' --tests 'dev.oxpecker.il.generators.*'`,
+   then `./gradlew :oxpecker-fuzz:test -Pslow --tests 'dev.oxpecker.il.GenerationRhinoTest'` (parse
+   property, completion rate per family; `OXPECKER_EXAMPLES=N` for more programs).
 
 ## 6. What the tests guard
 
@@ -429,8 +450,8 @@ Rules, in the order they bite:
 | `test_completion_rhino.py` | completion rate per family with floors; syntax errors fail it, engine crashes are printed as findings with their seed |
 | `test_rhino_model.py` | number variables are a Java `Double` at a probe in optimized code, `Integer` in the activation copy |
 
-`pytest tests/il` runs everything but the completion test in about a minute (the parse and
-model tests need the built harness and are skipped without it).
+`./gradlew test` runs everything that needs no harness; `./gradlew test -Pslow` adds the parse,
+completion and model tests, which need a built harness (`OXPECKER_HARNESS=rhino1.9` to use that one).
 
 ## 7. Things that are easy to get wrong
 

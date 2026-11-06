@@ -57,8 +57,11 @@ Python (Hypothesis)                                       Java harness (one JVM,
 ```
 harness-rhino*/          Gradle, one per Rhino line; rhinoVersion in gradle.properties; ./gradlew fatJar → build/libs/
 bin/harness              launcher (JDK 21; OXPECKER_JAVA, OXPECKER_COVERAGE)
-oxpecker/                Python package (installed editable into .venv)
-tests/regressions/*.js   minimal reproducers; each must stay detected (test_harness.py)
+oxpecker-core/           Gradle: the IL, generators, mutators (jetCheck), lifter, analysis
+oxpecker-fuzz/           Gradle: harness client, comparison, corpus, shrinkers, the loop, the CLI
+bin/oxpecker             the CLI (./gradlew :oxpecker-fuzz:fatJar first)
+environment/             probe.js and the capability table it writes (oxpecker probe)
+tests/regressions/*.js   minimal reproducers; each must stay detected (HarnessTest)
 tests/seeds/*.js         the two test262 cases Rhino tags as mode-specific, standalone
 tests/findings/          property-test output (gitignored): <kind>.jsonl logs + shrunk .js
 runs/                    scratch output of gen/run/corpus (gitignored)
