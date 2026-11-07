@@ -20,6 +20,7 @@ import static dev.oxpecker.il.Type.UNDEFINED;
 
 import dev.oxpecker.il.Ops.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,12 @@ public final class Typer {
      */
     static final class Branches {
         final List<List<State>> levels = new ArrayList<>();
-        final Map<Integer, Type> overall = new LinkedHashMap<>();
-        final Map<Integer, Integer> alias = new LinkedHashMap<>();     // for-loop header copies -> the canonical loop variable
+        /** One past the highest variable set or aliased. */
+        private int size = 0;
+        /** Variable -> its current type; null where it has none. */
+        private Type[] overall = new Type[16];
+        /** For-loop header copies -> the canonical loop variable; the identity elsewhere. */
+        private int[] alias = identity(0, new int[16]);
 
         Branches() {
             List<State> first = new ArrayList<>();
@@ -63,20 +68,53 @@ public final class Typer {
         }
 
         State parent() {
-            if (levels.size() <= 1) return null;
+            if (levels.size() <= 1)
+                return null;
             List<State> l = levels.get(levels.size() - 2);
             return l.get(l.size() - 1);
         }
 
-        Type typeOf(int v) { return overall.getOrDefault(alias.getOrDefault(v, v), ANY); }
+        private static int[] identity(int from, int[] xs) {
+            for (int i = from; i < xs.length; i++) xs[i] = i;
+            return xs;
+        }
+
+        private void grow(int v) {
+            if (v >= overall.length) {
+                int old = overall.length;
+                int n = Math.max(v + 1, old * 2);
+                overall = Arrays.copyOf(overall, n);
+                alias = identity(old, Arrays.copyOf(alias, n));
+            }
+            if (v >= size) size = v + 1;
+        }
+
+        int canonical(int v) { return v < alias.length ? alias[v] : v; }
+
+        /** The current type of the (canonical) variable {@code v}, or null. */
+        Type get(int v) { return v < overall.length ? overall[v] : null; }
+
+        Type typeOf(int v) {
+            Type t = get(canonical(v));
+            return t == null ? ANY : t;
+        }
 
         void set(int v, Type t) {
-            v = alias.getOrDefault(v, v);
+            v = canonical(v);
+            grow(v);
             State p = parent();
-            if (p != null && !p.types.containsKey(v)) p.types.put(v, overall.getOrDefault(v, NOTHING));
+            if (p != null && !p.types.containsKey(v)) p.types.put(v, overall[v] == null ? NOTHING : overall[v]);
             active().types.put(v, t);
-            overall.put(v, t);
+            overall[v] = t;
         }
+
+        void setAlias(int v, int target) {
+            grow(v);
+            alias[v] = target;
+        }
+
+        /** The alias table up to the highest variable seen. */
+        int[] alias() { return Arrays.copyOf(alias, size); }
 
         void startGroup() { levels.add(new ArrayList<>()); }
 
@@ -84,23 +122,31 @@ public final class Typer {
          * A new sibling branch: variables the previous sibling changed revert to the parent's
          * types, then {@code entry} (if any) overrides them (JSTyper.swift:3136-3160, plus the entry map).
          */
-        void enterBranch(Map<Integer, Type> entry) {
+        void enterBranch(Type[] entry) {
             List<State> level = levels.get(levels.size() - 1);
             if (!level.isEmpty()) {
                 State prev = level.get(level.size() - 1);
                 State p = parent();
                 for (int v : prev.types.keySet()) {
-                    if (p != null && p.types.containsKey(v) && !p.types.get(v).isNothing()) overall.put(v, p.types.get(v));
-                    else overall.remove(v);
+                    if (p != null && p.types.containsKey(v) && !p.types.get(v).isNothing()) {
+                        overall[v] = p.types.get(v);
+                    } else {
+                        overall[v] = null;
+                    }
                 }
             }
             level.add(new State());
-            if (entry != null) for (var e : entry.entrySet()) set(e.getKey(), e.getValue());
+            if (entry != null) for (int v = 0; v < entry.length; v++) if (entry[v] != null) set(v, entry[v]);
         }
 
-        void enterBranch() { enterBranch(null); }
+        void enterBranch() {
+            enterBranch(null);
+        }
 
-        Map<Integer, Type> snapshot() { return new LinkedHashMap<>(overall); }
+        /** Variable -> current type, null where there is none. */
+        Type[] snapshot() {
+            return Arrays.copyOf(overall, size);
+        }
 
         /** Merge the sibling branches into the parent (JSTyper.swift:3251-3345). */
         void endGroup() {
@@ -115,7 +161,9 @@ public final class Typer {
                 Type nw = NOTHING;
                 for (Type t : ts) nw = nw.join(t);
                 if (ts.size() != siblings.size()) {
-                    Type fallback = parent.types.containsKey(v) ? parent.types.get(v) : overall.getOrDefault(v, NOTHING);
+                    Type fallback = parent.types.containsKey(v)
+                        ? parent.types.get(v)
+                            : (get(v) == null ? NOTHING : get(v));
                     nw = nw.join(fallback);
                 }
                 if (nw.isNothing()) continue;
@@ -164,14 +212,14 @@ public final class Typer {
         }
     }
 
-    private record Try(Map<Integer, Type> pre, List<Map<Integer, Type>> exits, boolean hasCatch) {}
+    private record Try(Type[] pre, List<Type[]> exits, boolean hasCatch) {}
 
     // ------------------------------------------------------------------------- the typer
     final List<Instruction> code;
     final Map<Integer, List<Type>> paramTypes;
     final Branches b = new Branches();
-    /** Function variable -> return type (a generator's: its Generator object type). */
-    public final Map<Integer, Type> returns = new LinkedHashMap<>();
+    /** Function variable -> return type (a generator's: its Generator object type); null for other variables. */
+    private Type[] returns = new Type[16];
     /** Object literal group ("_Object1", ...) -> its known members. */
     public final Map<String, Map<Key, Type>> literalProps = new LinkedHashMap<>();
     private final List<String> literals = new ArrayList<>();
@@ -190,9 +238,13 @@ public final class Typer {
     // -- queries
     public Type typeOf(int v) { return b.typeOf(v); }
 
-    public Map<Integer, Type> snapshot() { return b.snapshot(); }
+    public Type[] snapshot() { return b.snapshot(); }
 
-    public Map<Integer, Integer> alias() { return b.alias; }
+    /** For-loop header copies -> the canonical loop variable, the identity elsewhere. */
+    public int[] alias() { return b.alias(); }
+
+    /** Function variable -> return type, null for other variables. */
+    public Type[] returns() { return returns.clone(); }
 
     /** The group of the innermost open object literal, or null. */
     public String currentLiteralGroup() { return literals.isEmpty() ? null : literals.get(literals.size() - 1); }
@@ -330,7 +382,8 @@ public final class Typer {
                     result = !rets.isNothing() ? rets : UNDEFINED;
                 if (ft.is(FUNCTION) && ft.signature() != null)
                     b.set(fvar, ft.withSignature(new Signature(ft.signature().params(), result)));
-                returns.put(fvar, result);
+                if (fvar >= returns.length) returns = Arrays.copyOf(returns, Math.max(fvar + 1, returns.length * 2));
+                returns[fvar] = result;
             }
             if (!literals.isEmpty() && (begin instanceof BeginObjectLiteralMethod || begin instanceof BeginObjectLiteralGetter)) {
                 Type value = !rets.isNothing() ? rets : UNDEFINED;
@@ -458,13 +511,14 @@ public final class Typer {
                 int v = inner[k];
                 Type ty = ins.get(k);
                 // on a second pass the loop variable also carries what the afterthought and body made of it
-                b.set(v, b.overall.containsKey(v) ? ty.join(b.overall.get(v)) : ty);
+                Type seen = b.get(b.canonical(v));
+                b.set(v, seen != null ? ty.join(seen) : ty);
             }
         } else if (op instanceof BeginForLoopAfterthought || op instanceof BeginForLoopBody) {
             int[] condVars = code.get(headerCondition(code, i)).innerOutputs();
             List<Integer> inner = ints(instr.innerOutputs());
             if (op instanceof BeginForLoopBody) b.set(inner.remove(inner.size() - 1), Analysis.LABEL);
-            for (int k = 0; k < Math.min(inner.size(), condVars.length); k++) b.alias.put(inner.get(k), condVars[k]);
+            for (int k = 0; k < Math.min(inner.size(), condVars.length); k++) b.setAlias(inner.get(k), condVars[k]);
         } else if (op instanceof BeginForEachLoop o) {
             List<Integer> inner = ints(instr.innerOutputs());
             b.set(inner.remove(inner.size() - 1), Analysis.LABEL);

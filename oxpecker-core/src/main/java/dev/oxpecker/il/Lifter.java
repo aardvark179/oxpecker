@@ -369,7 +369,7 @@ public final class Lifter {
             if (s == Storage.LOOPVAR || s == Storage.COUNTER || s == Storage.FOREACH) return "i" + v;
             if (s == Storage.FUNCTION) return "f" + v;
             if (s == Storage.LABEL) return "L" + v;
-            Type t = an.types().get(v);
+            Type t = an.types()[v];
             String prefix = "v";
             if (t != null && !t.isNothing()) {
                 int k = t.possible();

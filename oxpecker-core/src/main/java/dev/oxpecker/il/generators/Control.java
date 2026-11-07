@@ -27,7 +27,6 @@ import dev.oxpecker.il.Type;
 import dev.oxpecker.il.UnaryOperator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /** Control flow: conditionals, loops, breaks, try/catch, switch, blocks, with, eval (control.py). */
 public final class Control {
@@ -45,9 +44,10 @@ public final class Control {
      */
     public static List<Integer> loopLabels(Builder b) {
         List<Integer> out = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> e : b.labels.entrySet()) {
-            int v = e.getKey();
-            if (b.inScope(v) && !b.isHidden(v) && Ops.isAny(b.code.get(e.getValue()).op(), Analysis.LOOP_BODIES)) out.add(v);
+        int[] labels = b.labels;
+        for (int v = 0; v < labels.length; v++) {
+            if (labels[v] == -1) continue;
+            if (b.inScope(v) && !b.isHidden(v) && Ops.isAny(b.code.get(labels[v]).op(), Analysis.LOOP_BODIES)) out.add(v);
         }
         return out;
     }

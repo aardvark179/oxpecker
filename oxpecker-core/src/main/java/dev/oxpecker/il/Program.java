@@ -15,11 +15,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /** A program, plus the static functions over code: validity, contexts, blocks, renumbering, signatures. */
@@ -81,7 +79,10 @@ public record Program(List<Instruction> code, GenOptions options, String templat
      * and visible, required contexts, balanced and matching blocks, consistent for-loop headers.
      */
     public static void check(List<Instruction> code) {
-        Map<Integer, Integer> defined = new HashMap<>();        // variable -> scope id
+        int top = -1;
+        for (Instruction instr : code) for (int v : instr.allOutputs()) top = Math.max(top, v);
+        int[] defined = new int[top + 1];                       // variable -> scope id, -1 if not defined (yet)
+        Arrays.fill(defined, -1);
         int scopeCounter = 0;
         List<Active> active = new ArrayList<>(List.of(new Active(0, null)));
         Deque<Integer> forHeader = new ArrayDeque<>();
@@ -91,8 +92,8 @@ public record Program(List<Instruction> code, GenOptions options, String templat
             if (instr.index() != idx) throw new InvalidProgram("index", "instruction has index " + instr.index(), idx);
             Operation op = instr.op();
             for (int v : instr.inputs()) {
-                Integer scope = defined.get(v);
-                if (scope == null) throw new InvalidProgram("undefined", "v" + v + " is never defined", idx);
+                int scope = v >= 0 && v < defined.length ? defined[v] : -1;
+                if (scope == -1) throw new InvalidProgram("undefined", "v" + v + " is never defined", idx);
                 boolean visible = false;
                 for (Active a : active) if (a.scope == scope) { visible = true; break; }
                 if (!visible) throw new InvalidProgram("invisible", "v" + v + " is not visible", idx);
@@ -126,10 +127,10 @@ public record Program(List<Instruction> code, GenOptions options, String templat
         if (active.size() != 1) throw new InvalidProgram("block_mismatch", (active.size() - 1) + " block(s) left open");
     }
 
-    private static void define(Map<Integer, Integer> defined, int v, int scope, int index) {
-        if (defined.containsKey(v)) throw new InvalidProgram("numbering", "v" + v + " defined twice", index);
-        if (v != 0 && !defined.containsKey(v - 1)) throw new InvalidProgram("numbering", "v" + v + " defined before v" + (v - 1), index);
-        defined.put(v, scope);
+    private static void define(int[] defined, int v, int scope, int index) {
+        if (v >= 0 && defined[v] != -1) throw new InvalidProgram("numbering", "v" + v + " defined twice", index);
+        if (v != 0 && (v < 0 || defined[v - 1] == -1)) throw new InvalidProgram("numbering", "v" + v + " defined before v" + (v - 1), index);
+        defined[v] = scope;
     }
 
     public static boolean isValid(List<Instruction> code) {
@@ -228,18 +229,22 @@ public record Program(List<Instruction> code, GenOptions options, String templat
     // --------------------------------------------------------------------------- renumbering, signatures
     /** Contiguous variable numbers in definition order and fresh indexes (Code.swift:166-181). */
     public static List<Instruction> renumber(List<Instruction> code) {
-        Map<Integer, Integer> mapping = new HashMap<>();
+        int top = -1;
+        for (Instruction instr : code) for (int v : instr.inouts()) top = Math.max(top, v);
+        int[] mapping = new int[top + 1];                         // old variable -> new, -1 if not defined yet
+        Arrays.fill(mapping, -1);
+        int defined = 0;
         List<Instruction> out = new ArrayList<>(code.size());
         for (int i = 0; i < code.size(); i++) {
             Instruction instr = code.get(i);
             for (int v : instr.allOutputs()) {
-                if (mapping.containsKey(v)) throw new InvalidProgram("numbering", "v" + v + " defined twice", i);
-                mapping.put(v, mapping.size());
+                if (mapping[v] != -1) throw new InvalidProgram("numbering", "v" + v + " defined twice", i);
+                mapping[v] = defined++;
             }
             int[] inouts = instr.inouts();
             for (int k = 0; k < inouts.length; k++) {
-                Integer m = mapping.get(inouts[k]);
-                if (m == null) throw new InvalidProgram("undefined", "v" + inouts[k] + " used before definition", i);
+                int m = inouts[k] >= 0 ? mapping[inouts[k]] : -1;
+                if (m == -1) throw new InvalidProgram("undefined", "v" + inouts[k] + " used before definition", i);
                 inouts[k] = m;
             }
             out.add(instr.withInouts(inouts).withIndex(i));

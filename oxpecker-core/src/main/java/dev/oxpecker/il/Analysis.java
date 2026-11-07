@@ -23,13 +23,14 @@ import static dev.oxpecker.il.Type.STRING;
 
 import dev.oxpecker.il.Ops.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -69,18 +70,18 @@ public final class Analysis {
     private final List<List<Integer>> visibleAt;
     private final List<Integer> contextAt;
     private final Map<Integer, Storage> storage;
-    private final Map<Integer, Integer> defs;
+    private final int[] defs;
     private final Map<Integer, List<Integer>> uses;
     private final Map<Integer, List<Integer>> assignments;
     private final List<Integer> functionOf;
     private final List<Boolean> strictAt;
-    private final Map<Integer, Integer> labels;
-    private final Map<Integer, Type> types;
-    private final Map<Integer, Type> returns;
+    private final int[] labels;
+    private final Type[] types;
+    private final Type[] returns;
     private final RhinoModel rhino;
-    private final List<Map<Integer, Type>> before;
-    private final List<Map<Integer, Type>> after;
-    private final Map<Integer, Integer> alias;
+    private final List<Type[]> before;
+    private final List<Type[]> after;
+    private final int[] alias;
 
     private Analysis(List<Instruction> code, Structure s, TypeResult t, RhinoModel rhino) {
         this.code = code;
@@ -93,8 +94,8 @@ public final class Analysis {
         this.functionOf = s.functionOf;
         this.strictAt = s.strictAt;
         this.labels = s.labels;
-        this.types = t.joined;
-        this.returns = t.returns;
+        this.types = Arrays.copyOf(t.joined, s.numVariables);
+        this.returns = Arrays.copyOf(t.returns, s.numVariables);
         this.rhino = rhino;
         this.before = t.before;
         this.after = t.after;
@@ -106,19 +107,20 @@ public final class Analysis {
     public List<List<Integer>> visibleAt() { return visibleAt; }
     public List<Integer> contextAt() { return contextAt; }
     public Map<Integer, Storage> storage() { return storage; }
-    public Map<Integer, Integer> defs() { return defs; }
+    /** Variable -> the index of the instruction defining it; every variable of the program has one. */
+    public int[] defs() { return defs; }
     public Map<Integer, List<Integer>> uses() { return uses; }
     /** Definition first, then every reassignment. */
     public Map<Integer, List<Integer>> assignments() { return assignments; }
     /** The enclosing subroutine begin index per instruction, {@link #TOP_LEVEL} outside any. */
     public List<Integer> functionOf() { return functionOf; }
     public List<Boolean> strictAt() { return strictAt; }
-    /** Label variable -> the block start that defines it. */
-    public Map<Integer, Integer> labels() { return labels; }
-    /** Types joined over the whole program. */
-    public Map<Integer, Type> types() { return types; }
-    /** Function variable -> return type. */
-    public Map<Integer, Type> returns() { return returns; }
+    /** Label variable -> the block start that defines it; -1 for other variables. */
+    public int[] labels() { return labels; }
+    /** Variable -> its type joined over the whole program; null where it has none. */
+    public Type[] types() { return types; }
+    /** Function variable -> return type; null for other variables. */
+    public Type[] returns() { return returns; }
     public RhinoModel rhino() { return rhino; }
 
     public Set<Integer> assignable() {
@@ -127,20 +129,28 @@ public final class Analysis {
         return out;
     }
 
-    /** Types at the end of the program (a function's full signature lives here). */
-    public Map<Integer, Type> finalTypes() { return after.isEmpty() ? Map.of() : after.get(after.size() - 1); }
+    /** Types at the end of the program (a function's full signature lives here); null where there is none. */
+    public Type[] finalTypes() {
+        return Arrays.copyOf(after.isEmpty() ? new Type[0] : after.get(after.size() - 1), defs.length);
+    }
+
+    private int canonical(int v) { return v < alias.length ? alias[v] : v; }
+
+    /** {@code types[v]}, or null when {@code v} is past its end. */
+    static Type typeIn(Type[] types, int v) { return v < types.length ? types[v] : null; }
 
     /** The type of {@code v} as seen by instruction {@code i}: before it for inputs, after it for its outputs. */
     public Type typeAt(int i, int v) {
-        v = alias.getOrDefault(v, v);
-        Type t = before.get(i).get(v);
+        v = canonical(v);
+        Type t = typeIn(before.get(i), v);
         if (t != null) return t;
-        return after.get(i).getOrDefault(v, ANY);
+        t = typeIn(after.get(i), v);
+        return t != null ? t : ANY;
     }
 
     public Type typeAfter(int i, int v) {
-        v = alias.getOrDefault(v, v);
-        return after.get(i).getOrDefault(v, ANY);
+        Type t = typeIn(after.get(i), canonical(v));
+        return t != null ? t : ANY;
     }
 
     public int numUses(int v) { return uses.getOrDefault(v, List.of()).size(); }
@@ -191,7 +201,7 @@ public final class Analysis {
     }
 
     @Override public String toString() {
-        return "<Analysis of " + code.size() + " instructions, " + types.size() + " variables>";
+        return "<Analysis of " + code.size() + " instructions, " + Arrays.stream(types).filter(Objects::nonNull).count() + " variables>";
     }
 
     // =========================================================================== structure
@@ -239,12 +249,13 @@ public final class Analysis {
         final List<List<Integer>> visibleAt = new ArrayList<>();
         List<Integer> contextAt;
         final Map<Integer, Storage> storage = new LinkedHashMap<>();
-        final Map<Integer, Integer> defs = new LinkedHashMap<>();
+        int numVariables;
+        int[] defs;
         final Map<Integer, List<Integer>> uses = new LinkedHashMap<>();
         final Map<Integer, List<Integer>> assignments = new LinkedHashMap<>();
         final List<Integer> functionOf = new ArrayList<>();
         final List<Boolean> strictAt = new ArrayList<>();
-        final Map<Integer, Integer> labels = new LinkedHashMap<>();
+        int[] labels;
     }
 
     private static Structure structure(List<Instruction> code, boolean strict) {
@@ -254,6 +265,12 @@ public final class Analysis {
         List<Frame> frames = new ArrayList<>();
         frames.add(new Frame(TOP_LEVEL, strict, 0));
         s.contextAt = Program.contexts(code);
+        int topVar = -1;
+        for (Instruction instr : code) for (int v : instr.allOutputs()) topVar = Math.max(topVar, v);
+        s.numVariables = topVar + 1;
+        s.defs = new int[s.numVariables];
+        s.labels = new int[s.numVariables];
+        Arrays.fill(s.labels, -1);
 
         for (int i = 0; i < code.size(); i++) {
             Instruction instr = code.get(i);
@@ -279,7 +296,7 @@ public final class Analysis {
             }
             Frame f = frames.get(frames.size() - 1);
             for (int v : instr.outputs()) {
-                s.defs.put(v, i);
+                s.defs[v] = i;
                 s.assignments.put(v, new ArrayList<>(List.of(i)));
                 s.storage.put(v, outputStorage(op, f.fn != TOP_LEVEL, f.depth > 0));
                 scopes.get(scopes.size() - 1).add(v);
@@ -292,12 +309,12 @@ public final class Analysis {
             int[] inner = instr.innerOutputs();
             for (int k = 0; k < inner.length; k++) {
                 int v = inner[k];
-                s.defs.put(v, i);
+                s.defs[v] = i;
                 s.assignments.put(v, new ArrayList<>(List.of(i)));
                 Storage st = innerStorage(op, k);
                 s.storage.put(v, st);
                 scopes.get(scopes.size() - 1).add(v);
-                if (st == Storage.LABEL) s.labels.put(v, i);
+                if (st == Storage.LABEL) s.labels[v] = i;
             }
         }
         return s;
@@ -366,14 +383,23 @@ public final class Analysis {
         return ANY;
     }
 
-    static Map<Integer, Type> joinStates(Map<Integer, Type> pre, List<Map<Integer, Type>> states) {
-        Map<Integer, Type> out = new LinkedHashMap<>();
-        Set<Integer> keys = new LinkedHashSet<>(pre.keySet());
-        for (Map<Integer, Type> s : states) keys.addAll(s.keySet());
-        for (int v : keys) {
-            Type ty = pre.getOrDefault(v, NOTHING);
-            for (Map<Integer, Type> s : states) if (s.containsKey(v)) ty = ty.join(s.get(v));
-            if (!ty.isNothing()) out.put(v, ty);
+    /** Variable-wise join of type states (null: no type); a variable that joins to nothing has none. */
+    static Type[] joinStates(Type[] pre, List<Type[]> states) {
+        int n = pre.length;
+        for (Type[] s : states) n = Math.max(n, s.length);
+        Type[] out = new Type[n];
+        for (int v = 0; v < n; v++) {
+            Type p = typeIn(pre, v);
+            boolean any = p != null;
+            Type ty = p != null ? p : NOTHING;
+            for (Type[] s : states) {
+                Type t = typeIn(s, v);
+                if (t != null) {
+                    ty = ty.join(t);
+                    any = true;
+                }
+            }
+            if (any && !ty.isNothing()) out[v] = ty;
         }
         return out;
     }
@@ -426,11 +452,11 @@ public final class Analysis {
     }
 
     private static final class TypeResult {
-        List<Map<Integer, Type>> before;
-        List<Map<Integer, Type>> after;
-        Map<Integer, Type> joined;
-        Map<Integer, Type> returns;
-        Map<Integer, Integer> alias;
+        List<Type[]> before;
+        List<Type[]> after;
+        Type[] joined;
+        Type[] returns;
+        int[] alias;
     }
 
     /**
@@ -439,13 +465,13 @@ public final class Analysis {
      */
     private static TypeResult types(List<Instruction> code, Map<Integer, List<Type>> paramTypes) {
         int n = code.size();
-        List<Map<Integer, Type>> before = new ArrayList<>(n);
-        List<Map<Integer, Type>> after = new ArrayList<>(n);
+        List<Type[]> before = new ArrayList<>(n);
+        List<Type[]> after = new ArrayList<>(n);
         for (int k = 0; k < n; k++) {
-            before.add(new LinkedHashMap<>());
-            after.add(new LinkedHashMap<>());
+            before.add(null);
+            after.add(null);
         }
-        Map<Integer, Type> joined = new LinkedHashMap<>();
+        Type[] joined = new Type[0];
         Typer typer = new Typer(code, paramTypes);
         Set<Integer> loopPasses = new HashSet<>();
         int i = 0;
@@ -462,21 +488,34 @@ public final class Analysis {
                 }
             }
             record(typer, after, i);
-            for (var e : after.get(i).entrySet()) joined.put(e.getKey(), joined.getOrDefault(e.getKey(), NOTHING).join(e.getValue()));
+            Type[] snap = after.get(i);
+            if (snap.length > joined.length) joined = Arrays.copyOf(joined, snap.length);
+            for (int v = 0; v < snap.length; v++)
+                if (snap[v] != null) joined[v] = joined[v] == null ? NOTHING.join(snap[v]) : joined[v].join(snap[v]);
             i++;
         }
         TypeResult r = new TypeResult();
         r.before = before;
         r.after = after;
         r.joined = joined;
-        r.returns = new LinkedHashMap<>(typer.returns);
-        r.alias = new LinkedHashMap<>(typer.alias());
+        r.returns = typer.returns();
+        r.alias = typer.alias();
+        for (int k = 0; k < n; k++) {         // instructions the walk never reached (it reaches them all)
+            if (before.get(k) == null) before.set(k, new Type[0]);
+            if (after.get(k) == null) after.set(k, new Type[0]);
+        }
         return r;
     }
 
-    private static void record(Typer typer, List<Map<Integer, Type>> slot, int i) {
-        Map<Integer, Type> snap = typer.snapshot();
-        slot.set(i, slot.get(i).isEmpty() ? snap : joinStates(slot.get(i), List.of(snap)));
+    private static void record(Typer typer, List<Type[]> slot, int i) {
+        Type[] snap = typer.snapshot();
+        Type[] seen = slot.get(i);
+        slot.set(i, seen == null || isEmpty(seen) ? snap : joinStates(seen, List.<Type[]>of(snap)));
+    }
+
+    private static boolean isEmpty(Type[] state) {
+        for (Type t : state) if (t != null) return false;
+        return true;
     }
 
     // =========================================================================== Rhino model
@@ -493,18 +532,18 @@ public final class Analysis {
      * treating an open block as ending at the end of the code. {@code functionOf} uses
      * {@link #TOP_LEVEL} for top-level instructions.
      */
-    public static RhinoModel rhinoModel(List<Instruction> code, Map<Integer, Storage> storage, Map<Integer, Integer> defs,
+    public static RhinoModel rhinoModel(List<Instruction> code, Map<Integer, Storage> storage, int[] defs,
                                         Map<Integer, List<Integer>> assignments, List<Integer> functionOf) {
         Map<Integer, List<ActivationReason>> activation = new LinkedHashMap<>();
         List<Integer> functions = new ArrayList<>();
         for (int i = 0; i < code.size(); i++) if (Ops.isAny(code.get(i).op(), Ops.SUBROUTINE_BEGINS)) functions.add(i);
-        Map<Integer, Integer> ends = new LinkedHashMap<>();
-        for (int f : functions) ends.put(f, safeBlockEnd(code, f));
+        int[] ends = new int[code.size()];
+        for (int f : functions) ends[f] = safeBlockEnd(code, f);
 
         for (int f : functions) {
             List<ActivationReason> reasons = new ArrayList<>();
             int j = f + 1;
-            while (j < ends.get(f)) {
+            while (j < ends[f]) {
                 Operation op = code.get(j).op();
                 if (Ops.isAny(op, Ops.SUBROUTINE_BEGINS)) {
                     if (!reasons.contains(ActivationReason.NESTED_FUNCTION)) reasons.add(ActivationReason.NESTED_FUNCTION);
@@ -528,7 +567,7 @@ public final class Analysis {
             if (!activation.get(f).isEmpty()) continue;
             Set<Integer> current = new TreeSet<>();
             for (var e : storage.entrySet())
-                if (e.getValue() == Storage.LOCAL_VAR && functionOf.get(defs.get(e.getKey())) == f) current.add(e.getKey());
+                if (e.getValue() == Storage.LOCAL_VAR && functionOf.get(defs[e.getKey()]) == f) current.add(e.getKey());
             boolean changed = true;
             while (changed) {
                 changed = false;
@@ -569,7 +608,7 @@ public final class Analysis {
                 Collections.unmodifiableSet(sites), Collections.unmodifiableMap(exprType));
     }
 
-    private static ActivationReason activationReason(List<Instruction> code, int j, Map<Integer, Integer> defs) {
+    private static ActivationReason activationReason(List<Instruction> code, int j, int[] defs) {
         Operation op = code.get(j).op();
         if (op instanceof BeginCatch) return ActivationReason.CATCH;
         if (op instanceof BeginWith) return ActivationReason.WITH;
@@ -579,14 +618,14 @@ public final class Analysis {
                 || op instanceof SetComputedSuperProperty || op instanceof GetComputedSuperProperty || op instanceof UpdateSuperProperty)
             return ActivationReason.SUPER;
         if (op instanceof CallFunction || op instanceof CallFunctionWithSpread) {
-            Operation callee = code.get(defs.get(code.get(j).input(0))).op();
+            Operation callee = code.get(defs[code.get(j).input(0)]).op();
             if (callee instanceof LoadBuiltin lb && lb.builtin().name().equals("eval")) return ActivationReason.EVAL;
         }
         return null;
     }
 
     private static RhinoType rhsType(List<Instruction> code, int assignI, int v, Set<Integer> numberVars,
-                                     Map<Integer, Storage> storage, Map<Integer, Integer> defs) {
+                                     Map<Integer, Storage> storage, int[] defs) {
         Instruction instr = code.get(assignI);
         Operation op = instr.op();
         if (op instanceof Declare) return varOrExpr(code, instr.input(0), numberVars, storage, defs);
@@ -601,9 +640,9 @@ public final class Analysis {
     }
 
     private static RhinoType varOrExpr(List<Instruction> code, int v, Set<Integer> numberVars,
-                                       Map<Integer, Storage> storage, Map<Integer, Integer> defs) {
+                                       Map<Integer, Storage> storage, int[] defs) {
         Storage s = storage.getOrDefault(v, Storage.TEMP);
-        if (s == Storage.TEMP) return exprType(code, defs.get(v), numberVars, storage, defs);
+        if (s == Storage.TEMP) return exprType(code, defs[v], numberVars, storage, defs);
         return numberVars.contains(v) ? RhinoType.NUMBER : RhinoType.ANY;
     }
 
@@ -620,7 +659,7 @@ public final class Analysis {
 
     /** Block.findExpressionType over one value-producing instruction. */
     private static RhinoType exprType(List<Instruction> code, int i, Set<Integer> numberVars,
-                                      Map<Integer, Storage> storage, Map<Integer, Integer> defs) {
+                                      Map<Integer, Storage> storage, int[] defs) {
         Instruction instr = code.get(i);
         Operation op = instr.op();
         if (op instanceof LoadInteger || op instanceof LoadFloat) return RhinoType.NUMBER;
@@ -708,7 +747,7 @@ public final class Analysis {
                 int target = instr.input(0);
                 if (an.storage.get(target) != Storage.LABEL)
                     throw new InvalidProgram("label", "break/continue target is not a label", i);
-                if ((op instanceof LoopBreak || op instanceof LoopContinue) && !Ops.isAny(code.get(an.labels.get(target)).op(), LOOP_BODIES))
+                if ((op instanceof LoopBreak || op instanceof LoopContinue) && !Ops.isAny(code.get(an.labels[target]).op(), LOOP_BODIES))
                     throw new InvalidProgram("label", "loop break/continue needs a loop label", i);
             }
             if (op instanceof CallFunction || op instanceof CallFunctionWithSpread || op instanceof Construct || op instanceof ConstructWithSpread) {

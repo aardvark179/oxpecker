@@ -29,9 +29,8 @@ import dev.oxpecker.il.Radix;
 import dev.oxpecker.il.Type;
 import dev.oxpecker.il.UnaryOperator;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -252,8 +251,9 @@ public final class Compiler {
                         fbv = fb2.f();
                         List<Integer> params2 = fb2.args();
                         d.sampled(ACTIVATION_TRIGGERS).accept(b);
-                        Map<Integer, Integer> map = new LinkedHashMap<>();
-                        for (int i = 0; i < Math.min(params.size(), params2.size()); i++) map.put(params.get(i), params2.get(i));
+                        int[] map = new int[fbv + 1];
+                        Arrays.fill(map, -1);
+                        for (int i = 0; i < Math.min(params.size(), params2.size()); i++) map[params.get(i)] = params2.get(i);
                         b.replay(bodyStart, bodyEnd, map);
                     }
                     int x = b.loadInt(d.sampled(SMALL_INTS));

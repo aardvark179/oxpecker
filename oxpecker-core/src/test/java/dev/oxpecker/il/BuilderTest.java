@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import dev.oxpecker.il.Ops.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** tests/il/test_builder.py: every block helper emits a balanced, checkable group; hiding; pools; at(); replay. */
@@ -175,12 +174,12 @@ class BuilderTest {
         b.probe();
         var code = b.finish();
         Analysis an = Analysis.verify(code);
-        assertTrue(an.types().get(f).is(FUNCTION));
-        assertTrue(an.returns().get(f).is(NUMBER));
+        assertTrue(an.types()[f].is(FUNCTION));
+        assertTrue(an.returns()[f].is(NUMBER));
         assertEquals(0, b.context() & Context.METHOD);
         assertEquals(Context.JAVASCRIPT, b.context());
         assertSame(Storage.TEMP, an.storage().get(obj));
-        assertTrue(an.types().get(obj).group().startsWith("_Object"));
+        assertTrue(an.types()[obj].group().startsWith("_Object"));
     }
 
     @Test void framesEnforceTheirProtocol() {
@@ -311,10 +310,10 @@ class BuilderTest {
             b3.doReturn(b3.binary(gb.arg(0), z, BinaryOperator.MUL));
         }
         int stop = b3.code.size();
-        Map<Integer, Integer> mapping = b3.replay(start, stop);
+        int[] mapping = b3.replay(start, stop);
         var code3 = b3.finish();
         Analysis.verify(code3);
-        assertNotEquals(g, mapping.get(g));
+        assertNotEquals(g, mapping[g]);
         assertEquals("EndPlainFunction", code3.get(code3.size() - 1).op().name());
         assertEquals(code3.get(start).op(), code3.get(stop).op());
         assertEquals(code3.get(start).gen(), code3.get(stop).gen());

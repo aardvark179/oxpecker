@@ -66,8 +66,8 @@ public final class Calls {
      */
     public static Builtin definingBuiltin(Builder b, int v) {
         int seen = 0;
-        while (b.defs.containsKey(v) && seen < 8) {
-            var instr = b.code.get(b.defs.get(v));
+        while (v < b.defs.length && b.defs[v] != -1 && seen < 8) {
+            var instr = b.code.get(b.defs[v]);
             if (instr.op() instanceof Ops.LoadBuiltin lb) return lb.builtin();
             if (instr.op() instanceof Ops.Declare) {
                 v = instr.input(0);

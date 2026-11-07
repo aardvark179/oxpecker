@@ -78,7 +78,7 @@ class AnalysisTest {
         assertEquals(List.of(3, 2, 1, 0), an.visibleAt().get(13));
         assertEquals(3, an.functionOf().get(4));
         assertEquals(Analysis.TOP_LEVEL, an.functionOf().get(13));
-        assertEquals(4, an.defs().get(5));
+        assertEquals(4, an.defs()[5]);
         assertEquals(List.of(4, 5, 6, 7), an.uses().get(4));
         assertEquals(List.of(3, 2, 1), an.declaredVisibleAt(13));
     }
@@ -113,17 +113,17 @@ class AnalysisTest {
                 I(new UnaryOperation(UnaryOperator.MINUS), 8, 10),
                 I(new TernaryOperation(), 6, 0, 2, 11));
         var ty = Analysis.analyse(p).types();
-        assertEquals(INTEGER, ty.get(0));
-        assertEquals(FLOAT, ty.get(1));
-        assertEquals(STRING, ty.get(2));
-        assertEquals(NUMBER, ty.get(3));
-        assertEquals(STRING, ty.get(4));
-        assertEquals(INTEGER, ty.get(5));
-        assertEquals(BOOLEAN, ty.get(6));
-        assertEquals(STRING, ty.get(7));
-        assertEquals(BIGINT, ty.get(9));
-        assertEquals(BIGINT, ty.get(10));
-        assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), ty.get(11).possible());
+        assertEquals(INTEGER, ty[0]);
+        assertEquals(FLOAT, ty[1]);
+        assertEquals(STRING, ty[2]);
+        assertEquals(NUMBER, ty[3]);
+        assertEquals(STRING, ty[4]);
+        assertEquals(INTEGER, ty[5]);
+        assertEquals(BOOLEAN, ty[6]);
+        assertEquals(STRING, ty[7]);
+        assertEquals(BIGINT, ty[9]);
+        assertEquals(BIGINT, ty[10]);
+        assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), ty[11].possible());
         assertTrue(Analysis.binaryResult(ADD, ANY, ANY).is(PRIMITIVE.join(BIGINT)));
     }
 
@@ -171,7 +171,7 @@ class AnalysisTest {
         Analysis an = Analysis.analyse(p);
         assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.typeAt(4, 1).possible());
         assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.typeAt(7, 1).possible());
-        assertEquals(INTEGER, an.types().get(3));
+        assertEquals(INTEGER, an.types()[3]);
     }
 
     @Test void catchEntryJoinsEverythingReachedInTry() {
@@ -188,7 +188,7 @@ class AnalysisTest {
         Analysis an = Analysis.analyse(p);
         assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.typeAt(6, 1).possible());
         assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.typeAt(8, 1).possible());
-        assertEquals(ANY, an.types().get(3));
+        assertEquals(ANY, an.types()[3]);
     }
 
     @Test void tryFinallyWithoutCatch() {
@@ -224,15 +224,15 @@ class AnalysisTest {
                 I(new EndGeneratorFunction()),
                 I(new CallFunction(0), 8, 10));
         Analysis an = Analysis.analyse(p, false, Map.of(0, List.of(NUMBER)));
-        assertEquals(NUMBER, an.types().get(1));
-        assertEquals(NUMBER, an.returns().get(0));
-        assertEquals(NUMBER, an.types().get(5));
-        assertEquals(UNDEFINED, an.returns().get(6));
-        assertEquals(UNDEFINED, an.types().get(7));
-        assertEquals("Generator", an.types().get(10).group());
-        assertEquals(INTEGER, an.types().get(10).element());
-        assertTrue(an.types().get(0).is(FUNCTION));
-        assertEquals(NUMBER, an.finalTypes().get(0).signature().returns());
+        assertEquals(NUMBER, an.types()[1]);
+        assertEquals(NUMBER, an.returns()[0]);
+        assertEquals(NUMBER, an.types()[5]);
+        assertEquals(UNDEFINED, an.returns()[6]);
+        assertEquals(UNDEFINED, an.types()[7]);
+        assertEquals("Generator", an.types()[10].group());
+        assertEquals(INTEGER, an.types()[10].element());
+        assertTrue(an.types()[0].is(FUNCTION));
+        assertEquals(NUMBER, an.finalTypes()[0].signature().returns());
     }
 
     @Test void functionBodyChangesOuterVariablesConditionally() {
@@ -268,16 +268,16 @@ class AnalysisTest {
                 I(new GetElement(0), 12, 13),
                 I(new GetProperty(k("LENGTH")), 12, 14));
         Analysis an = Analysis.analyse(p);
-        assertEquals("Map", an.types().get(1).group());
-        assertEquals(INTEGER, an.types().get(4));
-        assertEquals(NUMBER, an.types().get(7));
-        assertTrue(an.types().get(8).group().startsWith("_Object"));
-        assertTrue(an.types().get(8).props().contains(k("A")));
-        assertEquals(INTEGER, an.types().get(9));
-        assertEquals(ANY, an.types().get(10));
+        assertEquals("Map", an.types()[1].group());
+        assertEquals(INTEGER, an.types()[4]);
+        assertEquals(NUMBER, an.types()[7]);
+        assertTrue(an.types()[8].group().startsWith("_Object"));
+        assertTrue(an.types()[8].props().contains(k("A")));
+        assertEquals(INTEGER, an.types()[9]);
+        assertEquals(ANY, an.types()[10]);
         assertTrue(an.typeAt(14, 8).props().contains(k("B")));
-        assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.types().get(13).possible());
-        assertEquals(INTEGER, an.types().get(14));
+        assertEquals(Kind.of(Kind.INTEGER, Kind.STRING), an.types()[13].possible());
+        assertEquals(INTEGER, an.types()[14]);
     }
 
     @Test void forLoopHeaderVariablesAliasAndJoin() {
@@ -309,10 +309,10 @@ class AnalysisTest {
                 I(new EndForEachLoop()),
                 I(new Destruct(new ArrayPattern(List.of(new ArrayElement(new Binding())), new Binding())), 1, 6, 7));
         Analysis an = Analysis.analyse(p);
-        assertEquals(INTEGER, an.types().get(2));
-        assertEquals(STRING, an.types().get(4));
-        assertEquals(INTEGER, an.types().get(6));
-        assertEquals("Array", an.types().get(7).group());
+        assertEquals(INTEGER, an.types()[2]);
+        assertEquals(STRING, an.types()[4]);
+        assertEquals(INTEGER, an.types()[6]);
+        assertEquals("Array", an.types()[7].group());
         assertSame(Storage.FOREACH, an.storage().get(2));
         assertSame(Storage.TOP_VAR, an.storage().get(6));
     }

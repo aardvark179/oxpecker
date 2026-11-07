@@ -26,8 +26,8 @@ import dev.oxpecker.il.Ops.*;
 import java.lang.reflect.RecordComponent;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -394,7 +394,7 @@ public final class Mutate {
         for (int i : insertionPoints(code, an)) {
             for (int v : usable(an, i < code.size() ? i : code.size() - 1, null)) {
                 Storage s = an.storage().get(v);
-                if (!Analysis.NOT_ASSIGNABLE.contains(s) && s != Storage.TEMP && i > an.defs().getOrDefault(v, -1))
+                if (!Analysis.NOT_ASSIGNABLE.contains(s) && s != Storage.TEMP && i > an.defs()[v])
                     targets.add(new int[]{i, v});
             }
         }
@@ -459,12 +459,12 @@ public final class Mutate {
         List<Integer> needed = new ArrayList<>();
         for (int i : included) for (int v : donor.get(i).inputs()) if (!defined.contains(v)) needed.add(v);
         List<Integer> external = new ArrayList<>();
-        Map<Integer, Integer> defs = new HashMap<>();
-        for (int i = 0; i < donor.size(); i++) for (int v : donor.get(i).allOutputs()) defs.put(v, i);
+        int[] defs = new int[numVariables(donor)];
+        for (int i = 0; i < donor.size(); i++) for (int v : donor.get(i).allOutputs()) defs[v] = i;
         while (!needed.isEmpty()) {
             int v = needed.remove(needed.size() - 1);
             if (defined.contains(v) || external.contains(v)) continue;
-            int dd = defs.get(v);
+            int dd = defs[v];
             if (donor.get(dd).op().isBlock() || included.contains(dd)) {
                 external.add(v);
                 continue;
@@ -474,6 +474,19 @@ public final class Mutate {
             for (int w : donor.get(dd).inputs()) if (!defined.contains(w)) needed.add(w);
         }
         return new Slice(new ArrayList<>(included), external);
+    }
+
+    /** One past the highest variable {@code code} defines. */
+    private static int numVariables(List<Instruction> code) {
+        int top = -1;
+        for (Instruction instr : code) for (int v : instr.allOutputs()) top = Math.max(top, v);
+        return top + 1;
+    }
+
+    private static int[] unmapped(int n) {
+        int[] xs = new int[n];
+        Arrays.fill(xs, -1);
+        return xs;
     }
 
     private static List<Integer> ints(int[] xs) {
@@ -509,18 +522,21 @@ public final class Mutate {
             if (op.isBlockEnd() && !op.isBlockStart()) depth--;
         }
         Consumer<Builder> emit = b -> {
-            Map<Integer, Integer> mapping = new HashMap<>();
+            int[] mapping = unmapped(numVariables(dcode));     // donor variable -> host variable
             for (int v : s.external) {
-                Type want = dan.types().getOrDefault(v, Type.ANY);
+                Type want = dan.types()[v] != null ? dan.types()[v] : Type.ANY;
                 List<Integer> same = b.visible().stream().filter(w -> b.typeOf(w).is(want)).toList();
                 if (same.isEmpty()) same = b.visible();
                 if (same.isEmpty()) throw new BuilderError("no host variable for an external slice variable");
-                mapping.put(v, pick(d, same));
+                mapping[v] = pick(d, same);
             }
             for (int i : s.included) {
                 Instruction instr = dcode.get(i);
                 List<Integer> inputs = new ArrayList<>();
-                for (int v : instr.inputs()) inputs.add(mapping.computeIfAbsent(v, x -> x));
+                for (int v : instr.inputs()) {
+                    if (mapping[v] == -1) mapping[v] = v;
+                    inputs.add(mapping[v]);
+                }
                 Instruction fresh = b.emit(instr.op(), inputs, instr.lift());
                 int[] olds = instr.allOutputs(), news = fresh.allOutputs();
                 List<Integer> outputs = ints(instr.outputs());
@@ -529,11 +545,11 @@ public final class Mutate {
                     if (outputs.contains(old) && d.maybe(0.10)) {
                         List<Integer> same = b.visible().stream().filter(w -> w != nv && b.typeOf(w).is(b.typeOf(nv))).toList();
                         if (!same.isEmpty()) {
-                            mapping.put(old, pick(d, same));
+                            mapping[old] = pick(d, same);
                             continue;
                         }
                     }
-                    mapping.put(old, nv);
+                    mapping[old] = nv;
                 }
                 String gen = "splice:" + (instr.gen().isEmpty() ? instr.op().name() : instr.gen());
                 b.code.set(b.code.size() - 1, fresh.withProvenance(gen, instr.origin(), fresh.step()));
@@ -560,13 +576,16 @@ public final class Mutate {
         if (points.isEmpty() || dcode.isEmpty()) return null;
         int pos = pick(d, points);
         Consumer<Builder> emit = b -> {
-            Map<Integer, Integer> mapping = new HashMap<>();
+            int[] mapping = unmapped(numVariables(dcode));     // donor variable -> host variable
             for (Instruction instr : dcode) {
                 List<Integer> inputs = new ArrayList<>();
-                for (int v : instr.inputs()) inputs.add(Objects.requireNonNull(mapping.get(v), "unmapped donor variable"));
+                for (int v : instr.inputs()) {
+                    if (mapping[v] == -1) throw new NullPointerException("unmapped donor variable");
+                    inputs.add(mapping[v]);
+                }
                 Instruction fresh = b.emit(instr.op(), inputs, instr.lift());
                 int[] olds = instr.allOutputs(), news = fresh.allOutputs();
-                for (int k = 0; k < Math.min(olds.length, news.length); k++) mapping.put(olds[k], news[k]);
+                for (int k = 0; k < Math.min(olds.length, news.length); k++) mapping[olds[k]] = news[k];
                 b.code.set(b.code.size() - 1, fresh.withProvenance(instr.gen(), instr.origin(), fresh.step()));
             }
         };
@@ -674,7 +693,7 @@ public final class Mutate {
         numberVars.removeIf(v -> Analysis.NOT_ASSIGNABLE.contains(an.storage().get(v)));
         if (numberVars.isEmpty()) return null;
         int v = pick(d, numberVars);
-        int def = an.defs().get(v);
+        int def = an.defs()[v];
         int f = an.functionOf().get(def);
         int end = f != Analysis.TOP_LEVEL ? Program.blockEnd(code, f) : code.size();
         List<Integer> points = new ArrayList<>();

@@ -90,8 +90,13 @@ public final class Builder {
     private final List<Integer> contexts = new ArrayList<>();
     private final List<Frame> frames = new ArrayList<>();
     public final Map<Integer, Storage> storage = new LinkedHashMap<>();
-    public final Map<Integer, Integer> defs = new LinkedHashMap<>();
-    public final Map<Integer, Integer> labels = new LinkedHashMap<>();
+    /**
+     * Variable -> the index of the instruction defining it, -1 for a variable not defined (yet).
+     * Grows as variables are defined, so read the field afresh rather than keeping the array.
+     */
+    public int[] defs = filled(16);
+    /** Label variable -> the block start that defines it, -1 for other variables; grows like {@link #defs}. */
+    public int[] labels = filled(16);
     public final Map<Integer, List<Integer>> assignments = new LinkedHashMap<>();
     /** Enclosing subroutine begin per instruction, -1 at top level. */
     public final List<Integer> functionOf = new ArrayList<>();
@@ -217,6 +222,26 @@ public final class Builder {
     // ------------------------------------------------------------------ emitting
     private int fresh() { return nextVar++; }
 
+    private static int[] filled(int n) {
+        int[] xs = new int[n];
+        Arrays.fill(xs, -1);
+        return xs;
+    }
+
+    private static int[] grown(int[] xs, int v) {
+        if (v < xs.length) return xs;
+        int old = xs.length;
+        xs = Arrays.copyOf(xs, Math.max(v + 1, old * 2));
+        Arrays.fill(xs, old, xs.length, -1);
+        return xs;
+    }
+
+    private void define(int v, int i) {
+        defs = grown(defs, v);
+        labels = grown(labels, v);
+        defs[v] = i;
+    }
+
     public Instruction emit(Operation op) { return emit(op, List.of(), null); }
 
     public Instruction emit(Operation op, Lift lift) { return emit(op, List.of(), lift); }
@@ -274,7 +299,7 @@ public final class Builder {
         }
         Frame f = frames.get(frames.size() - 1);
         for (int v : instr.outputs()) {
-            defs.put(v, i);
+            define(v, i);
             assignments.put(v, new ArrayList<>(List.of(i)));
             storage.put(v, Analysis.outputStorage(op, f.fn != Analysis.TOP_LEVEL, f.depth > 0));
             scopes.get(scopes.size() - 1).add(v);
@@ -305,12 +330,12 @@ public final class Builder {
         int[] inner = instr.innerOutputs();
         for (int k = 0; k < inner.length; k++) {
             int v = inner[k];
-            defs.put(v, i);
+            define(v, i);
             assignments.put(v, new ArrayList<>(List.of(i)));
             Storage st = Analysis.innerStorage(op, k);
             storage.put(v, st);
             scopes.get(scopes.size() - 1).add(v);
-            if (st == Storage.LABEL) labels.put(v, i);
+            if (st == Storage.LABEL) labels[v] = i;
         }
         typer.step(i, instr);
     }
@@ -340,21 +365,23 @@ public final class Builder {
 
     public List<Instruction> newCode() { return List.copyOf(code.subList(mark, code.size())); }
 
-    public Map<Integer, Integer> replay(int start, int end) { return replay(start, end, null); }
+    public int[] replay(int start, int end) { return replay(start, end, null); }
 
     /**
      * Re-emit code[start:end] with fresh variables ("the same body twice", D22/D31): inputs are
      * mapped through {@code varMap} (identity for variables defined outside the range), outputs
-     * get fresh variables, provenance is kept. Returns the mapping.
+     * get fresh variables, provenance is kept. Both {@code varMap} and the returned mapping are
+     * indexed by old variable, -1 where a variable is not mapped; {@code varMap} may be shorter.
      */
-    public Map<Integer, Integer> replay(int start, int end, Map<Integer, Integer> varMap) {
-        Map<Integer, Integer> mapping = new LinkedHashMap<>(varMap == null ? Map.of() : varMap);
+    public int[] replay(int start, int end, int[] varMap) {
+        int[] mapping = filled(nextVar);
+        if (varMap != null) System.arraycopy(varMap, 0, mapping, 0, Math.min(varMap.length, mapping.length));
         for (Instruction instr : new ArrayList<>(code.subList(start, end))) {
             List<Integer> inputs = new ArrayList<>();
-            for (int v : instr.inputs()) inputs.add(mapping.getOrDefault(v, v));
+            for (int v : instr.inputs()) inputs.add(v < mapping.length && mapping[v] != -1 ? mapping[v] : v);
             Instruction nw = emit(instr.op(), inputs, instr.lift());
             int[] olds = instr.allOutputs(), news = nw.allOutputs();
-            for (int k = 0; k < Math.min(olds.length, news.length); k++) mapping.put(olds[k], news[k]);
+            for (int k = 0; k < Math.min(olds.length, news.length); k++) mapping[olds[k]] = news[k];
             code.set(code.size() - 1, nw.withProvenance(instr.gen(), instr.origin(), nw.step()));
         }
         return mapping;

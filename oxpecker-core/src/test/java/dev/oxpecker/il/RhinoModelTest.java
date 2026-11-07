@@ -70,23 +70,24 @@ class RhinoModelTest {
 
     /** The {@code x} local of f: the Declare in f's body. */
     static int localX(Analysis an, int fIndex) {
-        return new TreeMap<>(an.defs()).entrySet().stream()
-                .filter(e -> an.functionOf().get(e.getValue()) == fIndex && e.getValue() > fIndex
-                        && an.code().get(e.getValue()).op() instanceof Ops.Declare)
-                .sorted(Map.Entry.comparingByValue()).findFirst().orElseThrow().getKey();
+        int[] defs = an.defs();
+        return java.util.stream.IntStream.range(0, defs.length).boxed()
+                .filter(v -> an.functionOf().get(defs[v]) == fIndex && defs[v] > fIndex
+                        && an.code().get(defs[v]).op() instanceof Ops.Declare)
+                .min(java.util.Comparator.comparingInt(v -> defs[v])).orElseThrow();
     }
 
     @ParameterizedTest @MethodSource("shapes")
     void modelPredictionsOnThePair(String shape) {
         Pair p = pair(shape);
         Analysis an = Analysis.analyse(p.code());
-        int fIndex = an.defs().get(p.f()), gIndex = an.defs().get(p.g());
+        int fIndex = an.defs()[p.f()], gIndex = an.defs()[p.g()];
         assertTrue(an.rhino().optimizerRuns(fIndex));
         assertFalse(an.rhino().optimizerRuns(gIndex));
         assertEquals(List.of(ActivationReason.ARGUMENTS), an.rhino().activation().get(gIndex));
         int x = localX(an, fIndex);
         Shape s = SHAPES.get(shape);
         assertEquals(s.numberVar(), an.rhino().numberVar().contains(x));
-        assertEquals(s.observed(), PREDICTION.get(an.rhino().exprType().get(an.defs().get(x))));
+        assertEquals(s.observed(), PREDICTION.get(an.rhino().exprType().get(an.defs()[x])));
     }
 }

@@ -14,7 +14,7 @@ class ShellApiTest {
         int n = b.declare(b.loadInt(1));
         b.update(n, b.loadInt(2), BinaryOperator.ADD);
         assertEquals(List.of("var n1 = 1;", "n1 += 2;"), List.of(Lifter.js(b).split("\n")));
-        assertTrue(Analysis.analyse(b.code).types().get(n).is(Type.NUMBER));      // integer at first, number after `+= 2`
+        assertTrue(Analysis.analyse(b.code).types()[n].is(Type.NUMBER));      // integer at first, number after `+= 2`
         String text = Analysis.explain(b.code);
         assertTrue(Program.dump(b.code).contains("Declare"));
         assertTrue(text.contains("v1: integer [top_var]"));

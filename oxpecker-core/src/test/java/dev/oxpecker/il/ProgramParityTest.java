@@ -81,6 +81,20 @@ class ProgramParityTest {
         return new TreeMap<>(m).entrySet().stream().map(e -> e.getKey() + "=" + f.apply(e.getValue())).collect(Collectors.joining(";"));
     }
 
+    /** {@link #joined(Map, Function)} over an array indexed by key, skipping null slots. */
+    static <V> String joined(V[] xs, Function<V, String> f) {
+        List<String> out = new ArrayList<>();
+        for (int k = 0; k < xs.length; k++) if (xs[k] != null) out.add(k + "=" + f.apply(xs[k]));
+        return String.join(";", out);
+    }
+
+    /** {@link #joined(Map, Function)} over an array indexed by key, skipping -1 slots. */
+    static String joined(int[] xs) {
+        List<String> out = new ArrayList<>();
+        for (int k = 0; k < xs.length; k++) if (xs[k] != -1) out.add(k + "=" + xs[k]);
+        return String.join(";", out);
+    }
+
     static String pyList(List<Integer> xs) { return "[" + xs.stream().map(String::valueOf).collect(Collectors.joining(", ")) + "]"; }
 
     static List<Integer> ints(JsonArray a) {
@@ -139,15 +153,15 @@ class ProgramParityTest {
             r.check(sha(joined(an.returns(), Type::toString)).equals(a.get("returns").getAsString()), "returns", p, null);
             r.check(sha(joined(an.finalTypes(), Type::toString)).equals(a.get("final").getAsString()), "final", p, null);
             List<String> du = new ArrayList<>();
-            for (int v : new TreeMap<>(an.defs()).keySet())
-                du.add(v + ":" + an.defs().get(v) + ":" + pyList(an.uses().getOrDefault(v, List.of())) + ":"
+            for (int v = 0; v < an.defs().length; v++)
+                du.add(v + ":" + an.defs()[v] + ":" + pyList(an.uses().getOrDefault(v, List.of())) + ":"
                         + pyList(an.assignments().getOrDefault(v, List.of())));
             r.check(sha(String.join(";", du)).equals(a.get("defuse").getAsString()), "defuse", p, null);
             List<String> frames = new ArrayList<>();
             for (int i = 0; i < code.size(); i++)
                 frames.add(an.functionOf().get(i) + "," + (an.strictAt().get(i) ? 1 : 0) + "," + an.contextAt().get(i));
             r.check(sha(String.join(";", frames)).equals(a.get("frames").getAsString()), "frames", p, null);
-            r.check(sha(joined(an.labels(), String::valueOf)).equals(a.get("labels").getAsString()), "labels", p, null);
+            r.check(sha(joined(an.labels())).equals(a.get("labels").getAsString()), "labels", p, null);
             r.check(sha(an.visibleAt().stream().map(vs -> vs.stream().map(String::valueOf).collect(Collectors.joining(",")))
                     .collect(Collectors.joining("\n"))).equals(a.get("visible").getAsString()), "visible", p, null);
             List<String> decl = new ArrayList<>();
@@ -232,13 +246,13 @@ class ProgramParityTest {
             List<String> lines = new ArrayList<>();
             try {
                 Builder b = new Builder(options);
-                Map<Integer, Integer> mapping = new java.util.HashMap<>();
+                int[] mapping = new int[code.stream().flatMapToInt(x -> java.util.stream.IntStream.of(x.allOutputs())).max().orElse(-1) + 1];
                 for (Instruction instr : code) {
                     List<Integer> ins = new ArrayList<>();
-                    for (int v : instr.inputs()) ins.add(mapping.get(v));
+                    for (int v : instr.inputs()) ins.add(mapping[v]);
                     Instruction nw = b.emit(instr.op(), ins, instr.lift());
                     int[] olds = instr.allOutputs(), news = nw.allOutputs();
-                    for (int k = 0; k < olds.length; k++) mapping.put(olds[k], news[k]);
+                    for (int k = 0; k < olds.length; k++) mapping[olds[k]] = news[k];
                     lines.add(java.util.stream.IntStream.of(news).mapToObj(v -> v + "=" + b.typeOf(v)).collect(Collectors.joining(","))
                             + "|" + b.context() + "|" + (b.strict() ? 1 : 0) + "|" + b.currentFunction() + "|"
                             + b.visible().stream().map(String::valueOf).collect(Collectors.joining(",")));

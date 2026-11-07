@@ -29,7 +29,7 @@ public record Type(int possible, String group, Signature signature, Type element
     public Type(int possible) { this(possible, null, null, null, Set.of()); }
 
     // -- construction ---------------------------------------------------------------------
-    public static Type object(String group, Set<Key> props) { return new Type(Kind.OBJECT.bit, group, null, null, props); }
+    public static Type object(String group, Set<Key> props) { return new Type(Kind.OBJECT.bit, group, null, null, Set.copyOf(props)); }
     public static Type object(String group) { return object(group, Set.of()); }
     public static Type object() { return object(null); }
     public static Type function(Signature signature, String group) { return new Type(Kind.FUNCTION.bit, group, signature, null, Set.of()); }
@@ -70,8 +70,13 @@ public record Type(int possible, String group, Signature signature, Type element
         if (other.isNothing()) return this;
         Type el = null;
         if (element != null && other.element != null) el = element.join(other.element);
-        Set<Key> both = new TreeSet<>(props);
-        both.retainAll(other.props);
+        Set<Key> both;
+        if (props.isEmpty() || other.props.isEmpty()) {
+            both = Set.of();
+        } else {
+            both = new TreeSet<>(props);
+            both.retainAll(other.props);
+        }
         return new Type(possible | other.possible,
                 Objects.equals(group, other.group) ? group : null,
                 Objects.equals(signature, other.signature) ? signature : null,
