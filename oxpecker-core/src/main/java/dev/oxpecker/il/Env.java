@@ -69,15 +69,15 @@ public final class Env {
     static final List<String> ERRORS = List.of("Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError",
             "TypeError", "URIError", "InternalError", "AggregateError");
 
-    public static final Map<String, Type> GLOBAL_TYPES = ordered(
+    public static final Map<String, Type> GLOBAL_TYPES = table(
             "NaN", FLOAT, "Infinity", FLOAT, "undefined", UNDEFINED,
             "Math", Type.object("Math"), "JSON", Type.object("JSON"), "Reflect", Type.object("Reflect"));
     static final Map<String, String> INSTANCE_GROUP = new HashMap<>();
     static final Set<String> NOT_CONSTRUCTIBLE = Set.of("Symbol", "BigInt");
     static final Map<String, Type> INSTANCE_TYPE = Map.of("Continuation", Type.function("Continuation"));
     static final Map<String, Type> CALLS = new HashMap<>();
-    public static final Map<String, Type> RETURNS = new LinkedHashMap<>();
-    public static final Map<String, List<Type>> PARAMS = new LinkedHashMap<>();
+    public static final Map<String, Type> RETURNS = new HashMap<>();
+    public static final Map<String, List<Type>> PARAMS = new HashMap<>();
 
     static {
         for (String ta : TYPED_ARRAYS) INSTANCE_GROUP.put(ta, "TypedArray");
@@ -284,7 +284,7 @@ public final class Env {
 
         Map<String, Method> methods = new LinkedHashMap<>();
         Map<String, List<Method>> byGroup = new LinkedHashMap<>();
-        Map<String, SortedSet<Key>> propsByGroup = new LinkedHashMap<>();
+        Map<String, SortedSet<Key>> propsByGroup = new HashMap<>();
         Map<String, Key> keys = new LinkedHashMap<>();
 
         JsonObject protos = TABLE.has("protos") ? TABLE.getAsJsonObject("protos") : new JsonObject();
@@ -324,7 +324,7 @@ public final class Env {
         Map<String, List<Method>> bg = new LinkedHashMap<>();
         byGroup.forEach((g, ms) -> bg.put(g, List.copyOf(ms)));
         METHODS_BY_GROUP = Collections.unmodifiableMap(bg);
-        Map<String, SortedSet<Key>> pg = new LinkedHashMap<>();
+        Map<String, SortedSet<Key>> pg = new HashMap<>();
         propsByGroup.forEach((g, ps) -> pg.put(g, Collections.unmodifiableSortedSet(ps)));
         PROPS_BY_GROUP = Collections.unmodifiableMap(pg);
         PROBED_RHINO = TABLE.has("rhino") && !TABLE.get("rhino").isJsonNull() ? TABLE.get("rhino").getAsString() : "";
@@ -498,8 +498,8 @@ public final class Env {
         return out;
     }
 
-    private static Map<String, Type> ordered(Object... kv) {
-        Map<String, Type> m = new LinkedHashMap<>();
+    private static Map<String, Type> table(Object... kv) {
+        Map<String, Type> m = new HashMap<>();
         for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], (Type) kv[i + 1]);
         return Collections.unmodifiableMap(m);
     }

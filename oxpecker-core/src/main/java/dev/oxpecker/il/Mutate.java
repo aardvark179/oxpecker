@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -746,7 +747,7 @@ public final class Mutate {
     static final List<Integer> WEIGHTED;
 
     static {
-        Map<String, Mutator> m = new LinkedHashMap<>();
+        Map<String, Mutator> m = new HashMap<>();
         for (Named n : MUTATORS) m.put(n.name, n.mutator);
         MUTATOR_BY_NAME = Collections.unmodifiableMap(m);
         List<Integer> w = new ArrayList<>();
@@ -836,8 +837,8 @@ public final class Mutate {
             this.steps = new ArrayList<>(steps);
             this.rejected = rejected;
             this.cap = cap;
-            this.attemptedBy = new LinkedHashMap<>(attemptedBy);
-            this.rejectedBy = new LinkedHashMap<>(rejectedBy);
+            this.attemptedBy = new HashMap<>(attemptedBy);
+            this.rejectedBy = new HashMap<>(rejectedBy);
         }
 
         public Lineage(Program base, int cap) { this(base, List.of(), 0, cap, Map.of(), Map.of()); }

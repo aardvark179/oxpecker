@@ -5,6 +5,7 @@ import dev.oxpecker.util.Py;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,7 +49,7 @@ public final class Ensemble implements Harness {
     /** Each running process's info, as sent. */
     private final Map<String, Map<String, Object>> infos = new LinkedHashMap<>();
     /** ... and as declared (name, version, modes). */
-    private final Map<String, HarnessInfo> declared = new LinkedHashMap<>();
+    private final Map<String, HarnessInfo> declared = new HashMap<>();
     private ExecutorService pool;
 
     public Ensemble(List<HarnessSpec> specs, boolean coverage, boolean quiet, int recycleEvery, double hardTimeoutS) {
@@ -168,7 +169,7 @@ public final class Ensemble implements Harness {
     public Ensemble start() {
         Set<String> launchers = new TreeSet<>();
         for (HarnessSpec s : specs) launchers.add(s.harnessBin());
-        Map<String, HarnessInfo> statics = new LinkedHashMap<>();
+        Map<String, HarnessInfo> statics = new HashMap<>();
         ExecutorService describe = Executors.newFixedThreadPool(launchers.size(), daemon("oxpecker-describe"));
         try {
             List<String> ls = new ArrayList<>(launchers);

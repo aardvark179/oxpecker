@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -248,11 +248,11 @@ public final class Analysis {
     private static final class Structure {
         final List<List<Integer>> visibleAt = new ArrayList<>();
         List<Integer> contextAt;
-        final Map<Integer, Storage> storage = new LinkedHashMap<>();
+        final Map<Integer, Storage> storage = new HashMap<>();
         int numVariables;
         int[] defs;
-        final Map<Integer, List<Integer>> uses = new LinkedHashMap<>();
-        final Map<Integer, List<Integer>> assignments = new LinkedHashMap<>();
+        final Map<Integer, List<Integer>> uses = new HashMap<>();
+        final Map<Integer, List<Integer>> assignments = new HashMap<>();
         final List<Integer> functionOf = new ArrayList<>();
         final List<Boolean> strictAt = new ArrayList<>();
         int[] labels;
@@ -491,7 +491,7 @@ public final class Analysis {
             Type[] snap = after.get(i);
             if (snap.length > joined.length) joined = Arrays.copyOf(joined, snap.length);
             for (int v = 0; v < snap.length; v++)
-                if (snap[v] != null) joined[v] = joined[v] == null ? NOTHING.join(snap[v]) : joined[v].join(snap[v]);
+                if (snap[v] != null) joined[v] = joined[v] == null ? snap[v] : joined[v].join(snap[v]);
             i++;
         }
         TypeResult r = new TypeResult();
@@ -534,7 +534,7 @@ public final class Analysis {
      */
     public static RhinoModel rhinoModel(List<Instruction> code, Map<Integer, Storage> storage, int[] defs,
                                         Map<Integer, List<Integer>> assignments, List<Integer> functionOf) {
-        Map<Integer, List<ActivationReason>> activation = new LinkedHashMap<>();
+        Map<Integer, List<ActivationReason>> activation = new HashMap<>();
         List<Integer> functions = new ArrayList<>();
         for (int i = 0; i < code.size(); i++) if (Ops.isAny(code.get(i).op(), Ops.SUBROUTINE_BEGINS)) functions.add(i);
         int[] ends = new int[code.size()];
@@ -584,7 +584,7 @@ public final class Analysis {
             numberVars.addAll(current);
         }
         Set<Integer> numberVar = Collections.unmodifiableSet(numberVars);
-        Map<Integer, RhinoType> exprType = new LinkedHashMap<>();
+        Map<Integer, RhinoType> exprType = new HashMap<>();
         for (int i = 0; i < code.size(); i++)
             if (code.get(i).hasValue()) exprType.put(i, exprType(code, i, numberVar, storage, defs));
 

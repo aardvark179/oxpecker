@@ -45,7 +45,7 @@ public final class Cmin {
 
     /** Every probe a run hit in any mode. */
     public static Map<String, BigInteger> runHits(RunResult run) {
-        Map<String, BigInteger> hits = new LinkedHashMap<>();
+        Map<String, BigInteger> hits = new HashMap<>();
         for (Outcome o : run.results().values()) {
             if (o.hitProbes == null) continue;
             for (var e : o.hitProbes.entrySet()) {
@@ -142,7 +142,7 @@ public final class Cmin {
             throw new UncheckedIOException(new FileAlreadyExistsException(destDir + " already holds a corpus"));
         long t0 = System.nanoTime();
         List<Integer> undecodable = new ArrayList<>(), restarted = new ArrayList<>(), timedOut = new ArrayList<>();
-        Map<Integer, Double> replayMs = new LinkedHashMap<>();
+        Map<Integer, Double> replayMs = new HashMap<>();
         Map<Integer, String[]> sources = new HashMap<>();
         List<Sized> sized = new ArrayList<>();
         int fromParent = 0;

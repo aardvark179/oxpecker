@@ -21,7 +21,7 @@ import static dev.oxpecker.il.Type.UNDEFINED;
 import dev.oxpecker.il.Ops.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +33,7 @@ import java.util.Map;
 public final class Typer {
     // ------------------------------------------------------------------------- branch states
     static final class State {
-        final Map<Integer, Type> types = new LinkedHashMap<>();
+        final Map<Integer, Type> types = new HashMap<>();
         Type returns = NOTHING;
         Type yields = NOTHING;
         boolean hasReturned = false;
@@ -152,7 +152,7 @@ public final class Typer {
         void endGroup() {
             List<State> siblings = levels.remove(levels.size() - 1);
             State parent = active();
-            Map<Integer, List<Type>> changed = new LinkedHashMap<>();
+            Map<Integer, List<Type>> changed = new HashMap<>();
             for (State s : siblings)
                 for (var e : s.types.entrySet()) changed.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(e.getValue());
             for (var e : changed.entrySet()) {
@@ -221,7 +221,7 @@ public final class Typer {
     /** Function variable -> return type (a generator's: its Generator object type); null for other variables. */
     private Type[] returns = new Type[16];
     /** Object literal group ("_Object1", ...) -> its known members. */
-    public final Map<String, Map<Key, Type>> literalProps = new LinkedHashMap<>();
+    public final Map<String, Map<Key, Type>> literalProps = new HashMap<>();
     private final List<String> literals = new ArrayList<>();
     private final List<int[]> fns = new ArrayList<>();                 // (begin index, function variable or -1)
     private final List<Boolean> switchDefault = new ArrayList<>();
@@ -232,7 +232,7 @@ public final class Typer {
 
     public Typer(List<Instruction> code, Map<Integer, List<Type>> paramTypes) {
         this.code = code;
-        this.paramTypes = paramTypes == null ? new LinkedHashMap<>() : new LinkedHashMap<>(paramTypes);
+        this.paramTypes = paramTypes == null ? new HashMap<>() : new HashMap<>(paramTypes);
     }
 
     // -- queries
@@ -420,7 +420,7 @@ public final class Typer {
         } else if (op instanceof BeginObjectLiteral) {
             groups++;
             String group = "_Object" + groups;
-            literalProps.put(group, new LinkedHashMap<>());
+            literalProps.put(group, new HashMap<>());
             literals.add(group);
         } else if (op instanceof ObjectLiteralAddProperty o) {
             literalProps.get(literals.get(literals.size() - 1)).put(o.key(), ins.get(0));

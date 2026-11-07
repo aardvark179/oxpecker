@@ -12,8 +12,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +89,7 @@ public final class Builder {
     private final List<List<Integer>> hiddenByScope = new ArrayList<>();
     private final List<Integer> contexts = new ArrayList<>();
     private final List<Frame> frames = new ArrayList<>();
-    public final Map<Integer, Storage> storage = new LinkedHashMap<>();
+    public final Map<Integer, Storage> storage = new HashMap<>();
     /**
      * Variable -> the index of the instruction defining it, -1 for a variable not defined (yet).
      * Grows as variables are defined, so read the field afresh rather than keeping the array.
@@ -97,7 +97,7 @@ public final class Builder {
     public int[] defs = filled(16);
     /** Label variable -> the block start that defines it, -1 for other variables; grows like {@link #defs}. */
     public int[] labels = filled(16);
-    public final Map<Integer, List<Integer>> assignments = new LinkedHashMap<>();
+    public final Map<Integer, List<Integer>> assignments = new HashMap<>();
     /** Enclosing subroutine begin per instruction, -1 at top level. */
     public final List<Integer> functionOf = new ArrayList<>();
     public final Typer typer;

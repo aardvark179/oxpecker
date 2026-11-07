@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +74,7 @@ class EnsembleTest {
     @Test
     void onlyTheGuideClientGetsCoverage() {
         Ensemble e = Ensemble.fromModes(true, true);
-        Map<String, Boolean> cov = new LinkedHashMap<>();
+        Map<String, Boolean> cov = new HashMap<>();
         e.clients().forEach((n, c) -> cov.put(n, c.coverage()));
         assertEquals(Map.of("interpreted", true, "compiled", false), cov);
     }
@@ -116,7 +116,7 @@ class EnsembleTest {
         Outcome b = Outcome.of("compiled", "ok").value("1").engine("rhino 2.0");
         Outcome c = Outcome.of("interpreted", "ok").value("2").engine("rhino 1.9.2");
         Verdict v = compareRun(run("new", "new", a, "compiled", b, "old", c));
-        Map<String, String> kinds = new LinkedHashMap<>();
+        Map<String, String> kinds = new HashMap<>();
         v.pairs.forEach((n, p) -> kinds.put(n, p.kind));
         assertEquals(Map.of("compiled", EQUAL, "old", HARD), kinds);
         assertEquals("old", v.against);
@@ -270,9 +270,9 @@ class EnsembleTest {
         assumeTrue(built("rhino1.9") && built("rhino2.0"), "both Rhino harnesses must be built");
         try (Ensemble e = new Ensemble(Ensemble.specsFor(List.of("rhino2.0:interpreted", "rhino1.9:interpreted"),
                 "rhino2.0:interpreted")).start()) {
-            Map<String, String> names = new LinkedHashMap<>();
+            Map<String, String> names = new HashMap<>();
             for (HarnessSpec s : e.specs()) names.put(s.harness(), s.name());
-            Map<String, String> declared = new LinkedHashMap<>();
+            Map<String, String> declared = new HashMap<>();
             e.declared().forEach((n, d) -> declared.put(n, d.name()));
             assertEquals(Map.of(names.get("rhino2.0"), "Rhino2.0", names.get("rhino1.9"), "Rhino1.9"), declared);
             RunResult run = e.run("var a = [3, 1, 2].sort(); a.join() + typeof globalThis");

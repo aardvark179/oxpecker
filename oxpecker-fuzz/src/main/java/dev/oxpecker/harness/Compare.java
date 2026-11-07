@@ -3,6 +3,7 @@ package dev.oxpecker.harness;
 import dev.oxpecker.util.Py;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -108,7 +109,7 @@ public final class Compare {
             // frame, or captured at all in the compiled mode): the partial traces differ by construction
             return new Verdict(SKIP, List.of("both unsupported (" + Py.str(a.reason) + " / " + Py.str(b.reason) + ")"));
         }
-        Map<String, Boolean> paused = new LinkedHashMap<>();
+        Map<String, Boolean> paused = new HashMap<>();
         for (Outcome o : List.of(a, b)) paused.put(o.mode, Py.truthy(o.continuations));
         if (continuations && !Objects.equals(a.mode, b.mode) && Boolean.TRUE.equals(paused.get("interpreted"))
                 && !Boolean.TRUE.equals(paused.get("compiled"))

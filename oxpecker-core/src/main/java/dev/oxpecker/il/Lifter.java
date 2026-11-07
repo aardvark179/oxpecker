@@ -14,7 +14,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -505,7 +504,7 @@ public final class Lifter {
     private static String paramsText(Writer w, Parameters params, List<Integer> inner, List<Expr> defaults) {
         List<String> pieces = new ArrayList<>();
         inner = new ArrayList<>(inner);
-        Map<Integer, Patterns.Pattern> patterns = new LinkedHashMap<>();
+        Map<Integer, Patterns.Pattern> patterns = new HashMap<>();
         for (var e : params.destructuring()) patterns.put(e.getKey(), e.getValue());
         defaults = new ArrayList<>(defaults);
         for (int k = 0; k < params.count(); k++) {

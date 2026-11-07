@@ -14,7 +14,7 @@ import dev.oxpecker.il.Patterns.PropertyTarget;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -29,7 +29,7 @@ final class Scenarios {
 
     static Key k(String attr) { return Env.k(attr); }
 
-    static final Map<String, Consumer<Builder>> ALL = new LinkedHashMap<>();
+    static final Map<String, Consumer<Builder>> ALL = new HashMap<>();
     static {
         ALL.put("all_blocks", Scenarios::allBlocks);
         ALL.put("replayed", Scenarios::replayed);

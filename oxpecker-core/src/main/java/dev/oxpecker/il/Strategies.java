@@ -10,6 +10,7 @@ import dev.oxpecker.gen.Engine;
 import dev.oxpecker.gen.Gen;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public final class Strategies {
 
     public static final Map<String, GeneratorSpec> REGISTRY = new LinkedHashMap<>();
     public static final Map<Type, GeneratorSpec> VALUE_MAKERS = new LinkedHashMap<>();
-    public static final Map<String, TemplateSpec> TEMPLATES = new LinkedHashMap<>();
+    public static final Map<String, TemplateSpec> TEMPLATES = new HashMap<>();
 
     /** A program template: the overall shape of a program. */
     public record TemplateSpec(String name, int weight, java.util.function.BiConsumer<Draw, Builder> body,

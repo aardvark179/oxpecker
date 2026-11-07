@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -464,7 +465,7 @@ public final class Main {
             List<String> names = client.names();
             boolean hardOnly = args.bool("hard_only");
             Map<String, Integer> counts = new TreeMap<>();
-            Map<String, Map<String, Integer>> statusCounts = new LinkedHashMap<>();
+            Map<String, Map<String, Integer>> statusCounts = new HashMap<>();
             for (String m : names) statusCounts.put(m, new TreeMap<>());
             Map<String, Rec> results = new LinkedHashMap<>();
             long t0 = System.nanoTime();
@@ -566,7 +567,7 @@ public final class Main {
             Ensemble client = ensemble(false);
             List<String> names = client.names();
             Map<String, Integer> counts = new TreeMap<>();
-            Map<String, Map<String, Integer>> statusCounts = new LinkedHashMap<>();
+            Map<String, Map<String, Integer>> statusCounts = new HashMap<>();
             for (String m : names) statusCounts.put(m, new TreeMap<>());
             Map<String, Integer> sigs = new LinkedHashMap<>();
             int n = 0;
