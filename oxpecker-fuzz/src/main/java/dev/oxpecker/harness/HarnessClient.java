@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * One long-lived JVM running the harness, spoken to in JSON lines over stdio; restarted when it
- * dies. Not thread-safe; use one client per worker. With {@code mode}, the JVM is pinned to that
+ * dies, and after every {@code recycleEvery} cases (0: never). Not thread-safe; use one client per worker. With {@code mode}, the JVM is pinned to that
  * mode ({@code --serve --mode m}) and runs nothing else.
  */
 public final class HarnessClient implements Harness {
@@ -37,6 +37,11 @@ public final class HarnessClient implements Harness {
         t.setDaemon(true);
         return t;
     });
+
+    /** Set in the environment, bin/harness records a JFR profile of each harness JVM, written
+     * when it exits: give it time to, rather than killing it. */
+    private static final boolean JFR = System.getenv("OXPECKER_HARNESS_JFR") != null
+            && !System.getenv("OXPECKER_HARNESS_JFR").isEmpty();
 
     private final String harnessBin;
     private final boolean coverage;
@@ -117,7 +122,7 @@ public final class HarnessClient implements Harness {
         try {
             stdin.write(Json.line(Map.of("cmd", "exit")) + "\n");
             stdin.flush();
-            if (!p.waitFor(2, TimeUnit.SECONDS)) throw new IOException("timeout");
+            if (!p.waitFor(JFR ? 60 : 2, TimeUnit.SECONDS)) throw new IOException("timeout");
         } catch (IOException | InterruptedException e) {
             p.destroyForcibly();
             try {
@@ -281,7 +286,7 @@ public final class HarnessClient implements Harness {
         if (opt.coverageNewIds()) req.put("coverageNewIds", true);
         if (opt.coverageRequire() != null) req.put("coverageRequire", opt.coverageRequire());
         if (opt.coverageHits()) req.put("coverageHits", true);
-        if (casesSinceStart >= recycleEvery) restart();
+        if (recycleEvery > 0 && casesSinceStart >= recycleEvery) restart();
         casesSinceStart++;
         boolean restarted = false;
         Map<String, Object> resp;

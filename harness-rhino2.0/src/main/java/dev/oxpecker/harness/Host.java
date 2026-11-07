@@ -26,6 +26,11 @@ import org.mozilla.javascript.Wrapper;
 final class Host {
     private static final String CANON_SRC = resource("canon.js");
     private static final String PRELUDE_SRC = resource("prelude.js");
+    /**
+     * OXPECKER_CANON picks the canonicaliser: "java" ({@link JavaCanon}, the default), "js" (canon.js)
+     * or "both" (runs both, reports any difference on stderr, uses canon.js's).
+     */
+    private static final String CANON_IMPL = System.getenv().getOrDefault("OXPECKER_CANON", "java");
 
     final List<String> output = new ArrayList<>();
     final List<String> trace = new ArrayList<>();
@@ -37,6 +42,7 @@ final class Host {
     final List<String> continuations = new ArrayList<>();
     private Callable canon;
     private Callable errName;
+    private JavaCanon javaCanon;
     private VarScope scope;
 
     /** Canonical rendering of a value: text, Java leaf types, soft messages. */
@@ -111,6 +117,7 @@ final class Host {
             Scriptable api = (Scriptable) factory.call(cx, scope, global, new Object[] {helpers});
             canon = (Callable) ScriptableObject.getProperty(api, "canon");
             errName = (Callable) ScriptableObject.getProperty(api, "errName");
+            if (!CANON_IMPL.equals("js")) javaCanon = new JavaCanon(cx, scope);
 
             Script preludeScript = cx.compileString(PRELUDE_SRC, "prelude.js", 1, null);
             Callable prelude = (Callable) preludeScript.exec(cx, scope, global);
@@ -121,6 +128,15 @@ final class Host {
     }
 
     Canonical canon(Context cx, Object value) {
+        if (javaCanon == null) return jsCanon(cx, value);
+        if (CANON_IMPL.equals("java")) return javaCanon.canon(cx, value);
+        Canonical js = jsCanon(cx, value);
+        Canonical java = javaCanon.canon(cx, value);
+        if (!js.equals(java)) System.err.println("canon mismatch:\n  js:   " + js + "\n  java: " + java);
+        return js;
+    }
+
+    private Canonical jsCanon(Context cx, Object value) {
         Object r = canon.call(cx, scope, Undefined.SCRIPTABLE_UNDEFINED, new Object[] {value});
         Scriptable arr = (Scriptable) r;
         return new Canonical(
@@ -130,6 +146,15 @@ final class Host {
     }
 
     String errName(Context cx, Object value) {
+        if (javaCanon == null) return jsErrName(cx, value);
+        if (CANON_IMPL.equals("java")) return javaCanon.errName(cx, value);
+        String js = jsErrName(cx, value);
+        String java = javaCanon.errName(cx, value);
+        if (!js.equals(java)) System.err.println("errName mismatch: js=" + js + " java=" + java);
+        return js;
+    }
+
+    private String jsErrName(Context cx, Object value) {
         Object r = errName.call(cx, scope, Undefined.SCRIPTABLE_UNDEFINED, new Object[] {value});
         return ScriptRuntime.toString(r);
     }

@@ -3,15 +3,23 @@
 # console script. Build first: ./gradlew :oxpecker-fuzz:fatJar
 # OXPECKER_JAVA picks the java to run it with; OXPECKER_HARNESS (default rhino2.0) the harness.
 # A leading --jfr records a JFR profile of this (main) process only, not the harness processes,
-# to jfr/oxpecker-<date>-<pid>.jfr under the repo root.
+# to jfr/oxpecker-<date>-<pid>.jfr under the repo root. A leading --harness-jfr records the
+# harness processes instead (OXPECKER_HARNESS_JFR=1, see bin/harness); both may be given.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 JAR="$ROOT/oxpecker-fuzz/build/libs/oxpecker-all.jar"
 if [ ! -f "$JAR" ]; then
   echo "oxpecker: $JAR not found; build it with: (cd \"$ROOT\" && ./gradlew :oxpecker-fuzz:fatJar)" >&2
   exit 2
 fi
-if [ "$1" = "--jfr" ]; then
-  shift
+JFR=
+while :; do
+  case "$1" in
+    --jfr) JFR=1; shift ;;
+    --harness-jfr) export OXPECKER_HARNESS_JFR=1; shift ;;
+    *) break ;;
+  esac
+done
+if [ -n "$JFR" ]; then
   mkdir -p "$ROOT/jfr"
   # exec keeps this shell's PID, so $$ is the PID of the java process.
   exec "${OXPECKER_JAVA:-java}" \

@@ -10,4 +10,23 @@ JAR="$LIBS/oxpecker-harness-all.jar"
 if [ -n "$OXPECKER_COVERAGE" ]; then
   JAR="$LIBS/oxpecker-harness-cov.jar"
 fi
+# OXPECKER_HARNESS_JFR=1 records a JFR profile of each harness JVM to
+# jfr/harness-<name>-<mode>-<date>-<pid>.jfr under the repo root, written when the JVM exits
+# (killed JVMs write nothing; `--info` probes are not recorded). Pair it with
+# `oxpecker ... --recycle-every 0` for one long recording per process.
+if [ -n "$OXPECKER_HARNESS_JFR" ] && [ "$1" != "--info" ]; then
+  ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  MODE=any
+  PREV=
+  for a in "$@"; do
+    [ "$PREV" = "--mode" ] && MODE="$a"
+    PREV="$a"
+  done
+  mkdir -p "$ROOT/jfr"
+  # exec keeps this shell's PID, so $$ is the PID of the java process. JFR logs that it started
+  # to stdout, which is the JSON-lines protocol: silence it.
+  exec java -Xss64m -Xlog:jfr+startup=off \
+    "-XX:StartFlightRecording=filename=$ROOT/jfr/harness-${OXPECKER_HARNESS:-rhino2.0}-$MODE-$(date +%Y%m%d-%H%M%S)-$$.jfr,settings=profile,dumponexit=true" \
+    -jar "$JAR" "$@"
+fi
 exec java -Xss64m -jar "$JAR" "$@"

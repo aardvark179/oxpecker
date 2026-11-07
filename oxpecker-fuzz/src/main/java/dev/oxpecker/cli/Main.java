@@ -151,6 +151,8 @@ public final class Main {
         p.add("--guide").dflt("interpreted")
                 .help("[harness:]mode of the guide: the reference for comparisons and the only process coverage is "
                         + "gathered from (added to --modes if missing)");
+        p.add("--recycle-every").type("int").dflt(5000).metavar("N")
+                .help("restart each harness JVM after N cases (0 = never); a guide gathering coverage is never restarted");
     }
 
     private static void addRunOptions(ArgParse.Parser p) {
@@ -447,7 +449,7 @@ public final class Main {
         }
 
         Ensemble ensemble(boolean coverage) {
-            return new Ensemble(specs(), coverage, true);
+            return new Ensemble(specs(), coverage, true, args.integer("recycle_every"), 60.0);
         }
 
         // ------------------------------------------------------------------------- running
