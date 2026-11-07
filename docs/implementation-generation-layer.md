@@ -513,7 +513,7 @@ Harness observation points:
   unsupported is skipped.
 - Rebuild the jar after any Java change (`cd harness-rhino<version> && ./gradlew fatJar`), never while
   harness runs are in progress (a JVM loading classes lazily from a replaced jar fails oddly).
-  Coverage needs `OXPECKER_COVERAGE=1` (the client sets it) and `jacocoagent.jar` next to it.
+  Coverage needs `OXPECKER_COVERAGE=1` (the client sets it) and `oxpecker-harness-cov.jar` next to it.
   A re-run reaches 87 % of a run's new probes; 13 % are once-per-JVM.
 
 Rhino facts the oracle tests found (master `b95f75d`; 1.9.2 agrees unless noted):

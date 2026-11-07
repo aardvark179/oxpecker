@@ -20,7 +20,8 @@ if (rhinoJarFile != null && !rhinoJarFile.isFile()) {
 }
 
 configurations {
-    jacocoAgent
+    jacocoRuntime   // the JaCoCo agent jar, used offline: on the classpath of the coverage jar
+    jacocoAnt       // the offline instrumenter, used at build time only
 }
 
 dependencies {
@@ -30,11 +31,13 @@ dependencies {
         implementation "org.mozilla:rhino:${rhinoVersion}"
     }
     implementation 'com.google.code.gson:gson:2.11.0'
-    // Coverage of Rhino itself (brief §9.9): the agent is attached by bin/harness when
-    // OXPECKER_COVERAGE=1; core analyses the exec data against the Rhino classes.
+    // Coverage of Rhino itself (brief §9.9): covJar holds Rhino's classes instrumented offline at
+    // build time, and bin/harness runs it when OXPECKER_COVERAGE=1; core analyses the exec data
+    // against the original Rhino classes.
     implementation 'org.jacoco:org.jacoco.core:0.8.12'
     compileOnly 'org.jacoco:org.jacoco.agent:0.8.12:runtime'
-    jacocoAgent 'org.jacoco:org.jacoco.agent:0.8.12:runtime'
+    jacocoRuntime 'org.jacoco:org.jacoco.agent:0.8.12:runtime'
+    jacocoAnt 'org.jacoco:org.jacoco.ant:0.8.12:nodeps'
     testImplementation platform('org.junit:junit-bom:5.11.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -61,12 +64,62 @@ tasks.register('fatJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.register('jacocoAgentJar', Copy) {
-    from configurations.jacocoAgent
-    into layout.buildDirectory.dir('libs')
-    rename { 'jacocoagent.jar' }
+// Coverage jar (OXPECKER_COVERAGE=1 in bin/harness): fatJar with the org.mozilla classes replaced
+// by copies JaCoCo instrumented offline, so no agent has to instrument them at every JVM start.
+// It also carries the JaCoCo runtime, jacoco-agent.properties (output=none: Coverage drains the
+// data itself) and the uninstrumented classes as oxpecker/rhino-original.jar for analysis.
+def rhinoOriginalDir = layout.buildDirectory.dir('coverage/rhino-original')
+def rhinoInstrumentedDir = layout.buildDirectory.dir('coverage/rhino-instrumented')
+
+tasks.register('rhinoOriginalClasses', Sync) {
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? fileTree(it) : zipTree(it) } }
+    include 'org/mozilla/**/*.class'
+    into rhinoOriginalDir
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-tasks.named('fatJar') { dependsOn 'jacocoAgentJar' }
+
+tasks.register('rhinoOriginalJar', Jar) {
+    archiveFileName = 'rhino-original.jar'
+    destinationDirectory = layout.buildDirectory.dir('coverage')
+    from tasks.named('rhinoOriginalClasses')
+}
+
+tasks.register('instrumentRhino') {
+    def antClasspath = configurations.jacocoAnt
+    def originals = rhinoOriginalDir
+    def instrumented = rhinoInstrumentedDir
+    dependsOn 'rhinoOriginalClasses'
+    inputs.dir(originals)
+    inputs.files(antClasspath)
+    outputs.dir(instrumented)
+    doLast {
+        def out = instrumented.get().asFile
+        out.deleteDir()
+        out.mkdirs()
+        ant.taskdef(name: 'jacocoInstrument', classname: 'org.jacoco.ant.InstrumentTask', classpath: antClasspath.asPath)
+        ant.jacocoInstrument(destdir: out) { fileset(dir: originals.get().asFile) }
+    }
+}
+
+tasks.register('covJar', Jar) {
+    archiveBaseName = 'oxpecker-harness'
+    archiveClassifier = 'cov'
+    archiveVersion = ''
+    manifest { attributes 'Main-Class': 'dev.oxpecker.harness.Harness', 'Rhino-Version': rhinoJarFile != null ? "local:${rhinoJarFile.name}" : rhinoVersion }
+    from sourceSets.main.output
+    from tasks.named('instrumentRhino')
+    dependsOn configurations.runtimeClasspath
+    from({ configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }) {
+        exclude 'org/mozilla/**/*.class'
+    }
+    from({ configurations.jacocoRuntime.collect { zipTree(it) } }) {
+        exclude 'META-INF/MANIFEST.MF'
+    }
+    from(tasks.named('rhinoOriginalJar')) { into 'oxpecker' }
+    from('src/coverage/resources')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+tasks.named('fatJar') { dependsOn 'covJar' }
 
 test {
     useJUnitPlatform()

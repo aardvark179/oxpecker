@@ -3,10 +3,11 @@
 # (harness-<name>/, default rhino2.0); bin/harness-<name> sets it. Build first:
 # (cd harness-rhino2.0 && ./gradlew fatJar)
 LIBS="$(dirname "$0")/../harness-${OXPECKER_HARNESS:-rhino2.0}/build/libs"
-AGENT=""
-# OXPECKER_COVERAGE=1 attaches the JaCoCo agent so the harness can report which Rhino code each
-# case reached (coverage buckets, `oxpecker ... --coverage`). Generated script classes are excluded.
+JAR="$LIBS/oxpecker-harness-all.jar"
+# OXPECKER_COVERAGE=1 runs the coverage jar instead: Rhino's org.mozilla classes instrumented by
+# JaCoCo offline at build time, so the harness can report which Rhino code each case reached
+# (coverage buckets, `oxpecker ... --coverage`) without an agent instrumenting at startup.
 if [ -n "$OXPECKER_COVERAGE" ]; then
-  AGENT="-javaagent:$LIBS/jacocoagent.jar=output=none,includes=org.mozilla.javascript.*,excludes=org.mozilla.javascript.gen.*"
+  JAR="$LIBS/oxpecker-harness-cov.jar"
 fi
-exec java -Xss64m $AGENT -jar "$LIBS/oxpecker-harness-all.jar" "$@"
+exec java -Xss64m -jar "$JAR" "$@"

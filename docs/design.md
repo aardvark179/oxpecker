@@ -163,8 +163,11 @@ jobs drained before results are read. Checked by `test_self_consistency`.
 
 ### 4.8 Coverage (JaCoCo, optional)
 
-`OXPECKER_COVERAGE=1` makes `bin/harness` attach the JaCoCo agent (`includes=org.mozilla.javascript.*`,
-`excludes=…gen.*`). After each mode `Coverage.drain(bucket)` takes the agent's execution data
+`OXPECKER_COVERAGE=1` makes `bin/harness` run `oxpecker-harness-cov.jar` instead of the plain jar:
+the same harness with Rhino's `org.mozilla.*` classes instrumented by JaCoCo offline at build time
+(`covJar`), the JaCoCo runtime bundled (`output=none`), and the original classes embedded as
+`oxpecker/rhino-original.jar` for analysis. Runtime-generated script classes are never instrumented.
+After each mode `Coverage.drain(bucket)` takes the agent's execution data
 (and resets it), counts probes hit that the **cumulative** store had not seen
 (`run[i] && !cumulative[i]`), merges into the cumulative and the per-bucket (`<focus>|<mode>`)
 stores, and returns the count as `newProbes`. `cmd: coverage` analyses every bucket against the

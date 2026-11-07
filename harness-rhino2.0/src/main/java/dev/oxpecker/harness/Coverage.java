@@ -4,13 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
@@ -24,7 +21,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 /**
- * Coverage of Rhino itself, through the JaCoCo agent attached by bin/harness (OXPECKER_COVERAGE=1).
+ * Coverage of Rhino itself, when bin/harness runs the coverage jar (OXPECKER_COVERAGE=1): its
+ * org.mozilla classes were instrumented offline at build time and the JaCoCo runtime is bundled.
  *
  * <p>Every run can name a bucket (e.g. the generator the program came from). After each mode the
  * agent's execution data is drained, merged into the bucket's store (keyed bucket|mode) and into a
@@ -41,6 +39,8 @@ final class Coverage {
     Coverage() {
         Object a = null;
         try {
+            // The offline runtime starts when the first instrumented class initialises.
+            Class.forName("org.mozilla.javascript.Context", true, Coverage.class.getClassLoader());
             a = org.jacoco.agent.rt.RT.getAgent();
         } catch (Throwable ignored) {
             // agent not attached
@@ -191,20 +191,15 @@ final class Coverage {
             "org.mozilla.javascript.NativeObject", "org.mozilla.javascript.ScriptableObject", "org.mozilla.javascript.NativeProxy",
             "org.mozilla.javascript.JSFunction", "org.mozilla.javascript.ConsString"};
 
+    private static final String ORIGINALS = "/oxpecker/rhino-original.jar";
+
     private static Map<String, Object> analyse(ExecutionDataStore store) throws IOException {
         CoverageBuilder builder = new CoverageBuilder();
         Analyzer analyzer = new Analyzer(store, builder);
-        String jarPath = org.mozilla.javascript.Context.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        try (JarFile jar = new JarFile(jarPath)) {
-            Enumeration<JarEntry> entries = jar.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry je = entries.nextElement();
-                String n = je.getName();
-                if (!n.startsWith("org/mozilla/javascript/") || !n.endsWith(".class") || n.startsWith("org/mozilla/javascript/gen/")) continue;
-                try (InputStream in = jar.getInputStream(je)) {
-                    analyzer.analyzeClass(in, n);
-                }
-            }
+        // The classes on the classpath are instrumented; analysis needs the originals (covJar).
+        try (InputStream in = Coverage.class.getResourceAsStream(ORIGINALS)) {
+            if (in == null) throw new IOException("no " + ORIGINALS + " on the classpath: not the coverage jar");
+            analyzer.analyzeAll(in, ORIGINALS);
         }
         Map<String, int[]> packages = new TreeMap<>();   // pkg -> {mCov, mTot, bCov, bTot, lCov, lTot}
         Map<String, int[]> classes = new TreeMap<>();    // class -> {mCov, mTot}

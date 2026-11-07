@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 /** One harness process per mode: the guide (reference, sole coverage source) and comparators. */
 class EnsembleTest {
     static final Path REGRESSIONS = Oxpecker.root().resolve("tests/regressions");
-    static final Path AGENT = Oxpecker.harnessLibs(DEFAULT_HARNESS).resolve("jacocoagent.jar");
+    static final Path COV_JAR = Oxpecker.harnessLibs(DEFAULT_HARNESS).resolve("oxpecker-harness-cov.jar");
 
     // ------------------------------------------------------------------------------- without a JVM
 
@@ -245,7 +245,7 @@ class EnsembleTest {
     @Tag("slow")
     @SuppressWarnings("unchecked")
     void coverageComesFromTheGuideAlone() {
-        assumeTrue(Files.exists(AGENT), "agent not built");
+        assumeTrue(Files.exists(COV_JAR), "coverage jar not built");
         try (Ensemble e = Ensemble.fromModes(HarnessClient.DEFAULT_MODES, "compiled", true, true).start()) {
             assumeTrue(Boolean.TRUE.equals(e.info().get("coverage")), "coverage agent not attached");
             Map<String, Object> hs = (Map<String, Object>) e.info().get("harnesses");

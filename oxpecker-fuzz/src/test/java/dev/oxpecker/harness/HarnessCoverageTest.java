@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /** Per-run probe sets from the harness (decision D36): which probes a run hit for the first time,
  * and which probes of a required set P a run reaches -- what shrink-on-insert needs, because on a
- * re-run nothing is new any more. Needs the harness jar and the JaCoCo agent. */
+ * re-run nothing is new any more. Needs the harness coverage jar. */
 @Tag("slow")
 class HarnessCoverageTest {
-    static final Path AGENT = Oxpecker.harnessLibs(Oxpecker.DEFAULT_HARNESS).resolve("jacocoagent.jar");
+    static final Path COV_JAR = Oxpecker.harnessLibs(Oxpecker.DEFAULT_HARNESS).resolve("oxpecker-harness-cov.jar");
     static final String PROGRAM = """
 
             var b = 1n; var n = 0;
@@ -39,7 +39,7 @@ class HarnessCoverageTest {
 
     @BeforeEach
     void start() {
-        assumeTrue(Files.exists(Oxpecker.harnessBin()) && Files.exists(AGENT), "harness/agent not built");
+        assumeTrue(Files.exists(Oxpecker.harnessBin()) && Files.exists(COV_JAR), "harness/coverage jar not built");
         cov = new HarnessClient(Oxpecker.harnessBin(), null, true, true).start();
         assumeTrue(Boolean.TRUE.equals(cov.info().get("coverage")), "coverage agent not attached");
         cov.run("1;");                                  // warm up: JVM- and Rhino-startup probes out of the way

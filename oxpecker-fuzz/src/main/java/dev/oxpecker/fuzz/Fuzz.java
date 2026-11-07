@@ -147,7 +147,7 @@ public final class Fuzz {
                 client.start();
                 if (!Boolean.TRUE.equals(client.info().get("coverage"))) {
                     client.stop();
-                    throw new IllegalStateException("coverage agent not attached; the harness build must include jacocoagent.jar");
+                    throw new IllegalStateException("coverage agent not attached; the harness build must include oxpecker-harness-cov.jar");
                 }
             }
             runner = Runner.harness(client, c.languageVersion);

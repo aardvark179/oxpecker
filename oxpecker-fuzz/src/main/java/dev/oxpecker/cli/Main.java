@@ -838,7 +838,7 @@ public final class Main {
             Map<String, Object> s;
             try (HarnessClient client = new HarnessClient(Oxpecker.harnessBin(), null, true, true).start()) {
                 if (!Py.truthy(client.info().get("coverage"))) {
-                    err.println("coverage agent not attached: the harness build must include jacocoagent.jar");
+                    err.println("coverage agent not attached: the harness build must include oxpecker-harness-cov.jar");
                     return 2;
                 }
                 s = Cmin.minimise(Path.of(args.str("corpus")), Path.of(args.str("out")), client, GenOptions.DEFAULT, 5,
@@ -904,7 +904,7 @@ public final class Main {
             Map<String, Object> summary;
             try (Ensemble client = ensemble(true).start()) {
                 if (!Py.truthy(client.info().get("coverage"))) {
-                    err.println("coverage agent not attached: the harness build must include jacocoagent.jar");
+                    err.println("coverage agent not attached: the harness build must include oxpecker-harness-cov.jar");
                     return 2;
                 }
                 KnownIndex index = KnownIndex.knownIndex(client);
