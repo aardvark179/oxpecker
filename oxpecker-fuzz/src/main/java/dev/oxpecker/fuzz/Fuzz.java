@@ -47,6 +47,9 @@ import java.util.function.BiPredicate;
  *          new probes -> (optionally shrunk while it still reaches them) -> corpus
  *          a hard verdict with an unknown signature -> shrunk -> recorded
  * shrink   jetCheck's shrinker started from the recorded choices, with a call budget
+ * pipeline up to `pipeline` cases are in flight: while one case's outcomes are compared and acted
+ *          on, the harnesses are already running the next, so a new case's parent is chosen from a
+ *          corpus that may not yet hold the entries of the cases still in flight
  * </pre>
  */
 public final class Fuzz {
@@ -75,7 +78,12 @@ public final class Fuzz {
         public boolean hardOnly = false;
         public boolean resetCoverage = false;
         public PrintStream err = System.err;
+        /** How many cases may be in flight at once; 1 runs each case only after the last is dealt with. */
+        public int pipeline = 8;
     }
+
+    /** A case that has been started: what it was drawn from and its pending run. */
+    private record InFlight(Entry parent, Lineage baseLineage, Lineage lineage, Choices choices, Runner.Pending pending) {}
 
     // --------------------------------------------------------------------------- parent choice
     /**
@@ -174,45 +182,57 @@ public final class Fuzz {
         Map<String, Integer> attempted = new HashMap<>(), rejected = new HashMap<>(), productive = new HashMap<>();
         int i = 0;
         Map<String, Object> report = new HashMap<>();
+        java.util.ArrayDeque<InFlight> inFlight = new java.util.ArrayDeque<>();
+        int depth = Math.max(1, c.pipeline);
         try {
             while (true) {
-                if (c.iterations != null && i >= c.iterations) break;
-                double elapsed = (System.nanoTime() - t0) / 1e9;
-                if (c.seconds != null && elapsed >= c.seconds) break;
-                i++;
-                Entry parent = null;
-                Lineage parentLineage = null;
-                Lineages.Drawn drawn = null;
-                if (!corpus.entries.isEmpty() && rng.nextDouble() > c.pNew) {
-                    if (weights == null) weights = parentWeights(corpus.entries, childTimeouts);
-                    parent = weightedChoice(rng, corpus.entries, weights);
-                    Choices parentChoices = Choices.decode(parent.choices);
-                    parentLineage = parentChoices != null ? lineages.get(parent, c.options, c.steps, corpus.byId) : null;
-                    if (parentLineage != null && parentLineage.depth() >= c.maxDepth) {
-                        bump(stats, "at-max-depth", 1);
-                    } else {
-                        drawn = parentLineage != null
-                                ? Lineages.extend(parentChoices, c.options, c.steps, rng, parentLineage, null, c.maxDepth) : null;
-                        bump(stats, drawn != null ? "extended" : "extend-failed", 1);
+                // Keep the harnesses fed: start cases until `depth` are in flight.
+                while (inFlight.size() < depth) {
+                    if (c.iterations != null && i >= c.iterations) break;
+                    double elapsed = (System.nanoTime() - t0) / 1e9;
+                    if (c.seconds != null && elapsed >= c.seconds) break;
+                    i++;
+                    Entry parent = null;
+                    Lineage parentLineage = null;
+                    Lineages.Drawn drawn = null;
+                    if (!corpus.entries.isEmpty() && rng.nextDouble() > c.pNew) {
+                        if (weights == null) weights = parentWeights(corpus.entries, childTimeouts);
+                        parent = weightedChoice(rng, corpus.entries, weights);
+                        Choices parentChoices = Choices.decode(parent.choices);
+                        parentLineage = parentChoices != null ? lineages.get(parent, c.options, c.steps, corpus.byId) : null;
+                        if (parentLineage != null && parentLineage.depth() >= c.maxDepth) {
+                            bump(stats, "at-max-depth", 1);
+                        } else {
+                            drawn = parentLineage != null
+                                    ? Lineages.extend(parentChoices, c.options, c.steps, rng, parentLineage, null, c.maxDepth) : null;
+                            bump(stats, drawn != null ? "extended" : "extend-failed", 1);
+                        }
                     }
+                    if (drawn == null) {
+                        parent = null;
+                        drawn = Lineages.drawLineage(c.options, c.steps, rng);
+                        bump(stats, "fresh", 1);
+                    }
+                    if (drawn == null) {
+                        bump(stats, "rejected", 1);
+                        continue;
+                    }
+                    Lineage lineage = drawn.lineage();
+                    Lineage baseLineage = parent != null ? parentLineage : null;
+                    for (var e : lineage.attemptedBy.entrySet())
+                        bump(attempted, e.getKey(), e.getValue() - (baseLineage != null ? baseLineage.attemptedBy.getOrDefault(e.getKey(), 0) : 0));
+                    for (var e : lineage.rejectedBy.entrySet())
+                        bump(rejected, e.getKey(), e.getValue() - (baseLineage != null ? baseLineage.rejectedBy.getOrDefault(e.getKey(), 0) : 0));
+                    inFlight.add(new InFlight(parent, baseLineage, lineage, drawn.choices(), runner.submit(lineage)));
                 }
-                if (drawn == null) {
-                    parent = null;
-                    drawn = Lineages.drawLineage(c.options, c.steps, rng);
-                    bump(stats, "fresh", 1);
-                }
-                if (drawn == null) {
-                    bump(stats, "rejected", 1);
-                    continue;
-                }
-                Lineage lineage = drawn.lineage();
-                Choices choices = drawn.choices();
-                Lineage baseLineage = parent != null ? parentLineage : null;
-                for (var e : lineage.attemptedBy.entrySet())
-                    bump(attempted, e.getKey(), e.getValue() - (baseLineage != null ? baseLineage.attemptedBy.getOrDefault(e.getKey(), 0) : 0));
-                for (var e : lineage.rejectedBy.entrySet())
-                    bump(rejected, e.getKey(), e.getValue() - (baseLineage != null ? baseLineage.rejectedBy.getOrDefault(e.getKey(), 0) : 0));
-                Observation obs = runner.run(lineage);
+                if (inFlight.isEmpty()) break;
+                // ... then deal with the oldest while the harnesses run the rest.
+                InFlight job = inFlight.poll();
+                Entry parent = job.parent();
+                Lineage baseLineage = job.baseLineage();
+                Lineage lineage = job.lineage();
+                Choices choices = job.choices();
+                Observation obs = job.pending().await();
                 Verdict v = obs.verdict();
                 bump(stats, v.kind, 1);
                 if (obs.timedOut() && parent != null) {

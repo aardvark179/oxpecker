@@ -14,10 +14,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -31,9 +34,13 @@ import java.util.function.Function;
  * the same protocol; it reports only the JS-observable fields (its {@code capabilities}) and will
  * decide which side of a difference is wrong.
  *
- * <p>{@code run} sends a case to all of them at once and returns their outcomes keyed by harness
- * name. A process that dies is restarted on its own; the others' outcomes for that case are kept.
- * Not thread-safe.
+ * <p>Each process is fed from its own job queue, worked by one thread that owns its
+ * {@link HarnessClient}: every request to a process (cases, coverage, info, exit) goes through that
+ * queue, so they reach it one at a time and in the order they were submitted. {@link #submit}
+ * queues a case on all of them and returns at once, so the caller can queue the next case (which
+ * each process starts as soon as it is done with this one) before looking at this one's outcomes;
+ * {@code run} is submit-and-wait. A process that dies is restarted on its own; the others'
+ * outcomes for that case are kept.
  */
 public final class Ensemble implements Harness {
     public static final String GUIDE = "guide";
@@ -50,7 +57,8 @@ public final class Ensemble implements Harness {
     private final Map<String, Map<String, Object>> infos = new LinkedHashMap<>();
     /** ... and as declared (name, version, modes). */
     private final Map<String, HarnessInfo> declared = new HashMap<>();
-    private ExecutorService pool;
+    /** Each process's job queue and the one thread that works it; null until started. */
+    private Map<String, ExecutorService> workers;
 
     public Ensemble(List<HarnessSpec> specs, boolean coverage, boolean quiet, int recycleEvery, double hardTimeoutS) {
         this.specs = List.copyOf(specs);
@@ -185,24 +193,51 @@ public final class Ensemble implements Harness {
                         + ") does not support mode " + Py.repr(s.mode()) + "; it declares " + String.join(", ", d.modes()));
             }
         }
-        pool = Executors.newFixedThreadPool(clients.size(), daemon("oxpecker-harness"));
-        for (HarnessClient c : clients.values()) c.start();
-        List<String> names = new ArrayList<>(clients.keySet());
-        List<Map<String, Object>> got = map(pool, names, n -> clients.get(n).info());
-        for (int i = 0; i < names.size(); i++) {
-            infos.put(names.get(i), got.get(i));
-            declared.put(names.get(i), HarnessInfo.fromJson(got.get(i)));
+        Map<String, ExecutorService> ws = new LinkedHashMap<>();
+        for (String n : clients.keySet()) ws.put(n, Executors.newSingleThreadExecutor(daemon("oxpecker-harness-" + n)));
+        workers = ws;
+        Map<String, CompletableFuture<Map<String, Object>>> got = new LinkedHashMap<>();
+        for (String n : clients.keySet()) {
+            HarnessClient c = clients.get(n);
+            got.put(n, CompletableFuture.supplyAsync(() -> c.start().info(), ws.get(n)));
+        }
+        for (var e : got.entrySet()) {
+            Map<String, Object> info = join(e.getValue());
+            infos.put(e.getKey(), info);
+            declared.put(e.getKey(), HarnessInfo.fromJson(info));
         }
         return this;
     }
 
+    /** Stops every process once the jobs already queued for it are done. */
     @Override
     public void stop() {
-        for (HarnessClient c : clients.values()) c.stop();
-        if (pool != null) {
-            pool.shutdown();
-            pool = null;
+        Map<String, ExecutorService> ws = workers;
+        workers = null;
+        if (ws == null) {
+            for (HarnessClient c : clients.values()) c.stop();
+            return;
         }
+        for (var e : ws.entrySet()) {
+            HarnessClient c = clients.get(e.getKey());
+            e.getValue().execute(c::stop);
+            e.getValue().shutdown();
+        }
+        for (ExecutorService w : ws.values()) {
+            try {
+                if (!w.awaitTermination(5, TimeUnit.MINUTES)) w.shutdownNow();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                w.shutdownNow();
+            }
+        }
+    }
+
+    /** Queues {@code f} on harness {@code name}'s job queue (starting the ensemble if need be). */
+    private <R> CompletableFuture<R> onClient(String name, Function<HarnessClient, R> f) {
+        if (workers == null) start();
+        HarnessClient c = clients.get(name);
+        return CompletableFuture.supplyAsync(() -> f.apply(c), workers.get(name));
     }
 
     /** The declared name and version of the engine behind harness {@code name}, e.g. "Rhino 2.0.0". */
@@ -248,19 +283,21 @@ public final class Ensemble implements Harness {
 
     // -- coverage: the guide's alone -------------------------------------------------------
 
+    // Queued behind the guide's cases, so they see the coverage of every case submitted before them.
+
     @Override
     public int coverageSave(String path) {
-        return guideClient().coverageSave(path);
+        return join(onClient(guide, c -> c.coverageSave(path)));
     }
 
     @Override
     public int coverageLoad(String path) {
-        return guideClient().coverageLoad(path);
+        return join(onClient(guide, c -> c.coverageLoad(path)));
     }
 
     @Override
     public Map<String, Object> coverageReport() {
-        return guideClient().coverageReport();
+        return join(onClient(guide, HarnessClient::coverageReport));
     }
 
     // -- requests -------------------------------------------------------------------------
@@ -272,6 +309,16 @@ public final class Ensemble implements Harness {
      */
     @Override
     public RunResult run(String source, RunOptions options) {
+        return join(submit(source, options));
+    }
+
+    /**
+     * Queues one case (as {@link #run}) on each process it runs in and returns without waiting.
+     * The future completes once every one of them has run it; it fails with the first failure, in
+     * harness order.
+     */
+    @Override
+    public CompletableFuture<RunResult> submit(String source, RunOptions options) {
         List<String> comparators = options.comparators();
         if (options.modes() != null) {
             if (comparators != null) throw new IllegalArgumentException("pass comparators or modes, not both");
@@ -279,7 +326,7 @@ public final class Ensemble implements Harness {
             comparators = specs.stream().filter(s -> s.role().equals(COMPARATOR) && modes.contains(s.mode()))
                     .map(HarnessSpec::name).toList();
         }
-        if (pool == null) start();
+        if (workers == null) start();
         Set<String> wanted = new HashSet<>(comparators == null ? comparators() : comparators);
         Set<String> unknown = new TreeSet<>(Py.ORDER);
         unknown.addAll(wanted);
@@ -292,7 +339,21 @@ public final class Ensemble implements Harness {
         RunOptions base = options.withModes((List<String>) null).withComparators((List<String>) null).withId(caseId);
         RunOptions forComparators = base.withoutGuideCoverage();
 
-        List<RunResult> got = map(pool, names, n -> clients.get(n).run(source, n.equals(guide) ? base : forComparators));
+        List<CompletableFuture<RunResult>> fs = new ArrayList<>();
+        for (String n : names) {
+            RunOptions o = n.equals(guide) ? base : forComparators;
+            fs.add(onClient(n, c -> c.run(source, o)));
+        }
+        return CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new))
+                .handle((ignored, failure) -> {
+                    List<RunResult> got = new ArrayList<>();
+                    for (CompletableFuture<RunResult> f : fs) got.add(join(f));   // the first failure, in order
+                    return assemble(names, got, caseId);
+                });
+    }
+
+    /** The outcomes of one case, labelled with the harness, role and engine they came from. */
+    private RunResult assemble(List<String> names, List<RunResult> got, String caseId) {
         Map<String, Outcome> results = new LinkedHashMap<>();
         boolean restarted = false;
         for (int i = 0; i < names.size(); i++) {
@@ -340,6 +401,18 @@ public final class Ensemble implements Harness {
     }
 
     // -- helpers ---------------------------------------------------------------------------
+
+    /** The future's value, its failure re-raised as it was thrown. */
+    private static <R> R join(CompletableFuture<R> f) {
+        try {
+            return f.join();
+        } catch (CompletionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException r) throw r;
+            if (cause instanceof Error err) throw err;
+            throw new HarnessError(String.valueOf(cause), cause);
+        }
+    }
 
     /** ThreadPoolExecutor.map: results in order, the first failure re-raised. */
     private static <T, R> List<R> map(ExecutorService pool, List<T> items, Function<T, R> f) {

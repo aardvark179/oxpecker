@@ -1,6 +1,7 @@
 package dev.oxpecker.harness;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * What runs cases: one {@link HarnessClient} (one JVM) or an {@link Ensemble} of them. The
@@ -10,6 +11,12 @@ public interface Harness extends AutoCloseable {
 
     /** Runs one case; see {@link RunOptions} for the arguments. */
     RunResult run(String source, RunOptions options);
+
+    /** Starts one case without waiting for it: an {@link Ensemble} queues it on its processes and
+     * returns at once; anything else runs it before returning. */
+    default CompletableFuture<RunResult> submit(String source, RunOptions options) {
+        return CompletableFuture.completedFuture(run(source, options));
+    }
 
     default RunResult run(String source) {
         return run(source, RunOptions.DEFAULT);
