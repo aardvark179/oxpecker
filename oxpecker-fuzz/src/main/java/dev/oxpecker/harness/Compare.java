@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /** Comparison rules (brief §7): decide whether two modes' outcomes constitute a finding. */
 public final class Compare {
@@ -26,26 +25,6 @@ public final class Compare {
     public static final String SKIP = "skip";
     /** Both timeout/resource: a generator problem. */
     public static final String DISCARD = "discard";
-
-    /** A dotted class name ({@code java.lang.Object}) or a JVM array descriptor ({@code [I},
-     * {@code [[D}, {@code [Ljava.lang.String;}) followed by {@code @} and up to eight hex digits. No
-     * word boundary after the hash: the script may concatenate text straight onto it
-     * ({@code J.intArray(0) + "x"}), and the hash's length varies. */
-    private static final Pattern IDENTITY_HASH = Py.re(
-            "((?:(?:[A-Za-z_$][\\w$]*\\.)+[A-Za-z_$][\\w$]*|\\[+(?:[ZBCSIJFD]|L[\\w.$]+;))@)[0-9a-f]{1,8}");
-
-    /** {@code dev.oxpecker.harness.JavaProbe@3bde59e5} -> {@code ...JavaProbe@}, {@code [I@6e6b878}
-     * -> {@code [I@}: a Java object's default {@code toString} carries its identity hash, which
-     * differs between any two runs. */
-    public static String canonIdentity(String s) {
-        return s == null ? null : IDENTITY_HASH.matcher(s).replaceAll("$1");
-    }
-
-    private static List<String> canonAll(List<String> l) {
-        List<String> out = new ArrayList<>(l.size());
-        for (String t : l) out.add(canonIdentity(t));
-        return out;
-    }
 
     private static Object thrownName(Outcome o) {
         return Py.truthy(o.thrown) ? o.thrown.get("name") : null;
@@ -73,8 +52,7 @@ public final class Compare {
     public static Verdict compare(Outcome a, Outcome b, boolean strictJavaTypes, boolean strictMessages) {
         boolean javaTypes = has(a, b, "javaTypes"), javaTrace = has(a, b, "javaTrace"),
                 continuations = has(a, b, "continuations");
-        a = canonCopy(a);
-        b = canonCopy(b);
+        // Java identity hashes in printed values are masked by the harness (IdentityHashes).
         // Each side by its mode, or by its harness name when the two come from different engines (the
         // same mode in two Rhino versions would otherwise read "interpreted vs interpreted").
         boolean sameEngine = Objects.equals(a.engine, b.engine);
@@ -227,15 +205,6 @@ public final class Compare {
         }
         if (!softReasons.isEmpty()) return new Verdict(strictMessages ? HARD : SOFT, softReasons, jdiff);
         return new Verdict(EQUAL);
-    }
-
-    private static Outcome canonCopy(Outcome o) {
-        Outcome c = o.copy();
-        c.value = canonIdentity(o.value);
-        c.trace = canonAll(o.trace);
-        c.output = canonAll(o.output);
-        c.javaTrace = canonAll(o.javaTrace);
-        return c;
     }
 
     private static String st(Outcome o) {

@@ -17151,12 +17151,12 @@
       "mode": "interpreted",
       "status": "ok",
       "compiledActually": null,
-      "value": "dev.oxpecker.harness.JavaProbe@1a2b",
+      "value": "dev.oxpecker.harness.JavaProbe@",
       "valueJavaTypes": null,
       "thrown": null,
       "trace": [
-       "\"p\" | [I@ff",
-       "\"q\" | [[Ljava.lang.String;@1x"
+       "\"p\" | [I@",
+       "\"q\" | [[Ljava.lang.String;@x"
       ],
       "traceJavaTypes": [],
       "javaTrace": [],
@@ -17180,12 +17180,12 @@
       "mode": "compiled",
       "status": "ok",
       "compiledActually": null,
-      "value": "dev.oxpecker.harness.JavaProbe@c3d4",
+      "value": "dev.oxpecker.harness.JavaProbe@",
       "valueJavaTypes": null,
       "thrown": null,
       "trace": [
-       "\"p\" | [I@01",
-       "\"q\" | [[Ljava.lang.String;@2x"
+       "\"p\" | [I@",
+       "\"q\" | [[Ljava.lang.String;@x"
       ],
       "traceJavaTypes": [],
       "javaTrace": [],
@@ -17486,7 +17486,7 @@
       "mode": "interpreted",
       "status": "ok",
       "compiledActually": null,
-      "value": "a.B@1",
+      "value": "a.B@",
       "valueJavaTypes": null,
       "thrown": null,
       "trace": [],
@@ -17512,7 +17512,7 @@
       "mode": "compiled",
       "status": "ok",
       "compiledActually": null,
-      "value": "a.C@1",
+      "value": "a.C@",
       "valueJavaTypes": null,
       "thrown": null,
       "trace": [],
@@ -75703,48 +75703,6 @@
    "coarse": "equal@engine:A|B:value",
    "pretty": "EQUAL: value -1.5 vs -0.0 [java types: value -1.5 vs -0.0]"
   }
- ],
- "canon": [
-  [
-   "x dev.oxpecker.harness.JavaProbe@3bde59e5 y",
-   "x dev.oxpecker.harness.JavaProbe@ y"
-  ],
-  [
-   "@0Object<Array.prototype>{}",
-   "@0Object<Array.prototype>{}"
-  ],
-  [
-   "\"[I@6e6b878\"",
-   "\"[I@\""
-  ],
-  [
-   "[[Ljava.lang.String;@1a2b",
-   "[[Ljava.lang.String;@"
-  ],
-  [
-   "a.B@123456789",
-   "a.B@9"
-  ],
-  [
-   "a.b.C$D@ff x@1",
-   "a.b.C$D@ x@1"
-  ],
-  [
-   "java.lang.Object@",
-   "java.lang.Object@"
-  ],
-  [
-   "[Z@0[[[D@1",
-   "[Z@[[[D@"
-  ],
-  [
-   "\u00e9.\u00fc@1f",
-   "\u00e9.\u00fc@1f"
-  ],
-  [
-   "x.y@ABC",
-   "x.y@ABC"
-  ]
  ],
  "tokens": [
   [

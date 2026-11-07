@@ -69,8 +69,10 @@ final class ModeRunner {
     private Outcome runOnThisThread(Request req, Mode mode) {
         Outcome o = Outcome.of(mode, Outcome.OK);
         Host host = new Host();
+        IdentityHashes.Factory wraps = new IdentityHashes.Factory();
         try (Context cx = factory.enterContext()) {
             mode.configure(cx);
+            cx.setWrapFactory(wraps);
             cx.setLanguageVersion(req.languageVersion());
             cx.setLocale(Locale.ROOT);
             cx.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -176,6 +178,7 @@ final class ModeRunner {
                 o.javaTrace = host.java.trace;
                 o.javaTraceTypes = host.java.types;
                 if (o.compiledActually == null && script != null) o.compiledActually = wasCompiled(script, mode);
+                if (wraps.seen()) IdentityHashes.mask(o);
             }
         } catch (RuntimeException | LinkageError | AssertionError e) {
             // Failure while setting up the scope or the host: a harness bug rather than a finding,

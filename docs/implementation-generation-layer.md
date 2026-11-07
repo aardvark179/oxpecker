@@ -504,7 +504,7 @@ Harness observation points:
   argument in `Outcome.traceJavaTypes` as `"String | Double | Integer"` (the label first).
 - `Outcome.value` prints Java objects opaquely (`[Java java.lang.String]`); wrap a Java-returned
   string in `String(...)` if the script's completion value must show it. `JavaProbe.toString`
-  is a fixed string and `canon_identity` masks identity hashes (also on array descriptors and
+  is a fixed string and the harness (`IdentityHashes`) masks identity hashes (also on array descriptors and
   with text glued on), because a printed hash differs between the modes' wrappers.
 - An engine exception past JS try/catch (`status == "crash"`, `engineException`) is a Rhino
   finding in both modes; the completion test prints it with its seed rather than failing.

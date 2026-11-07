@@ -261,7 +261,9 @@ the rate.
 **G39. Java identity hashes are canonicalised before comparison** (`compare.canon_identity`):
 a Java object's default `toString` (`JavaProbe@3bde59e5`) differs between any two runs; the
 first campaign reported four such "findings". Values, traces and output are normalised in
-`compare()`; the harness's own `@N` object ids are untouched.
+`compare()`; the harness's own `@N` object ids are untouched. Since moved into the harnesses
+(`IdentityHashes`): they mask only runs whose script was handed a Java object that can print a
+hash, so most outcomes are never scanned, and `compare()` no longer copies or rewrites outcomes.
 
 **G40. `oxpecker shrink FILE` and statement-level shrinking after Hypothesis.** Hypothesis's
 shrinker within a 150-run budget left reproducers at 150–170 lines; the deleted layer's

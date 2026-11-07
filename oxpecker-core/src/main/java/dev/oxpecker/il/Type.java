@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +70,18 @@ public record Type(int possible, String group, Signature signature, Type element
     public Type join(Type other) {
         if (isNothing()) return other;
         if (other.isNothing()) return this;
+        if (this.equals(other)) return this;
+        // Not computeIfAbsent: computing a join recurses into join for the element types,
+        // which would modify the map during its own update.
+        Map<Type, Type> row = JOINS.computeIfAbsent(this, t -> new ConcurrentHashMap<>());
+        Type cached = row.get(other);
+        if (cached != null) return cached;
+        Type result = computeJoin(other);
+        row.put(other, result);
+        return result;
+    }
+
+    private Type computeJoin(Type other) {
         Type el = null;
         if (element != null && other.element != null) el = element.join(other.element);
         Set<Key> both;
@@ -82,6 +96,9 @@ public record Type(int possible, String group, Signature signature, Type element
                 Objects.equals(signature, other.signature) ? signature : null,
                 el, both);
     }
+
+    /** Memoised results of {@link #join}, keyed by receiver then argument. */
+    private static final Map<Type, Map<Type, Type>> JOINS = new ConcurrentHashMap<>();
 
     public Type withProp(Key key) {
         Set<Key> s = new TreeSet<>(props);

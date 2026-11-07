@@ -160,6 +160,32 @@ class HarnessTest {
         assertEquals("@0Object<Object.prototype>{\"a\"{ecw}:@1Array<Array.prototype>{length=2;[1,-0]};\"b\"{ecw}:null}", o.thrown.get("value"));
     }
 
+    /** A Java object's default toString carries its identity hash, which differs between any two
+     * runs (first ten-minute campaign, 2026-10-26): the harness masks it, also on array
+     * descriptors and with text glued on, in every printed field. */
+    @Test
+    void identityHashesAreMasked() {
+        RunResult r = run("var a = J.intArray(1), s = J.stringArray();"
+                + " print(a + 'x'); __probe('p', '' + s, J.echo('' + a)); '' + J.getClass().getClassLoader();");
+        for (Outcome o : r.results().values()) {
+            assertEquals(List.of("[I@x"), o.output);
+            assertEquals(List.of("\"p\" | \"[Ljava.lang.String;@\" | @0[Java java.lang.String]"), o.trace);
+            assertTrue(o.javaTrace.contains("echo(\"[I@\") -> \"[I@\""), o.javaTrace.toString());
+            assertTrue(o.value.matches("\"[\\w.$]+@\""), o.value);
+        }
+        assertEquals(EQUAL, compareRun(r).kind);
+    }
+
+    /** Without a hash-printing Java object in reach, nothing is masked. */
+    @Test
+    void hashLikeTextIsKeptWithoutJavaObjects() {
+        RunResult r = run("__probe('p', 'a.B@12'); 'x.y@ff';");
+        for (Outcome o : r.results().values()) {
+            assertEquals(List.of("\"p\" | \"a.B@12\""), o.trace);
+            assertEquals("\"x.y@ff\"", o.value);
+        }
+    }
+
     @Test
     void languageVersionIsHonoured() {
         RunResult r = run("__probe('p', typeof Symbol, [1,2].includes(2));", RunOptions.DEFAULT.withLanguageVersion(250));

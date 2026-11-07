@@ -159,14 +159,6 @@ class HarnessParityTest {
     }
 
     @Test
-    void canonIdentity() {
-        for (JsonElement e : P.getAsJsonArray("canon")) {
-            JsonArray a = e.getAsJsonArray();
-            assertEquals(s(a.get(1)), Compare.canonIdentity(s(a.get(0))));
-        }
-    }
-
-    @Test
     void sourceTokens() {
         for (JsonElement e : P.getAsJsonArray("tokens")) {
             JsonArray a = e.getAsJsonArray();
